@@ -323,7 +323,8 @@ PhysicalInterfaces/ISonosInterface.lo: \
  /usr/include/homegear-base/SSDP/SSDP.h \
  /usr/include/homegear-base/Encoding/HTTP.h \
  /usr/include/homegear-base/Variable.h \
- PhysicalInterfaces/../SonosPacket.h /usr/include/homegear-base/BaseLib.h \
+ /usr/include/homegear-base/IQueue.h PhysicalInterfaces/../SonosPacket.h \
+ /usr/include/homegear-base/BaseLib.h \
  /usr/include/homegear-base/Encoding/RapidXml/rapidxml.hpp \
  PhysicalInterfaces/../GD.h PhysicalInterfaces/../Sonos.h \
  PhysicalInterfaces/../PhysicalInterfaces/ISonosInterface.h
@@ -1111,6 +1112,8 @@ PhysicalInterfaces/ISonosInterface.h:
 /usr/include/homegear-base/Encoding/HTTP.h:
 
 /usr/include/homegear-base/Variable.h:
+
+/usr/include/homegear-base/IQueue.h:
 
 PhysicalInterfaces/../SonosPacket.h:
 

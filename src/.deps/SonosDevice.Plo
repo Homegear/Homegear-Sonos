@@ -320,7 +320,8 @@ SonosDevice.lo: SonosDevice.cpp /usr/include/stdc-predef.h SonosDevice.h \
  /usr/include/homegear-base/Output/Output.h \
  /usr/include/homegear-base/SSDP/SSDP.h \
  /usr/include/homegear-base/Encoding/HTTP.h \
- /usr/include/homegear-base/Variable.h SonosPeer.h DeviceTypes.h \
+ /usr/include/homegear-base/Variable.h \
+ /usr/include/homegear-base/IQueue.h SonosPeer.h DeviceTypes.h \
  /usr/include/c++/4.8/queue /usr/include/c++/4.8/bits/stl_queue.h GD.h \
  Sonos.h PhysicalInterfaces/ISonosInterface.h \
  /usr/include/homegear-base/BaseLib.h PhysicalInterfaces/../SonosPacket.h \
@@ -1109,6 +1110,8 @@ SonosDevice.h:
 /usr/include/homegear-base/Encoding/HTTP.h:
 
 /usr/include/homegear-base/Variable.h:
+
+/usr/include/homegear-base/IQueue.h:
 
 SonosPeer.h:
 

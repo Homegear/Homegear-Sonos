@@ -321,7 +321,8 @@ LogicalDevices/SonosCentral.lo: LogicalDevices/SonosCentral.cpp \
  /usr/include/homegear-base/Output/Output.h \
  /usr/include/homegear-base/SSDP/SSDP.h \
  /usr/include/homegear-base/Encoding/HTTP.h \
- /usr/include/homegear-base/Variable.h LogicalDevices/../SonosPeer.h \
+ /usr/include/homegear-base/Variable.h \
+ /usr/include/homegear-base/IQueue.h LogicalDevices/../SonosPeer.h \
  LogicalDevices/../DeviceTypes.h /usr/include/c++/4.8/queue \
  /usr/include/c++/4.8/bits/stl_queue.h LogicalDevices/../GD.h \
  LogicalDevices/../Sonos.h \
@@ -1115,6 +1116,8 @@ LogicalDevices/../SonosDevice.h:
 /usr/include/homegear-base/Encoding/HTTP.h:
 
 /usr/include/homegear-base/Variable.h:
+
+/usr/include/homegear-base/IQueue.h:
 
 LogicalDevices/../SonosPeer.h:
 

@@ -43,7 +43,7 @@ Sonos::Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink*
 	GD::out.init(bl);
 	GD::out.setPrefix("Module Sonos: ");
 	GD::out.printDebug("Debug: Loading module...");
-	_family = BaseLib::Systems::DeviceFamilies::Sonos;
+	_family = 6;
 	GD::rpcDevices.init(_bl);
 }
 

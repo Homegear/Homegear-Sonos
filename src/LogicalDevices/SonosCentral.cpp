@@ -874,7 +874,7 @@ PVariable SonosCentral::searchDevices(int32_t clientID)
 			}
 			else
 			{
-				peer = createPeer(BaseLib::Systems::LogicalDeviceType(BaseLib::Systems::DeviceFamilies::Sonos, 1), serialNumber, i->ip(), softwareVersion, idString, typeString, true);
+				peer = createPeer(BaseLib::Systems::LogicalDeviceType(6, 1), serialNumber, i->ip(), softwareVersion, idString, typeString, true);
 				if(!peer)
 				{
 					GD::out.printWarning("Warning: No matching XML file found for device with IP: " + i->ip());

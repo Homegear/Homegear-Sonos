@@ -35,5 +35,5 @@ namespace Sonos
 	Sonos* GD::family = nullptr;
 	std::shared_ptr<ISonosInterface> GD::physicalInterface;
 	BaseLib::Output GD::out;
-	BaseLib::DeviceDescription::Devices GD::rpcDevices(BaseLib::Systems::DeviceFamilies::Sonos);
+	BaseLib::DeviceDescription::Devices GD::rpcDevices(6);
 }

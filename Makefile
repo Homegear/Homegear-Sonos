@@ -81,10 +81,11 @@ subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
 	$(srcdir)/config.h.in cfg/compile cfg/config.guess \
-	cfg/config.sub cfg/install-sh cfg/missing cfg/ltmain.sh \
-	$(top_srcdir)/cfg/compile $(top_srcdir)/cfg/config.guess \
-	$(top_srcdir)/cfg/config.sub $(top_srcdir)/cfg/install-sh \
-	$(top_srcdir)/cfg/ltmain.sh $(top_srcdir)/cfg/missing
+	cfg/config.sub cfg/depcomp cfg/install-sh cfg/missing \
+	cfg/ltmain.sh $(top_srcdir)/cfg/compile \
+	$(top_srcdir)/cfg/config.guess $(top_srcdir)/cfg/config.sub \
+	$(top_srcdir)/cfg/install-sh $(top_srcdir)/cfg/ltmain.sh \
+	$(top_srcdir)/cfg/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -300,7 +301,7 @@ install_sh = ${SHELL} /home/PREETZ/sathya/GitHub/Homegear/homegear-sonos/cfg/ins
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
-localstatedir = ${prefix}/var
+localstatedir = /var
 mandir = ${datarootdir}/man
 mkdir_p = $(MKDIR_P)
 oldincludedir = /usr/include
@@ -311,7 +312,7 @@ psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
-sysconfdir = ${prefix}/etc
+sysconfdir = /etc
 target_alias = 
 top_build_prefix = 
 top_builddir = .

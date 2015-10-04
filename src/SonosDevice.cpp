@@ -33,11 +33,11 @@
 namespace Sonos
 {
 
-SonosDevice::SonosDevice(IDeviceEventSink* eventHandler) : LogicalDevice(BaseLib::Systems::DeviceFamilies::Sonos, GD::bl, eventHandler)
+SonosDevice::SonosDevice(IDeviceEventSink* eventHandler) : LogicalDevice(6, GD::bl, eventHandler)
 {
 }
 
-SonosDevice::SonosDevice(uint32_t deviceID, std::string serialNumber, IDeviceEventSink* eventHandler) : LogicalDevice(BaseLib::Systems::DeviceFamilies::Sonos, GD::bl, deviceID, serialNumber, -1, eventHandler)
+SonosDevice::SonosDevice(uint32_t deviceID, std::string serialNumber, IDeviceEventSink* eventHandler) : LogicalDevice(6, GD::bl, deviceID, serialNumber, -1, eventHandler)
 {
 }
 

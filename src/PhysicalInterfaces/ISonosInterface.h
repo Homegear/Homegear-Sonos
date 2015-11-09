@@ -30,7 +30,7 @@
 #ifndef ISONOSINTERFACE_H_
 #define ISONOSINTERFACE_H_
 
-#include "../homegear-base/BaseLib.h"
+#include "homegear-base/BaseLib.h"
 #include "../SonosPacket.h"
 
 namespace Sonos {

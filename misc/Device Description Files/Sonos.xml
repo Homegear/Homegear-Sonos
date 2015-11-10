@@ -36,7 +36,6 @@
 				<element>
 					<key>FirstTrackNumberEnqueued</key>
 					<parameterId>FIRST_TRACK_NUMBER_ENQUEUED</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -51,17 +50,14 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentURI</key>
 					<parameterId>AV_TRANSPORT_URI</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentURIMetaData</key>
 					<parameterId>AV_TRANSPORT_URI_METADATA</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -74,165 +70,135 @@
 				<element>
 					<key>Track</key>
 					<parameterId>CURRENT_TRACK</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackDuration</key>
 					<parameterId>CURRENT_TRACK_DURATION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackURI</key>
 					<parameterId>CURRENT_TRACK_URI</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<parameterId>CURRENT_TRACK_METADATA</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RelTime</key>
 					<parameterId>CURRENT_TRACK_RELATIVE_TIME</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AbsTime</key>
 					<parameterId>CURRENT_TRACK_ABSOLUTE_TIME</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RelCount</key>
 					<parameterId>CURRENT_TRACK_RELATIVE_COUNT</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AbsCount</key>
 					<parameterId>CURRENT_TRACK_ABSOLUTE_COUNT</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ShareIndexInProgress</key>
 					<parameterId>SHARE_INDEX_IN_PROGRESS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ShareIndexLastError</key>
 					<parameterId>SHARE_INDEX_LAST_ERROR</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>FavoritesUpdateID</key>
 					<parameterId>FAVORITES_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>FavoritePresetsUpdateID</key>
 					<parameterId>FAVORITE_PRESETS_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RadioFavoritesUpdateID</key>
 					<parameterId>RADIO_FAVORITES_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RadioLocationUpdateID</key>
 					<parameterId>RADIO_LOCATION_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>SavedQueuesUpdateID</key>
 					<parameterId>SAVED_QUEUES_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ShareListUpdateID</key>
 					<parameterId>SHARE_LIST_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RecentlyPlayedUpdateID</key>
 					<parameterId>RECENTLY_PLAYED_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>id</subkey>
 					<parameterId>CURRENT_TRACK_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>parentID</subkey>
 					<parameterId>CURRENT_TRACK_PARENT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>restricted</subkey>
 					<parameterId>CURRENT_TRACK_RESTRICTED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>res</subkey>
 					<parameterId>CURRENT_TRACK_RESOURCE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>duration</subkey>
 					<parameterId>CURRENT_TRACK_DURATION2</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>protocolInfo</subkey>
 					<parameterId>CURRENT_TRACK_PROTOCOL</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>upnp:album</subkey>
 					<parameterId>CURRENT_ALBUM</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>dc:title</subkey>
 					<parameterId>CURRENT_TITLE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>dc:creator</subkey>
 					<parameterId>CURRENT_ARTIST</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>upnp:albumArtURI</subkey>
 					<parameterId>CURRENT_ALBUM_ART</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>upnp:class</subkey>
 					<parameterId>CURRENT_TRACK_CLASS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>r:streamContent</subkey>
 					<parameterId>CURRENT_TRACK_STREAM_CONTENT</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TrackMetaData</key>
 					<subkey>r:radioShowMd</subkey>
 					<parameterId>CURRENT_TRACK_RADIO_SHOW_MD</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -245,516 +211,422 @@
 				<element>
 					<key>VolumeMaster</key>
 					<parameterId>VOLUME</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>VolumeLF</key>
 					<parameterId>VOLUME_LF</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>VolumeRF</key>
 					<parameterId>VOLUME_RF</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>MuteMaster</key>
 					<parameterId>MUTE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>MuteLF</key>
 					<parameterId>MUTE_LF</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>MuteRF</key>
 					<parameterId>MUTE_RF</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>Bass</key>
 					<parameterId>BASS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>Treble</key>
 					<parameterId>TREBLE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>LoudnessMaster</key>
 					<parameterId>LOUDNESS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>OutputFixed</key>
 					<parameterId>OUTPUT_FIXED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>HeadphoneConnected</key>
 					<parameterId>HEADPHONE_CONNECTED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>SpeakerSize</key>
 					<parameterId>SPEAKER_SIZE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>SubGain</key>
 					<parameterId>SUB_GAIN</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>SubCrossover</key>
 					<parameterId>SUB_CROSSOVER</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>SubPolarity</key>
 					<parameterId>SUB_POLARITY</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>SubEnabled</key>
 					<parameterId>SUB_ENABLED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>PresetNameList</key>
 					<parameterId>PRESET_NAME_LIST</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TransportState</key>
 					<parameterId>TRANSPORT_STATE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentPlayMode</key>
 					<parameterId>CURRENT_PLAY_MODE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentCrossfadeMode</key>
 					<parameterId>CURRENT_CROSSFADE_MODE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NumberOfTracks</key>
 					<parameterId>NUMBER_OF_TRACKS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrack</key>
 					<parameterId>CURRENT_TRACK</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentSection</key>
 					<parameterId>CURRENT_SECTION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackURI</key>
 					<parameterId>CURRENT_TRACK_URI</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackDuration</key>
 					<parameterId>CURRENT_TRACK_DURATION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackURI</key>
 					<parameterId>NEXT_TRACK_URI</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURI</key>
 					<parameterId>ENQUEUED_TRANSPORT_URI</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>PlaybackStorageMedium</key>
 					<parameterId>PLAYBACK_STORAGE_MEDIUM</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURI</key>
 					<parameterId>AV_TRANSPORT_URI</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURI</key>
 					<parameterId>NEXT_AV_TRANSPORT_URI</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTransportActions</key>
 					<parameterId>CURRENT_TRANSPORT_ACTIONS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:CurrentValidPlayModes</key>
 					<parameterId>CURRENT_PLAY_MODES</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TransportStatus</key>
 					<parameterId>TRANSPORT_STATUS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:SleepTimerGeneration</key>
 					<parameterId>SLEEP_TIMER_GENERATION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:AlarmRunning</key>
 					<parameterId>ALARM_RUNNING</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:SnoozeRunning</key>
 					<parameterId>SNOOZE_RUNNING</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:RestartPending</key>
 					<parameterId>RESTART_PENDING</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>TransportPlaySpeed</key>
 					<parameterId>TRANSPORT_PLAY_SPEED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentMediaDuration</key>
 					<parameterId>CURRENT_MEDIA_DURATION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RecordStorageMedium</key>
 					<parameterId>RECORD_STORAGE_MEDIUM</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>PossiblePlaybackStorageMedia</key>
 					<parameterId>POSSIBLE_PLAYBACK_STORAGE_MEDIUM</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>PossibleRecordStorageMedia</key>
 					<parameterId>POSSIBLE_RECORD_STORAGE_MEDIUM</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RecordMediumWriteStatus</key>
 					<parameterId>RECORD_MEDIUM_WRITE_STATUS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentRecordQualityMode</key>
 					<parameterId>CURRENT_RECORD_QUALITY_MODE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>PossibleRecordQualityModes</key>
 					<parameterId>POSSIBLE_RECORD_QUALITY_MODES</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<parameterId>CURRENT_TRACK_METADATA</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<parameterId>NEXT_TRACK_METADATA</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
 					<parameterId>AV_TRANSPORT_METADATA</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
 					<parameterId>NEXT_AV_TRANSPORT_METADATA</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
 					<parameterId>ENQUEUED_TRANSPORT_METADATA</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>id</subkey>
 					<parameterId>CURRENT_TRACK_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>parentID</subkey>
 					<parameterId>CURRENT_TRACK_PARENT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>restricted</subkey>
 					<parameterId>CURRENT_TRACK_RESTRICTED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>res</subkey>
 					<parameterId>CURRENT_TRACK_RESOURCE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>duration</subkey>
 					<parameterId>CURRENT_TRACK_DURATION2</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>protocolInfo</subkey>
 					<parameterId>CURRENT_TRACK_PROTOCOL</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>upnp:album</subkey>
 					<parameterId>CURRENT_ALBUM</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>dc:title</subkey>
 					<parameterId>CURRENT_TITLE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>dc:creator</subkey>
 					<parameterId>CURRENT_ARTIST</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>upnp:albumArtURI</subkey>
 					<parameterId>CURRENT_ALBUM_ART</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>upnp:class</subkey>
 					<parameterId>CURRENT_TRACK_CLASS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>r:streamContent</subkey>
 					<parameterId>CURRENT_TRACK_STREAM_CONTENT</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTrackMetaData</key>
 					<subkey>r:radioShowMd</subkey>
 					<parameterId>CURRENT_TRACK_RADIO_SHOW_MD</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>id</subkey>
 					<parameterId>NEXT_TRACK_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>parentID</subkey>
 					<parameterId>NEXT_TRACK_PARENT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>restricted</subkey>
 					<parameterId>NEXT_TRACK_RESTRICTED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>res</subkey>
 					<parameterId>NEXT_TRACK_RESOURCE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>duration</subkey>
 					<parameterId>NEXT_TRACK_DURATION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>protocolInfo</subkey>
 					<parameterId>NEXT_TRACK_PROTOCOL</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>upnp:album</subkey>
 					<parameterId>NEXT_ALBUM</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>dc:title</subkey>
 					<parameterId>NEXT_TITLE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>dc:creator</subkey>
 					<parameterId>NEXT_ARTIST</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>upnp:albumArtURI</subkey>
 					<parameterId>NEXT_ALBUM_ART</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>upnp:class</subkey>
 					<parameterId>NEXT_TRACK_CLASS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>r:streamContent</subkey>
 					<parameterId>NEXT_TRACK_STREAM_CONTENT</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:NextTrackMetaData</key>
 					<subkey>r:radioShowMd</subkey>
 					<parameterId>NEXT_TRACK_RADIO_SHOW_MD</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
 					<subkey>id</subkey>
 					<parameterId>AV_TRANSPORT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
 					<subkey>parentID</subkey>
 					<parameterId>AV_TRANSPORT_PARENT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
 					<subkey>restricted</subkey>
 					<parameterId>AV_TRANSPORT_RESTRICTED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
 					<subkey>dc:title</subkey>
 					<parameterId>AV_TRANSPORT_TITLE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
 					<subkey>upnp:class</subkey>
 					<parameterId>AV_TRANSPORT_CLASS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
 					<subkey>desc</subkey>
 					<parameterId>AV_TRANSPORT_DESCRIPTION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
 					<subkey>id</subkey>
 					<parameterId>NEXT_AV_TRANSPORT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
 					<subkey>parentID</subkey>
 					<parameterId>NEXT_AV_TRANSPORT_PARENT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
 					<subkey>restricted</subkey>
 					<parameterId>NEXT_AV_TRANSPORT_RESTRICTED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
 					<subkey>dc:title</subkey>
 					<parameterId>NEXT_AV_TRANSPORT_TITLE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
 					<subkey>upnp:class</subkey>
 					<parameterId>NEXT_AV_TRANSPORT_CLASS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
 					<subkey>desc</subkey>
 					<parameterId>NEXT_AV_TRANSPORT_DESCRIPTION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
 					<subkey>id</subkey>
 					<parameterId>ENQUEUED_TRANSPORT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
 					<subkey>parentID</subkey>
 					<parameterId>ENQUEUED_TRANSPORT_PARENT_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
 					<subkey>restricted</subkey>
 					<parameterId>ENQUEUED_TRANSPORT_RESTRICTED</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
 					<subkey>dc:title</subkey>
 					<parameterId>ENQUEUED_TRANSPORT_TITLE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
 					<subkey>upnp:class</subkey>
 					<parameterId>ENQUEUED_TRANSPORT_CLASS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
 					<subkey>desc</subkey>
 					<parameterId>ENQUEUED_TRANSPORT_DESCRIPTION</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -767,62 +639,50 @@
 				<element>
 					<key>SystemUpdateID</key>
 					<parameterId>SYSTEM_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ContainerUpdateIDs</key>
 					<parameterId>CONTAINER_UPDATE_IDS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ShareListRefreshState</key>
 					<parameterId>SHARE_LIST_REFRESH_STATE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ShareIndexInProgress</key>
 					<parameterId>SHARE_INDEX_IN_PROGRESS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ShareIndexLastError</key>
 					<parameterId>SHARE_INDEX_LAST_ERROR</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>FavoritesUpdateID</key>
 					<parameterId>FAVORITES_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>FavoritePresetsUpdateID</key>
 					<parameterId>FAVORITE_PRESETS_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RadioFavoritesUpdateID</key>
 					<parameterId>RADIO_FAVORITES_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RadioLocationUpdateID</key>
 					<parameterId>RADIO_LOCATION_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>SavedQueuesUpdateID</key>
 					<parameterId>SAVED_QUEUES_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>ShareListUpdateID</key>
 					<parameterId>SHARE_LIST_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>RecentlyPlayedUpdateID</key>
 					<parameterId>RECENTLY_PLAYED_UPDATE_ID</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -837,7 +697,6 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -850,7 +709,6 @@
 				<element>
 					<key>CurrentLEDState</key>
 					<parameterId>LED_STATE</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -865,7 +723,6 @@
 				<element>
 					<key>DesiredLEDState</key>
 					<parameterId>LED_STATE</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -880,10 +737,10 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 				<element>
 					<key>Channel</key>
+					<constValueString>Master</constValueString>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -896,7 +753,6 @@
 				<element>
 					<key>CurrentMute</key>
 					<parameterId>MUTE</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -911,15 +767,14 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 				<element>
 					<key>Channel</key>
+					<constValueString>Master</constValueString>
 				</element>
 				<element>
 					<key>DesiredMute</key>
 					<parameterId>MUTE</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -934,7 +789,6 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -949,7 +803,6 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -964,12 +817,10 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 				<element>
 					<key>Speed</key>
 					<constValueInteger>1</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -984,7 +835,6 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -999,27 +849,22 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 				<element>
 					<key>EnqueuedURI</key>
 					<parameterId>ADD_URI_TO_QUEUE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>EnqueuedURIMetaData</key>
 					<parameterId>ADD_URI_TO_QUEUE_METADATA</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>DesiredFirstTrackNumberEnqueued</key>
 					<parameterId>ADD_URI_TO_QUEUE_DESIRED_FIRST_TRACK_NUMBER</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>EnqueueAsNext</key>
 					<parameterId>ADD_URI_TO_QUEUE_ENQUEUE_NEXT</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1034,7 +879,6 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1049,7 +893,6 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1062,12 +905,10 @@
 				<element>
 					<key>RemainingSleepTimerDuration</key>
 					<parameterId>SLEEP_TIMER_GENERATION</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentSleepTimerGeneration</key>
 					<parameterId>REMAINING_SLEEP_TIMER_DURATION</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1082,7 +923,6 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1095,17 +935,14 @@
 				<element>
 					<key>CurrentTransportState</key>
 					<parameterId>TRANSPORT_STATE</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentTransportStatus</key>
 					<parameterId>TRANSPORT_STATUS</parameterId>
-					<constValueString/>
 				</element>
 				<element>
 					<key>CurrentSpeed</key>
 					<parameterId>TRANSPORT_PLAY_SPEED</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1120,10 +957,10 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 				<element>
 					<key>Channel</key>
+					<constValueString>Master</constValueString>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1136,7 +973,6 @@
 				<element>
 					<key>CurrentVolume</key>
 					<parameterId>VOLUME</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -1151,15 +987,14 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
-					<constValueString/>
 				</element>
 				<element>
 					<key>Channel</key>
+					<constValueString>Master</constValueString>
 				</element>
 				<element>
 					<key>DesiredVolume</key>
 					<parameterId>VOLUME</parameterId>
-					<constValueString/>
 				</element>
 			</jsonPayload>
 		</packet>

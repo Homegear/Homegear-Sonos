@@ -255,6 +255,7 @@ Sonos.lo: Sonos.cpp /usr/include/stdc-predef.h Sonos.h \
  /usr/include/homegear-base/HelperFunctions/Net.h \
  /usr/include/homegear-base/Exception.h \
  /usr/include/homegear-base/HelperFunctions/Io.h \
+ /usr/include/homegear-base/LowLevel/Gpio.h \
  /usr/include/homegear-base/DeviceDescription/Devices.h \
  /usr/include/homegear-base/Systems/Packet.h \
  /usr/include/homegear-base/Systems/DeviceTypes.h \
@@ -320,8 +321,7 @@ Sonos.lo: Sonos.cpp /usr/include/stdc-predef.h Sonos.h \
  /usr/include/homegear-base/IQueue.h DeviceTypes.h \
  PhysicalInterfaces/EventServer.h PhysicalInterfaces/../SonosPacket.h \
  /usr/include/homegear-base/Encoding/RapidXml/rapidxml.hpp \
- PhysicalInterfaces/ISonosInterface.h \
- /usr/include/homegear-base/BaseLib.h LogicalDevices/SonosCentral.h \
+ PhysicalInterfaces/ISonosInterface.h LogicalDevices/SonosCentral.h \
  LogicalDevices/../SonosDevice.h LogicalDevices/../SonosPeer.h \
  LogicalDevices/../DeviceTypes.h /usr/include/c++/4.8/queue \
  /usr/include/c++/4.8/bits/stl_queue.h GD.h \
@@ -967,6 +967,8 @@ Sonos.h:
 
 /usr/include/homegear-base/HelperFunctions/Io.h:
 
+/usr/include/homegear-base/LowLevel/Gpio.h:
+
 /usr/include/homegear-base/DeviceDescription/Devices.h:
 
 /usr/include/homegear-base/Systems/Packet.h:
@@ -1114,8 +1116,6 @@ PhysicalInterfaces/../SonosPacket.h:
 /usr/include/homegear-base/Encoding/RapidXml/rapidxml.hpp:
 
 PhysicalInterfaces/ISonosInterface.h:
-
-/usr/include/homegear-base/BaseLib.h:
 
 LogicalDevices/SonosCentral.h:
 

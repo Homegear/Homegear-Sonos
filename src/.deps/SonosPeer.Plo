@@ -255,6 +255,7 @@ SonosPeer.lo: SonosPeer.cpp /usr/include/stdc-predef.h SonosPeer.h \
  /usr/include/homegear-base/HelperFunctions/Net.h \
  /usr/include/homegear-base/Exception.h \
  /usr/include/homegear-base/HelperFunctions/Io.h \
+ /usr/include/homegear-base/LowLevel/Gpio.h \
  /usr/include/homegear-base/DeviceDescription/Devices.h \
  /usr/include/homegear-base/Systems/Packet.h \
  /usr/include/homegear-base/Systems/DeviceTypes.h \
@@ -322,8 +323,7 @@ SonosPeer.lo: SonosPeer.cpp /usr/include/stdc-predef.h SonosPeer.h \
  LogicalDevices/../DeviceTypes.h /usr/include/c++/4.8/queue \
  /usr/include/c++/4.8/bits/stl_queue.h SonosPacket.h \
  /usr/include/homegear-base/Encoding/RapidXml/rapidxml.hpp GD.h Sonos.h \
- PhysicalInterfaces/ISonosInterface.h \
- /usr/include/homegear-base/BaseLib.h PhysicalInterfaces/../SonosPacket.h \
+ PhysicalInterfaces/ISonosInterface.h PhysicalInterfaces/../SonosPacket.h \
  /usr/include/x86_64-linux-gnu/sys/wait.h
 
 /usr/include/stdc-predef.h:
@@ -966,6 +966,8 @@ SonosPeer.h:
 
 /usr/include/homegear-base/HelperFunctions/Io.h:
 
+/usr/include/homegear-base/LowLevel/Gpio.h:
+
 /usr/include/homegear-base/DeviceDescription/Devices.h:
 
 /usr/include/homegear-base/Systems/Packet.h:
@@ -1125,8 +1127,6 @@ GD.h:
 Sonos.h:
 
 PhysicalInterfaces/ISonosInterface.h:
-
-/usr/include/homegear-base/BaseLib.h:
 
 PhysicalInterfaces/../SonosPacket.h:
 

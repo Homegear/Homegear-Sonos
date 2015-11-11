@@ -257,6 +257,7 @@ PhysicalInterfaces/ISonosInterface.lo: \
  /usr/include/homegear-base/HelperFunctions/Net.h \
  /usr/include/homegear-base/Exception.h \
  /usr/include/homegear-base/HelperFunctions/Io.h \
+ /usr/include/homegear-base/LowLevel/Gpio.h \
  /usr/include/homegear-base/DeviceDescription/Devices.h \
  /usr/include/homegear-base/Systems/Packet.h \
  /usr/include/homegear-base/Systems/DeviceTypes.h \
@@ -320,7 +321,6 @@ PhysicalInterfaces/ISonosInterface.lo: \
  /usr/include/homegear-base/Encoding/HTTP.h \
  /usr/include/homegear-base/Variable.h \
  /usr/include/homegear-base/IQueue.h PhysicalInterfaces/../SonosPacket.h \
- /usr/include/homegear-base/BaseLib.h \
  /usr/include/homegear-base/Encoding/RapidXml/rapidxml.hpp \
  PhysicalInterfaces/../GD.h PhysicalInterfaces/../Sonos.h \
  PhysicalInterfaces/../PhysicalInterfaces/ISonosInterface.h
@@ -965,6 +965,8 @@ PhysicalInterfaces/ISonosInterface.h:
 
 /usr/include/homegear-base/HelperFunctions/Io.h:
 
+/usr/include/homegear-base/LowLevel/Gpio.h:
+
 /usr/include/homegear-base/DeviceDescription/Devices.h:
 
 /usr/include/homegear-base/Systems/Packet.h:
@@ -1104,8 +1106,6 @@ PhysicalInterfaces/ISonosInterface.h:
 /usr/include/homegear-base/IQueue.h:
 
 PhysicalInterfaces/../SonosPacket.h:
-
-/usr/include/homegear-base/BaseLib.h:
 
 /usr/include/homegear-base/Encoding/RapidXml/rapidxml.hpp:
 

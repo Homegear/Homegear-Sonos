@@ -256,6 +256,7 @@ LogicalDevices/SonosCentral.lo: LogicalDevices/SonosCentral.cpp \
  /usr/include/homegear-base/HelperFunctions/Net.h \
  /usr/include/homegear-base/Exception.h \
  /usr/include/homegear-base/HelperFunctions/Io.h \
+ /usr/include/homegear-base/LowLevel/Gpio.h \
  /usr/include/homegear-base/DeviceDescription/Devices.h \
  /usr/include/homegear-base/Systems/Packet.h \
  /usr/include/homegear-base/Systems/DeviceTypes.h \
@@ -323,7 +324,6 @@ LogicalDevices/SonosCentral.lo: LogicalDevices/SonosCentral.cpp \
  /usr/include/c++/4.8/bits/stl_queue.h LogicalDevices/../GD.h \
  LogicalDevices/../Sonos.h \
  LogicalDevices/../PhysicalInterfaces/ISonosInterface.h \
- /usr/include/homegear-base/BaseLib.h \
  LogicalDevices/../PhysicalInterfaces/../SonosPacket.h \
  /usr/include/homegear-base/Encoding/RapidXml/rapidxml.hpp
 
@@ -969,6 +969,8 @@ LogicalDevices/../SonosDevice.h:
 
 /usr/include/homegear-base/HelperFunctions/Io.h:
 
+/usr/include/homegear-base/LowLevel/Gpio.h:
+
 /usr/include/homegear-base/DeviceDescription/Devices.h:
 
 /usr/include/homegear-base/Systems/Packet.h:
@@ -1120,8 +1122,6 @@ LogicalDevices/../GD.h:
 LogicalDevices/../Sonos.h:
 
 LogicalDevices/../PhysicalInterfaces/ISonosInterface.h:
-
-/usr/include/homegear-base/BaseLib.h:
 
 LogicalDevices/../PhysicalInterfaces/../SonosPacket.h:
 

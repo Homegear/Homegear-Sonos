@@ -28,10 +28,16 @@
  */
 
 #include "Factory.h"
+#include "../config.h"
 
 BaseLib::Systems::DeviceFamily* SonosFactory::createDeviceFamily(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler)
 {
 	return new Sonos::Sonos(bl, eventHandler);
+}
+
+std::string getVersion()
+{
+	return VERSION;
 }
 
 BaseLib::Systems::SystemFactory* getFactory()

@@ -5,7 +5,7 @@ cat > "$dir/libhomegear-base-version.cpp" <<-'EOF'
 
 int main(int argc, char** argv)
 {
-	std::cout << BaseLib::Obj::version() << '1' << std::endl;
+	std::cout << BaseLib::Obj::version() << std::endl;
 	return 0;
 }
 EOF

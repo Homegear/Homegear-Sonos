@@ -409,7 +409,7 @@ void SonosPeer::loadVariables(BaseLib::Systems::LogicalDevice* device, std::shar
 {
 	try
 	{
-		if(!rows) rows = raiseGetPeerVariables();
+		if(!rows) rows = _bl->db->getPeerVariables(_peerID);
 		Peer::loadVariables(device, rows);
 		_databaseMutex.lock();
 		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)

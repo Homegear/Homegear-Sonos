@@ -30,6 +30,8 @@
 #ifndef GD_H_
 #define GD_H_
 
+#define SONOS_FAMILY_ID 6
+
 #include "homegear-base/BaseLib.h"
 #include "Sonos.h"
 #include "PhysicalInterfaces/ISonosInterface.h"
@@ -44,6 +46,7 @@ public:
 
 	static BaseLib::Obj* bl;
 	static Sonos* family;
+	static std::shared_ptr<Systems::FamilySettings> settings;
 	static std::shared_ptr<ISonosInterface> physicalInterface;
 	static BaseLib::DeviceDescription::Devices rpcDevices;
 	static BaseLib::Output out;

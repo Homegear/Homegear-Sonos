@@ -1473,7 +1473,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			std::string ttsProgram = GD::physicalInterface->ttsProgram();
 			if(ttsProgram.empty())
 			{
-				GD::out.printError("Error: No program to generate TTS audio file specified in physicalinterfaces.conf");
+				GD::out.printError("Error: No program to generate TTS audio file specified in sonos.conf");
 				return true;
 			}
 

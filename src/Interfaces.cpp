@@ -27,43 +27,54 @@
  * files in the program, then also delete it here.
  */
 
-#ifndef SONOS_H_
-#define SONOS_H_
-
-#include "homegear-base/BaseLib.h"
+#include "Interfaces.h"
+#include "GD.h"
+#include "PhysicalInterfaces/EventServer.h"
 
 namespace Sonos
 {
-class SonosDevice;
-class SonosCentral;
 
-using namespace BaseLib;
-
-class Sonos : public BaseLib::Systems::DeviceFamily
+Interfaces::Interfaces(BaseLib::Obj* bl, std::vector<std::shared_ptr<Systems::PhysicalInterfaceSettings>> physicalInterfaceSettings) : Systems::PhysicalInterfaces(bl, GD::family->getFamily(), physicalInterfaceSettings)
 {
-public:
-	Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler);
-	virtual ~Sonos();
-	virtual bool init();
-	virtual void dispose();
-
-	virtual void load();
-	virtual std::shared_ptr<SonosDevice> getDevice(uint32_t address);
-	virtual std::shared_ptr<SonosDevice> getDevice(std::string serialNumber);
-	virtual std::shared_ptr<BaseLib::Systems::Central> getCentral();
-	virtual std::string handleCLICommand(std::string& command);
-	virtual bool skipFamilyCLI() { return true; }
-	virtual bool hasPhysicalInterface() { return true; }
-	virtual PVariable getPairingMethods();
-private:
-	std::shared_ptr<SonosCentral> _central;
-
-	void createCentral();
-	void createSpyDevice();
-	uint32_t getUniqueAddress(uint32_t seed);
-	std::string getUniqueSerialNumber(std::string seedPrefix, uint32_t seedNumber);
-};
-
+	create();
 }
 
-#endif
+Interfaces::~Interfaces()
+{
+}
+
+void Interfaces::create()
+{
+	try
+	{
+
+		for(std::vector<std::shared_ptr<Systems::PhysicalInterfaceSettings>>::iterator i = _physicalInterfaceSettings.begin(); i != _physicalInterfaceSettings.end(); ++i)
+		{
+			std::shared_ptr<ISonosInterface> device;
+			if(!*i) continue;
+			GD::out.printDebug("Debug: Creating physical device. Type defined in sonos.conf is: " + (*i)->type);
+			if((*i)->type == "eventserver") device.reset(new EventServer((*i)));
+			else GD::out.printError("Error: Unsupported physical device type: " + (*i)->type);
+			if(device)
+			{
+				if(_physicalInterfaces.find((*i)->id) != _physicalInterfaces.end()) GD::out.printError("Error: id used for two devices: " + (*i)->id);
+				_physicalInterfaces[(*i)->id] = device;
+				GD::physicalInterface = device;
+			}
+		}
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
+}

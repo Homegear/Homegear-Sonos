@@ -27,41 +27,24 @@
  * files in the program, then also delete it here.
  */
 
-#ifndef SONOS_H_
-#define SONOS_H_
+#ifndef INTERFACES_H_
+#define INTERFACES_H_
 
 #include "homegear-base/BaseLib.h"
 
 namespace Sonos
 {
-class SonosDevice;
-class SonosCentral;
 
 using namespace BaseLib;
 
-class Sonos : public BaseLib::Systems::DeviceFamily
+class Interfaces : public BaseLib::Systems::PhysicalInterfaces
 {
 public:
-	Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler);
-	virtual ~Sonos();
-	virtual bool init();
-	virtual void dispose();
+	Interfaces(BaseLib::Obj* bl, std::vector<std::shared_ptr<Systems::PhysicalInterfaceSettings>> physicalInterfaceSettings);
+	virtual ~Interfaces();
 
-	virtual void load();
-	virtual std::shared_ptr<SonosDevice> getDevice(uint32_t address);
-	virtual std::shared_ptr<SonosDevice> getDevice(std::string serialNumber);
-	virtual std::shared_ptr<BaseLib::Systems::Central> getCentral();
-	virtual std::string handleCLICommand(std::string& command);
-	virtual bool skipFamilyCLI() { return true; }
-	virtual bool hasPhysicalInterface() { return true; }
-	virtual PVariable getPairingMethods();
-private:
-	std::shared_ptr<SonosCentral> _central;
-
-	void createCentral();
-	void createSpyDevice();
-	uint32_t getUniqueAddress(uint32_t seed);
-	std::string getUniqueSerialNumber(std::string seedPrefix, uint32_t seedNumber);
+protected:
+	virtual void create();
 };
 
 }

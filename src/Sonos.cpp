@@ -29,22 +29,23 @@
 
 #include "Sonos.h"
 #include "DeviceTypes.h"
-#include "PhysicalInterfaces/EventServer.h"
 #include "LogicalDevices/SonosCentral.h"
+#include "Interfaces.h"
 #include "GD.h"
 
 namespace Sonos
 {
 
-Sonos::Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler) : BaseLib::Systems::DeviceFamily(bl, eventHandler)
+Sonos::Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler) : BaseLib::Systems::DeviceFamily(bl, eventHandler, SONOS_FAMILY_ID, "Sonos")
 {
 	GD::bl = bl;
 	GD::family = this;
+	GD::settings = _settings;
 	GD::out.init(bl);
 	GD::out.setPrefix("Module Sonos: ");
 	GD::out.printDebug("Debug: Loading module...");
-	_family = 6;
 	GD::rpcDevices.init(_bl, this);
+	_physicalInterfaces.reset(new Interfaces(bl, _settings->getPhysicalInterfaceSettings()));
 }
 
 Sonos::~Sonos()
@@ -67,33 +68,6 @@ void Sonos::dispose()
 
 	_central.reset();
 	GD::rpcDevices.clear();
-}
-
-std::shared_ptr<BaseLib::Systems::IPhysicalInterface> Sonos::createPhysicalDevice(std::shared_ptr<BaseLib::Systems::PhysicalInterfaceSettings> settings)
-{
-	try
-	{
-		std::shared_ptr<ISonosInterface> device;
-		if(!settings) return device;
-		GD::out.printDebug("Debug: Creating physical device. Type defined in physicalinterfaces.conf is: " + settings->type);
-		if(settings->type == "eventserver") device.reset(new EventServer(settings));
-		else GD::out.printError("Error: Unsupported physical device type: " + settings->type);
-		if(device) GD::physicalInterface = device;
-		return device;
-	}
-	catch(const std::exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
-	return std::shared_ptr<BaseLib::Systems::IPhysicalInterface>();
 }
 
 std::shared_ptr<BaseLib::Systems::Central> Sonos::getCentral() { return _central; }
@@ -200,7 +174,7 @@ void Sonos::load()
 	try
 	{
 		_devices.clear();
-		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getDevices((uint32_t)_family);
+		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getDevices((uint32_t)getFamily());
 		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
 		{
 			uint32_t deviceID = row->second.at(0)->intValue;

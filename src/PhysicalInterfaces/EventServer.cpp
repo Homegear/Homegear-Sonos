@@ -81,7 +81,7 @@ void EventServer::getAddress()
 		if(_settings->host.empty())
 		{
 			_listenAddress = BaseLib::Net::getMyIpAddress();
-			if(_listenAddress.empty()) _bl->out.printError("Error: No IP address could be found to bind the server to. Please specify the IP address manually in main.conf.");
+			if(_listenAddress.empty()) _bl->out.printError("Error: No IP address could be found to bind the server to. Please specify the IP address manually in sonos.conf.");
 		}
 		else _listenAddress = _settings->host;
 	}
@@ -107,7 +107,7 @@ void EventServer::startListening()
 		getAddress();
 		if(_listenAddress.empty())
 		{
-			GD::out.printError("Error: Could not get listen automatically. Please specify it in physicalinterfaces.conf");
+			GD::out.printError("Error: Could not get listen automatically. Please specify it in sonos.conf");
 			return;
 		}
 		_stopServer = false;
@@ -609,7 +609,7 @@ void EventServer::httpGet(BaseLib::HTTP& http, std::vector<char>& content)
 
 		if(!path.empty() && path.front() == '/') path = path.substr(1);
 		std::string contentPath = _bl->settings.tempPath() + "sonos/" + path;
-		if(!BaseLib::Io::fileExists(contentPath)) contentPath = _settings->dataPath + path;
+		if(!BaseLib::Io::fileExists(contentPath)) contentPath = GD::settings->get("datapath") + path;
 		if(!BaseLib::Io::fileExists(contentPath))
 		{
 			getHttpError(404, http.getStatusText(404), "The requested URL was not found on this server.", content);

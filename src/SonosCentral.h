@@ -30,7 +30,8 @@
 #ifndef SONOSCENTRAL_H_
 #define SONOSCENTRAL_H_
 
-#include "../SonosDevice.h"
+#include "homegear-base/BaseLib.h"
+#include "SonosPeer.h"
 
 #include <memory>
 #include <mutex>
@@ -39,20 +40,26 @@
 namespace Sonos
 {
 
-class SonosCentral : public SonosDevice, public BaseLib::Systems::Central
+class SonosCentral : public BaseLib::Systems::ICentral
 {
 public:
-	SonosCentral(IDeviceEventSink* eventHandler);
-	SonosCentral(uint32_t deviceType, std::string serialNumber, IDeviceEventSink* eventHandler);
+	SonosCentral(ICentralEventSink* eventHandler);
+	SonosCentral(uint32_t deviceType, std::string serialNumber, ICentralEventSink* eventHandler);
 	virtual ~SonosCentral();
 	virtual void dispose(bool wait = true);
 
 	virtual bool onPacketReceived(std::string& senderID, std::shared_ptr<BaseLib::Systems::Packet> packet);
-	std::string handleCLICommand(std::string command);
-	uint64_t getPeerIDFromSerial(std::string serialNumber) { std::shared_ptr<SonosPeer> peer = getPeer(serialNumber); if(peer) return peer->getID(); else return 0; }
+	std::string handleCliCommand(std::string command);
+	uint64_t getPeerIdFromSerial(std::string serialNumber) { std::shared_ptr<SonosPeer> peer = getPeer(serialNumber); if(peer) return peer->getID(); else return 0; }
 
-	virtual bool knowsDevice(std::string serialNumber);
-	virtual bool knowsDevice(uint64_t id);
+	std::shared_ptr<SonosPeer> getPeer(uint64_t id);
+	std::shared_ptr<SonosPeer> getPeer(std::string serialNumber);
+	virtual void loadPeers();
+	virtual void savePeers(bool full);
+	virtual void loadVariables() {}
+	virtual void saveVariables() {}
+
+	virtual void homegearShuttingDown();
 
 	virtual PVariable deleteDevice(int32_t clientID, std::string serialNumber, int32_t flags);
 	virtual PVariable deleteDevice(int32_t clientID, uint64_t peerID, int32_t flags);
@@ -62,6 +69,10 @@ public:
 	virtual PVariable searchDevices(int32_t clientID);
 protected:
 	std::unique_ptr<BaseLib::SSDP> _ssdp;
+	bool _shuttingDown = false;
+
+	bool _stopWorkerThread = false;
+	std::thread _workerThread;
 
 	std::shared_ptr<SonosPeer> createPeer(BaseLib::Systems::LogicalDeviceType deviceType, std::string serialNumber, std::string ip, std::string softwareVersion, std::string idString, std::string typeString, bool save = true);
 	void deletePeer(uint64_t id);

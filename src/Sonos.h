@@ -34,7 +34,6 @@
 
 namespace Sonos
 {
-class SonosDevice;
 class SonosCentral;
 
 using namespace BaseLib;
@@ -48,20 +47,12 @@ public:
 	virtual void dispose();
 
 	virtual void load();
-	virtual std::shared_ptr<SonosDevice> getDevice(uint32_t address);
-	virtual std::shared_ptr<SonosDevice> getDevice(std::string serialNumber);
-	virtual std::shared_ptr<BaseLib::Systems::Central> getCentral();
-	virtual std::string handleCLICommand(std::string& command);
-	virtual bool skipFamilyCLI() { return true; }
+	virtual std::shared_ptr<BaseLib::Systems::ICentral> getCentral();
+	virtual std::string handleCliCommand(std::string& command);
 	virtual bool hasPhysicalInterface() { return true; }
 	virtual PVariable getPairingMethods();
 private:
-	std::shared_ptr<SonosCentral> _central;
-
 	void createCentral();
-	void createSpyDevice();
-	uint32_t getUniqueAddress(uint32_t seed);
-	std::string getUniqueSerialNumber(std::string seedPrefix, uint32_t seedNumber);
 };
 
 }

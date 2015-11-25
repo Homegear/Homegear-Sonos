@@ -28,16 +28,16 @@
  */
 
 #include "SonosCentral.h"
-#include "../GD.h"
+#include "GD.h"
 
 namespace Sonos {
 
-SonosCentral::SonosCentral(IDeviceEventSink* eventHandler) : SonosDevice(eventHandler), BaseLib::Systems::Central(GD::bl, this)
+SonosCentral::SonosCentral(ICentralEventSink* eventHandler) : BaseLib::Systems::ICentral(SONOS_FAMILY_ID, GD::bl, eventHandler)
 {
 	init();
 }
 
-SonosCentral::SonosCentral(uint32_t deviceID, std::string serialNumber, IDeviceEventSink* eventHandler) : SonosDevice(deviceID, serialNumber, eventHandler), Central(GD::bl, this)
+SonosCentral::SonosCentral(uint32_t deviceID, std::string serialNumber, ICentralEventSink* eventHandler) : BaseLib::Systems::ICentral(SONOS_FAMILY_ID, GD::bl, deviceID, serialNumber, -1, eventHandler)
 {
 	init();
 }
@@ -49,19 +49,52 @@ SonosCentral::~SonosCentral()
 
 void SonosCentral::dispose(bool wait)
 {
-	SonosDevice::dispose(wait);
-	_ssdp.reset();
+	try
+	{
+		if(_disposing) return;
+		_disposing = true;
+		GD::out.printDebug("Removing device " + std::to_string(_deviceId) + " from physical device's event queue...");
+		GD::physicalInterface->removeEventHandler(_physicalInterfaceEventhandler);
+		_stopWorkerThread = true;
+		if(_workerThread.joinable())
+		{
+			GD::out.printDebug("Debug: Waiting for worker thread of device " + std::to_string(_deviceId) + "...");
+			_workerThread.join();
+		}
+		_ssdp.reset();
+	}
+    catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+	_disposed = true;
+}
+
+void SonosCentral::homegearShuttingDown()
+{
+	_shuttingDown = true;
 }
 
 void SonosCentral::init()
 {
 	try
 	{
-		SonosDevice::init();
+		if(_initialized) return; //Prevent running init two times
+		_initialized = true;
 
 		_ssdp.reset(new BaseLib::SSDP(GD::bl));
-		_deviceType = (uint32_t)DeviceType::CENTRAL;
 		GD::physicalInterface->addEventHandler((BaseLib::Systems::IPhysicalInterface::IPhysicalInterfaceEventSink*)this);
+
+		_workerThread = std::thread(&SonosCentral::worker, this);
+		BaseLib::Threads::setThreadPriority(_bl, _workerThread.native_handle(), _bl->settings.workerThreadPriority(), _bl->settings.workerThreadPolicy());
 	}
 	catch(const std::exception& ex)
 	{
@@ -104,9 +137,9 @@ void SonosCentral::worker()
 				{
 					counter = 0;
 					_peersMutex.lock();
-					if(_peersByID.size() > 0)
+					if(_peersById.size() > 0)
 					{
-						int32_t windowTimePerPeer = _bl->settings.workerThreadWindow() / _peersByID.size();
+						int32_t windowTimePerPeer = _bl->settings.workerThreadWindow() / _peersById.size();
 						if(windowTimePerPeer > 2) windowTimePerPeer -= 2;
 						sleepingTime = std::chrono::milliseconds(windowTimePerPeer);
 						countsPer10Minutes = 600000 / windowTimePerPeer;
@@ -116,17 +149,17 @@ void SonosCentral::worker()
 				}
 				*/
 				_peersMutex.lock();
-				if(!_peersByID.empty())
+				if(!_peersById.empty())
 				{
-					if(!_peersByID.empty())
+					if(!_peersById.empty())
 					{
-						std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator nextPeer = _peersByID.find(lastPeer);
-						if(nextPeer != _peersByID.end())
+						std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator nextPeer = _peersById.find(lastPeer);
+						if(nextPeer != _peersById.end())
 						{
 							nextPeer++;
-							if(nextPeer == _peersByID.end()) nextPeer = _peersByID.begin();
+							if(nextPeer == _peersById.end()) nextPeer = _peersById.begin();
 						}
-						else nextPeer = _peersByID.begin();
+						else nextPeer = _peersById.begin();
 						lastPeer = nextPeer->first;
 					}
 				}
@@ -192,6 +225,126 @@ bool SonosCentral::onPacketReceived(std::string& senderID, std::shared_ptr<BaseL
     return false;
 }
 
+void SonosCentral::loadPeers()
+{
+	try
+	{
+		std::shared_ptr<BaseLib::Database::DataTable> rows = _bl->db->getPeers(_deviceId);
+		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
+		{
+			int32_t peerID = row->second.at(0)->intValue;
+			GD::out.printMessage("Loading Sonos peer " + std::to_string(peerID));
+			std::shared_ptr<SonosPeer> peer(new SonosPeer(peerID, row->second.at(3)->textValue, _deviceId, true, this));
+			if(!peer->load(this)) continue;
+			if(!peer->getRpcDevice()) continue;
+			_peersMutex.lock();
+			if(!peer->getSerialNumber().empty()) _peersBySerial[peer->getSerialNumber()] = peer;
+			_peersById[peerID] = peer;
+			_peersMutex.unlock();
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    	_peersMutex.unlock();
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    	_peersMutex.unlock();
+    }
+    catch(...)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    	_peersMutex.unlock();
+    }
+}
+
+std::shared_ptr<SonosPeer> SonosCentral::getPeer(uint64_t id)
+{
+	try
+	{
+		_peersMutex.lock();
+		if(_peersById.find(id) != _peersById.end())
+		{
+			std::shared_ptr<SonosPeer> peer(std::dynamic_pointer_cast<SonosPeer>(_peersById.at(id)));
+			_peersMutex.unlock();
+			return peer;
+		}
+	}
+	catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _peersMutex.unlock();
+    return std::shared_ptr<SonosPeer>();
+}
+
+std::shared_ptr<SonosPeer> SonosCentral::getPeer(std::string serialNumber)
+{
+	try
+	{
+		_peersMutex.lock();
+		if(_peersBySerial.find(serialNumber) != _peersBySerial.end())
+		{
+			std::shared_ptr<SonosPeer> peer(std::dynamic_pointer_cast<SonosPeer>(_peersBySerial.at(serialNumber)));
+			_peersMutex.unlock();
+			return peer;
+		}
+	}
+	catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    _peersMutex.unlock();
+    return std::shared_ptr<SonosPeer>();
+}
+
+void SonosCentral::savePeers(bool full)
+{
+	try
+	{
+		_peersMutex.lock();
+		for(std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
+		{
+			//Necessary, because peers can be assigned to multiple virtual devices
+			if(i->second->getParentID() != _deviceId) continue;
+			//We are always printing this, because the init script needs it
+			GD::out.printMessage("(Shutdown) => Saving Sonos peer " + std::to_string(i->second->getID()));
+			i->second->save(full, full, full);
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+	_peersMutex.unlock();
+}
+
 void SonosCentral::deletePeer(uint64_t id)
 {
 	try
@@ -217,7 +370,7 @@ void SonosCentral::deletePeer(uint64_t id)
 		peer->deleteFromDatabase();
 		_peersMutex.lock();
 		if(_peersBySerial.find(peer->getSerialNumber()) != _peersBySerial.end()) _peersBySerial.erase(peer->getSerialNumber());
-		if(_peersByID.find(id) != _peersByID.end()) _peersByID.erase(id);
+		if(_peersById.find(id) != _peersById.end()) _peersById.erase(id);
 		_peersMutex.unlock();
 		GD::out.printMessage("Removed Sonos peer " + std::to_string(peer->getID()));
 	}
@@ -238,7 +391,7 @@ void SonosCentral::deletePeer(uint64_t id)
     }
 }
 
-std::string SonosCentral::handleCLICommand(std::string command)
+std::string SonosCentral::handleCliCommand(std::string command)
 {
 	try
 	{
@@ -250,7 +403,7 @@ std::string SonosCentral::handleCLICommand(std::string command)
 				_currentPeer.reset();
 				return "Peer unselected.\n";
 			}
-			return _currentPeer->handleCLICommand(command);
+			return _currentPeer->handleCliCommand(command);
 		}
 		if(command == "help" || command == "h")
 		{
@@ -358,7 +511,7 @@ std::string SonosCentral::handleCLICommand(std::string command)
 					return stringStream.str();
 				}
 
-				if(_peersByID.empty())
+				if(_peersById.empty())
 				{
 					stringStream << "No peers are paired to this central." << std::endl;
 					return stringStream.str();
@@ -389,7 +542,7 @@ std::string SonosCentral::handleCLICommand(std::string command)
 					<< std::setw(typeWidth2)
 					<< std::endl;
 				_peersMutex.lock();
-				for(std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator i = _peersByID.begin(); i != _peersByID.end(); ++i)
+				for(std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
 				{
 					if(filterType == "id")
 					{
@@ -599,7 +752,7 @@ std::shared_ptr<SonosPeer> SonosCentral::createPeer(BaseLib::Systems::LogicalDev
 {
 	try
 	{
-		std::shared_ptr<SonosPeer> peer(new SonosPeer(_deviceID, true, this));
+		std::shared_ptr<SonosPeer> peer(new SonosPeer(_deviceId, true, this));
 		peer->setDeviceType(deviceType);
 		peer->setSerialNumber(serialNumber);
 		peer->setIp(ip);
@@ -625,61 +778,6 @@ std::shared_ptr<SonosPeer> SonosCentral::createPeer(BaseLib::Systems::LogicalDev
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return std::shared_ptr<SonosPeer>();
-}
-
-bool SonosCentral::knowsDevice(std::string serialNumber)
-{
-	if(serialNumber == _serialNumber) return true;
-	_peersMutex.lock();
-	try
-	{
-		if(_peersBySerial.find(serialNumber) != _peersBySerial.end())
-		{
-			_peersMutex.unlock();
-			return true;
-		}
-	}
-	catch(const std::exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
-	_peersMutex.unlock();
-	return false;
-}
-
-bool SonosCentral::knowsDevice(uint64_t id)
-{
-	_peersMutex.lock();
-	try
-	{
-		if(_peersByID.find(id) != _peersByID.end())
-		{
-			_peersMutex.unlock();
-			return true;
-		}
-	}
-	catch(const std::exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
-	_peersMutex.unlock();
-	return false;
 }
 
 PVariable SonosCentral::deleteDevice(int32_t clientID, std::string serialNumber, int32_t flags)
@@ -718,7 +816,7 @@ PVariable SonosCentral::deleteDevice(int32_t clientID, uint64_t peerID, int32_t 
 
 		deletePeer(id);
 
-		if(knowsDevice(id)) return Variable::createError(-1, "Error deleting peer. See log for more details.");
+		if(peerExists(id)) return Variable::createError(-1, "Error deleting peer. See log for more details.");
 
 		return PVariable(new Variable(VariableType::tVoid));
 	}
@@ -755,7 +853,7 @@ PVariable SonosCentral::getDeviceInfo(int32_t clientID, uint64_t id, std::map<st
 			std::vector<std::shared_ptr<SonosPeer>> peers;
 			//Copy all peers first, because listDevices takes very long and we don't want to lock _peersMutex too long
 			_peersMutex.lock();
-			for(std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator i = _peersByID.begin(); i != _peersByID.end(); ++i)
+			for(std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
 			{
 				peers.push_back(std::dynamic_pointer_cast<SonosPeer>(i->second));
 			}
@@ -885,7 +983,7 @@ PVariable SonosCentral::searchDevices(int32_t clientID)
 				try
 				{
 					if(!peer->getSerialNumber().empty()) _peersBySerial[peer->getSerialNumber()] = peer;
-					_peersByID[peer->getID()] = peer;
+					_peersById[peer->getID()] = peer;
 				}
 				catch(const std::exception& ex)
 				{

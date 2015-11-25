@@ -28,14 +28,14 @@
  */
 
 #include "SonosPeer.h"
-#include "LogicalDevices/SonosCentral.h"
+#include "SonosCentral.h"
 #include "SonosPacket.h"
 #include "GD.h"
 #include "sys/wait.h"
 
 namespace Sonos
 {
-std::shared_ptr<BaseLib::Systems::Central> SonosPeer::getCentral()
+std::shared_ptr<BaseLib::Systems::ICentral> SonosPeer::getCentral()
 {
 	try
 	{
@@ -55,28 +55,7 @@ std::shared_ptr<BaseLib::Systems::Central> SonosPeer::getCentral()
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-	return std::shared_ptr<BaseLib::Systems::Central>();
-}
-
-std::shared_ptr<BaseLib::Systems::LogicalDevice> SonosPeer::getDevice(int32_t address)
-{
-	try
-	{
-		return GD::family->get(address);
-	}
-	catch(const std::exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
-	return std::shared_ptr<BaseLib::Systems::LogicalDevice>();
+	return std::shared_ptr<BaseLib::Systems::ICentral>();
 }
 
 SonosPeer::SonosPeer(uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler) : BaseLib::Systems::Peer(GD::bl, parentID, centralFeatures, eventHandler)
@@ -253,7 +232,7 @@ void SonosPeer::homegearShuttingDown()
 	}
 }
 
-std::string SonosPeer::handleCLICommand(std::string command)
+std::string SonosPeer::handleCliCommand(std::string command)
 {
 	try
 	{
@@ -405,12 +384,12 @@ std::string SonosPeer::printConfig()
 }
 
 
-void SonosPeer::loadVariables(BaseLib::Systems::LogicalDevice* device, std::shared_ptr<BaseLib::Database::DataTable> rows)
+void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_ptr<BaseLib::Database::DataTable>& rows)
 {
 	try
 	{
 		if(!rows) rows = _bl->db->getPeerVariables(_peerID);
-		Peer::loadVariables(device, rows);
+		Peer::loadVariables(central, rows);
 		_databaseMutex.lock();
 		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
 		{
@@ -439,11 +418,12 @@ void SonosPeer::loadVariables(BaseLib::Systems::LogicalDevice* device, std::shar
     _databaseMutex.unlock();
 }
 
-bool SonosPeer::load(BaseLib::Systems::LogicalDevice* device)
+bool SonosPeer::load(BaseLib::Systems::ICentral* central)
 {
 	try
 	{
-		loadVariables((SonosDevice*)device);
+		std::shared_ptr<BaseLib::Database::DataTable> rows;
+		loadVariables(central, rows);
 
 		_rpcDevice = GD::rpcDevices.find(_deviceType, 0x10, -1);
 		if(!_rpcDevice)

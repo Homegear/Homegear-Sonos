@@ -40,7 +40,6 @@ using namespace BaseLib::DeviceDescription;
 namespace Sonos
 {
 class SonosCentral;
-class SonosDevice;
 class SonosPacket;
 
 class FrameValue
@@ -76,11 +75,9 @@ public:
 	// }}}
 
 	void worker();
-	virtual std::string handleCLICommand(std::string command);
+	virtual std::string handleCliCommand(std::string command);
 
-	virtual bool load(BaseLib::Systems::LogicalDevice* device);
-    virtual void loadVariables(BaseLib::Systems::LogicalDevice* device = nullptr, std::shared_ptr<BaseLib::Database::DataTable> rows = std::shared_ptr<BaseLib::Database::DataTable>());
-    virtual void saveVariables();
+	virtual bool load(BaseLib::Systems::ICentral* central);
     virtual void savePeers() {}
 
 	virtual int32_t getChannelGroupedWith(int32_t channel) { return -1; }
@@ -140,8 +137,10 @@ protected:
 	typedef std::pair<std::string, std::string> SoapValuePair;
 	UpnpFunctions _upnpFunctions;
 
-	virtual std::shared_ptr<BaseLib::Systems::Central> getCentral();
-	virtual std::shared_ptr<BaseLib::Systems::LogicalDevice> getDevice(int32_t address);
+	virtual void loadVariables(BaseLib::Systems::ICentral* central, std::shared_ptr<BaseLib::Database::DataTable>& rows);
+    virtual void saveVariables();
+
+	virtual std::shared_ptr<BaseLib::Systems::ICentral> getCentral();
 	void getValuesFromPacket(std::shared_ptr<SonosPacket> packet, std::vector<FrameValues>& frameValue);
 	bool setHomegearValue(uint32_t channel, std::string valueKey, PVariable value);
 

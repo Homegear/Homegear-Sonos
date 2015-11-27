@@ -57,7 +57,7 @@ EventServer::~EventServer()
 {
 	try
 	{
-		_stopCallbackThread = true;
+		_stopServer = true;
 		if(_listenThread.joinable()) _listenThread.join();
 	}
     catch(const std::exception& ex)

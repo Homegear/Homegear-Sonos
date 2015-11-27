@@ -1062,7 +1062,7 @@
 				</properties>
 				<logicalInteger>
 					<minimumValue>0</minimumValue>
-					<maximumValue>200</maximumValue>
+					<maximumValue>100</maximumValue>
 				</logicalInteger>
 				<physicalInteger groupId="VOLUME">
 					<operationType>command</operationType>

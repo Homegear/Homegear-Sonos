@@ -906,6 +906,23 @@
 				</element>
 			</jsonPayload>
 		</packet>
+		<packet id="CURRENT_PLAY_MODE_SET">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:AVTransport:1#SetPlayMode</function1>
+			<function2>SetPlayMode</function2>
+			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:AVTransport:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>InstanceID</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>NewPlayMode</key>
+					<parameterId>CURRENT_PLAY_MODE</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
 		<packet id="QUEUE_URI">
 			<direction>fromCentral</direction>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue</function1>
@@ -1521,20 +1538,47 @@
 			</parameter>
 			<parameter id="CURRENT_PLAY_MODE">
 				<properties>
-					<writeable>false</writeable>
 					<casts>
+						<optionString/>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
+				<logicalEnumeration>
+                        <defaultValue>0</defaultValue>
+                        <value>
+                                <id>NORMAL</id>
+                                <index>0</index>
+                        </value>
+                        <value>
+                                <id>SHUFFLE</id>
+                                <index>1</index>
+                        </value>
+                        <value>
+                                <id>REPEAT_ONE</id>
+                                <index>2</index>
+                        </value>
+                        <value>
+                                <id>REPEAT_ALL</id>
+                                <index>3</index>
+                        </value>
+                        <value>
+                                <id>SHUFFLE_NOREPEAT</id>
+                                <index>4</index>
+                        </value>
+                        <value>
+                                <id>SHUFFLE_REPEAT_ONE</id>
+                                <index>5</index>
+                        </value>
+                </logicalEnumeration>
 				<physicalString groupId="CURRENT_PLAY_MODE">
 					<operationType>command</operationType>
 				</physicalString>
 				<packets>
 					<packet id="INFO">
 						<type>event</type>
+					</packet>
+					<packet id="CURRENT_PLAY_MODE_SET">
+						<type>set</type>
 					</packet>
 				</packets>
 			</parameter>

@@ -885,6 +885,27 @@
 				</element>
 			</jsonPayload>
 		</packet>
+		<packet id="CURRENT_TRACK_RELATIVE_TIME_SET">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:AVTransport:1#Seek</function1>
+			<function2>Seek</function2>
+			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:AVTransport:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>InstanceID</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>Unit</key>
+					<constValueString>REL_TIME</constValueString>
+				</element>
+				<element>
+					<key>Target</key>
+					<parameterId>CURRENT_TRACK_RELATIVE_TIME</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
 		<packet id="QUEUE_URI">
 			<direction>fromCentral</direction>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue</function1>
@@ -1644,7 +1665,6 @@
 			</parameter>
 			<parameter id="CURRENT_TRACK_RELATIVE_TIME">
 				<properties>
-					<writeable>false</writeable>
 					<unit>s</unit>
 					<casts>
 						<timeStringSeconds/>
@@ -1660,6 +1680,9 @@
 				<packets>
 					<packet id="GET_POSITION_INFO_RESPONSE">
 						<type>event</type>
+					</packet>
+					<packet id="CURRENT_TRACK_RELATIVE_TIME_SET">
+						<type>set</type>
 					</packet>
 				</packets>
 			</parameter>

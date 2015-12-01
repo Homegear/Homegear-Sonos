@@ -96,6 +96,7 @@ void SonosPeer::init()
 	_upnpFunctions.insert(UpnpFunctionPair("AddURIToQueue", UpnpFunctionEntry("urn:schemas-upnp-org:service:AVTransport:1", "/MediaRenderer/AVTransport/Control", PSoapValues(new SoapValues()))));
 	_upnpFunctions.insert(UpnpFunctionPair("GetCrossfadeMode", UpnpFunctionEntry("urn:schemas-upnp-org:service:AVTransport:1", "/MediaRenderer/AVTransport/Control", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0") }))));
 	_upnpFunctions.insert(UpnpFunctionPair("GetMute", UpnpFunctionEntry("urn:schemas-upnp-org:service:RenderingControl:1", "/MediaRenderer/RenderingControl/Control", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master") }))));
+	_upnpFunctions.insert(UpnpFunctionPair("GetMediaInfo", UpnpFunctionEntry("urn:schemas-upnp-org:service:AVTransport:1", "/MediaRenderer/AVTransport/Control", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0") }))));
 	_upnpFunctions.insert(UpnpFunctionPair("GetPositionInfo", UpnpFunctionEntry("urn:schemas-upnp-org:service:AVTransport:1", "/MediaRenderer/AVTransport/Control", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0") }))));
 	_upnpFunctions.insert(UpnpFunctionPair("GetRemainingSleepTimerDuration", UpnpFunctionEntry("urn:schemas-upnp-org:service:AVTransport:1", "/MediaRenderer/AVTransport/Control", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0") }))));
 	_upnpFunctions.insert(UpnpFunctionPair("GetTransportInfo", UpnpFunctionEntry("urn:schemas-upnp-org:service:AVTransport:1", "/MediaRenderer/AVTransport/Control", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0") }))));
@@ -119,6 +120,32 @@ void SonosPeer::setIp(std::string value)
 	{
 		Peer::setIp(value);
 		_httpClient.reset(new BaseLib::HTTPClient(GD::bl, _ip, 1400, false));
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
+void SonosPeer::setRinconId(std::string value)
+{
+	try
+	{
+		if(!_rpcDevice) return;
+		Functions::iterator functionIterator = _rpcDevice->functions.find(1);
+		if(functionIterator == _rpcDevice->functions.end()) return;
+		PParameter parameter = functionIterator->second->variables->getParameter("ID");
+		if(!parameter) return;
+		parameter->convertToPacket(PVariable(new Variable(value)), valuesCentral[1]["ID"].data);
+		saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ID", valuesCentral[1]["ID"].data);
 	}
 	catch(const std::exception& ex)
 	{
@@ -162,6 +189,11 @@ void SonosPeer::worker()
 					}
 				}
 			}
+		}
+		if( BaseLib::HelperFunctions::getTimeSeconds() - _lastAvTransportInfo > 60)
+		{
+			_lastAvTransportInfo = BaseLib::HelperFunctions::getTimeSeconds();
+			execute("GetMediaInfo");
 		}
 		if(BaseLib::HelperFunctions::getTimeSeconds() - _lastAvTransportSubscription > 300)
 		{
@@ -1054,6 +1086,49 @@ PVariable SonosPeer::getParamsetDescription(int32_t clientID, int32_t channel, P
     return Variable::createError(-32500, "Unknown application error.");
 }
 
+bool SonosPeer::getAllValuesHook2(PParameter parameter, uint32_t channel, PVariable parameters)
+{
+	try
+	{
+		if(channel == 1 && parameter->id == "IP_ADDRESS") parameter->convertToPacket(PVariable(new Variable(_ip)), valuesCentral[channel][parameter->id].data);
+	}
+	catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
+}
+
+PVariable SonosPeer::getValue(int32_t clientID, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous)
+{
+	try
+	{
+		if(channel == 1 && valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
+		return Peer::getValue(clientID, channel, valueKey, requestFromDevice, asynchronous);
+	}
+	catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable SonosPeer::putParamset(int32_t clientID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool onlyPushing)
 {
 	try
@@ -1231,6 +1306,12 @@ PVariable SonosPeer::setValue(int32_t clientID, uint32_t channel, std::string va
 				{
 					_httpClient->sendRequest(soapRequest, response);
 					if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + response);
+				}
+				catch(BaseLib::HTTPException& ex)
+				{
+					GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+					GD::out.printMessage("Request was: \n" + soapRequest);
+					return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
 				}
 				catch(BaseLib::HTTPClientException& ex)
 				{

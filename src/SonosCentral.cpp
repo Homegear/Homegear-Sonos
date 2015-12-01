@@ -950,10 +950,15 @@ PVariable SonosCentral::searchDevices(int32_t clientID)
 		for(std::vector<BaseLib::SSDPInfo>::iterator i = devices.begin(); i != devices.end(); ++i)
 		{
 			PVariable info = i->info();
-			if(!info ||	info->structValue->find("serialNum") == info->structValue->end())
+			if(!info ||	info->structValue->find("serialNum") == info->structValue->end() || info->structValue->find("UDN") == info->structValue->end())
 			{
-				GD::out.printWarning("Warning: Device does not provide serial number: " + i->ip());
+				GD::out.printWarning("Warning: Device does not provide serial number or UDN: " + i->ip());
 				continue;
+			}
+			if(GD::bl->debugLevel >= 5)
+			{
+				GD::out.printDebug("Debug: Search response:");
+				info->print();
 			}
 			std::string serialNumber = info->structValue->at("serialNum")->stringValue;
 			std::string::size_type pos = serialNumber.find(':');
@@ -999,6 +1004,13 @@ PVariable SonosCentral::searchDevices(int32_t clientID)
 				_peersMutex.unlock();
 				GD::out.printMessage("Added peer 0x" + BaseLib::HelperFunctions::getHexString(peer->getID()) + ".");
 				newPeers.push_back(peer);
+			}
+			if(peer)
+			{
+				std::string udn = info->structValue->at("UDN")->stringValue;
+				std::string::size_type pos = udn.find(':');
+				if(pos != std::string::npos && pos + 1 < udn.size()) udn = udn.substr(pos + 1);
+				peer->setRinconId(udn);
 			}
 			if(peer && !roomName.empty()) peer->setValue(-1, 1, "ROOMNAME", PVariable(new Variable(roomName)));
 		}

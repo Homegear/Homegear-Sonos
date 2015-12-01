@@ -74,6 +74,8 @@ public:
 	virtual void setIp(std::string value);
 	// }}}
 
+	virtual void setRinconId(std::string value);
+
 	void worker();
 	virtual std::string handleCliCommand(std::string command);
 
@@ -99,6 +101,7 @@ public:
 	virtual PVariable getDeviceInfo(int32_t clientID, std::map<std::string, bool> fields);
 	virtual PVariable getParamsetDescription(int32_t clientID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
 	virtual PVariable getParamset(int32_t clientID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel);
+	virtual PVariable getValue(int32_t clientID, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual PVariable putParamset(int32_t clientID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool onlyPushing = false);
 	virtual PVariable setValue(int32_t clientID, uint32_t channel, std::string valueKey, PVariable value);
 	//End RPC methods
@@ -129,6 +132,7 @@ protected:
 	std::shared_ptr<BaseLib::HTTPClient> _httpClient;
 	int32_t _lastAvTransportSubscription = 0;
 	int32_t _lastPositionInfo = 0;
+	int32_t _lastAvTransportInfo = 0;
 
 	typedef std::map<std::string, UpnpFunctionEntry> UpnpFunctions;
 	typedef std::pair<std::string, UpnpFunctionEntry> UpnpFunctionPair;
@@ -160,6 +164,13 @@ protected:
 	void sendSoapRequest(std::string& request, bool ignoreErrors = false);
 
 	void playLocalFile(std::string filename, bool now, bool unmute, int32_t volume);
+
+	// {{{ Hooks
+		/**
+		 * {@inheritDoc}
+		 */
+		virtual bool getAllValuesHook2(PParameter parameter, uint32_t channel, PVariable parameters);
+	// }}}
 };
 
 }

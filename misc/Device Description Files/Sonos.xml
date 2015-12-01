@@ -29,7 +29,6 @@
 	<packets>
 		<packet id="ADD_URI_TO_QUEUE_RESPONSE">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>AddURIToQueueResponse</function2>
 			<channel>1</channel>
 			<jsonPayload>
@@ -39,9 +38,36 @@
 				</element>
 			</jsonPayload>
 		</packet>
+		<packet id="GET_MEDIAINFO">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:AVTransport:1#GetMediaInfo</function1>
+			<function2>GetMediaInfo</function2>
+			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:AVTransport:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>InstanceID</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="GET_MEDIAINFO_RESPONSE">
+			<direction>toCentral</direction>
+			<function2>GetMediaInfoResponse</function2>
+			<channel>1</channel>
+			<jsonPayload>
+				<element>
+					<key>CurrentURI</key>
+					<parameterId>AV_TRANSPORT_URI</parameterId>
+				</element>
+				<element>
+					<key>CurrentURIMetaData</key>
+					<parameterId>AV_TRANSPORT_URI_METADATA</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>-->
 		<packet id="AV_TRANSPORT_URI_SET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI</function1>
 			<function2>SetAVTransportURI</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -61,9 +87,29 @@
 				</element>
 			</jsonPayload>
 		</packet>
+		<packet id="AV_TRANSPORT_RINCON_SET">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportRincon</function1>
+			<function2>SetAVTransportRincon</function2>
+			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:AVTransport:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>InstanceID</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>CurrentURI</key>
+					<parameterId>AV_TRANSPORT_URI</parameterId>
+				</element>
+				<element>
+					<key>CurrentURIMetaData</key>
+					<parameterId>AV_TRANSPORT_URI_METADATA</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
 		<packet id="GET_POSITION_INFO_RESPONSE">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>GetPositionInfoResponse</function2>
 			<channel>2</channel>
 			<jsonPayload>
@@ -204,7 +250,6 @@
 		</packet>
 		<packet id="INFO">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>InfoBroadcast</function2>
 			<channel>2</channel>
 			<jsonPayload>
@@ -632,7 +677,6 @@
 		</packet>
 		<packet id="INFO2">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>InfoBroadcast2</function2>
 			<channel>2</channel>
 			<jsonPayload>
@@ -688,7 +732,6 @@
 		</packet>
 		<packet id="LED_GET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:DeviceProperties:1#GetLEDState</function1>
 			<function2>GetLEDState</function2>
 			<metaString1>/DeviceProperties/Control</metaString1>
@@ -702,7 +745,6 @@
 		</packet>
 		<packet id="LED_GET_RESPONSE">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>GetLEDStateResponse</function2>
 			<channel>1</channel>
 			<jsonPayload>
@@ -714,7 +756,6 @@
 		</packet>
 		<packet id="LED_SET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:DeviceProperties:1#SetLEDState</function1>
 			<function2>SetLEDState</function2>
 			<metaString1>/DeviceProperties/Control</metaString1>
@@ -728,7 +769,6 @@
 		</packet>
 		<packet id="MUTE_GET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:RenderingControl:1#GetMute</function1>
 			<function2>GetMute</function2>
 			<metaString1>/MediaRenderer/RenderingControl/Control</metaString1>
@@ -746,7 +786,6 @@
 		</packet>
 		<packet id="MUTE_GET_RESPONSE">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>GetMuteResponse</function2>
 			<channel>2</channel>
 			<jsonPayload>
@@ -758,7 +797,6 @@
 		</packet>
 		<packet id="MUTE_SET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:RenderingControl:1#SetMute</function1>
 			<function2>SetMute</function2>
 			<metaString1>/MediaRenderer/RenderingControl/Control</metaString1>
@@ -780,7 +818,6 @@
 		</packet>
 		<packet id="NEXT">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#Next</function1>
 			<function2>Next</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -792,9 +829,21 @@
 				</element>
 			</jsonPayload>
 		</packet>
+		<packet id="STOP">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:AVTransport:1#Stop</function1>
+			<function2>Stop</function2>
+			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:AVTransport:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>InstanceID</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+			</jsonPayload>
+		</packet>
 		<packet id="PAUSE">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#Pause</function1>
 			<function2>Pause</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -808,7 +857,6 @@
 		</packet>
 		<packet id="PLAY">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#Play</function1>
 			<function2>Play</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -826,7 +874,6 @@
 		</packet>
 		<packet id="PREVIOUS">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#Previous</function1>
 			<function2>Previous</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -840,7 +887,6 @@
 		</packet>
 		<packet id="QUEUE_URI">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue</function1>
 			<function2>AddURIToQueue</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -870,7 +916,6 @@
 		</packet>
 		<packet id="REMOVE_ALL_TRACKS_FROM_QUEUE">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#RemoveAllTracksFromQueue</function1>
 			<function2>RemoveAllTracksFromQueue</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -884,7 +929,6 @@
 		</packet>
 		<packet id="SLEEP_TIMER_GET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#GetRemainingSleepTimerDuration</function1>
 			<function2>GetRemainingSleepTimerDuration</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -898,7 +942,6 @@
 		</packet>
 		<packet id="SLEEP_TIMER_GET_RESPONSE">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>GetRemainingSleepTimerDurationResponse</function2>
 			<channel>2</channel>
 			<jsonPayload>
@@ -914,7 +957,6 @@
 		</packet>
 		<packet id="TRANSPORT_STATE_GET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo</function1>
 			<function2>GetTransportInfo</function2>
 			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
@@ -928,7 +970,6 @@
 		</packet>
 		<packet id="TRANSPORT_STATE_GET_RESPONSE">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>GetTransportInfoResponse</function2>
 			<channel>2</channel>
 			<jsonPayload>
@@ -948,7 +989,6 @@
 		</packet>
 		<packet id="VOLUME_GET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:RenderingControl:1#GetVolume</function1>
 			<function2>GetVolume</function2>
 			<metaString1>/MediaRenderer/RenderingControl/Control</metaString1>
@@ -966,7 +1006,6 @@
 		</packet>
 		<packet id="VOLUME_GET_RESPONSE">
 			<direction>toCentral</direction>
-			<type>0x0</type>
 			<function2>GetVolumeResponse</function2>
 			<channel>2</channel>
 			<jsonPayload>
@@ -978,7 +1017,6 @@
 		</packet>
 		<packet id="VOLUME_SET">
 			<direction>fromCentral</direction>
-			<type>0x0</type>
 			<function1>urn:schemas-upnp-org:service:RenderingControl:1#SetVolume</function1>
 			<function2>SetVolume</function2>
 			<metaString1>/MediaRenderer/RenderingControl/Control</metaString1>
@@ -1056,6 +1094,7 @@
 		<variables id="speaker_info_valueset--2">
 			<parameter id="VOLUME">
 				<properties>
+					<control>EASYSONOS.DUMMY</control>
 					<casts>
 						<rpcBinary/>
 					</casts>
@@ -1421,12 +1460,29 @@
 				<properties>
 					<writeable>false</writeable>
 					<casts>
+						<optionString/>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
+				<logicalEnumeration>
+                        <defaultValue>0</defaultValue>
+                        <value>
+                                <id>STOPPED</id>
+                                <index>0</index>
+                        </value>
+                        <value>
+                                <id>PAUSED_PLAYBACK</id>
+                                <index>1</index>
+                        </value>
+                        <value>
+                                <id>TRANSITIONING</id>
+                                <index>2</index>
+                        </value>
+                        <value>
+                                <id>PLAYING</id>
+                                <index>3</index>
+                        </value>
+                </logicalEnumeration>
 				<physicalString groupId="TRANSPORT_STATE">
 					<operationType>command</operationType>
 				</physicalString>
@@ -1589,13 +1645,15 @@
 			<parameter id="CURRENT_TRACK_RELATIVE_TIME">
 				<properties>
 					<writeable>false</writeable>
+					<unit>s</unit>
 					<casts>
+						<timeStringSeconds/>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+				</logicalInteger>
 				<physicalString groupId="CURRENT_TRACK_RELATIVE_TIME">
 					<operationType>command</operationType>
 				</physicalString>
@@ -1661,13 +1719,15 @@
 			<parameter id="CURRENT_TRACK_DURATION">
 				<properties>
 					<writeable>false</writeable>
+					<unit>s</unit>
 					<casts>
+						<timeStringSeconds/>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+				</logicalInteger>
 				<physicalString groupId="CURRENT_TRACK_DURATION">
 					<operationType>command</operationType>
 				</physicalString>
@@ -2252,13 +2312,15 @@
 			<parameter id="CURRENT_TRACK_DURATION2">
 				<properties>
 					<writeable>false</writeable>
+					<unit>s</unit>
 					<casts>
+						<timeStringSeconds/>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+				</logicalInteger>
 				<physicalString groupId="CURRENT_TRACK_DURATION2">
 					<operationType>command</operationType>
 				</physicalString>
@@ -2425,28 +2487,6 @@
 					</packet>
 				</packets>
 			</parameter>
-			<parameter id="CURRENT_ALBUM">
-				<properties>
-					<writeable>false</writeable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
-				<physicalString groupId="CURRENT_ALBUM">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="INFO">
-						<type>event</type>
-					</packet>
-					<packet id="GET_POSITION_INFO_RESPONSE">
-						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
 			<parameter id="CURRENT_TITLE">
 				<properties>
 					<writeable>false</writeable>
@@ -2555,13 +2595,15 @@
 			<parameter id="NEXT_TRACK_DURATION">
 				<properties>
 					<writeable>false</writeable>
+					<unit>s</unit>
 					<casts>
+						<timeStringSeconds/>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+				</logicalInteger>
 				<physicalString groupId="NEXT_TRACK_DURATION">
 					<operationType>command</operationType>
 				</physicalString>
@@ -3345,6 +3387,41 @@
 			</parameter>
 		</variables>
 		<variables id="speaker_valueset--1">
+			<parameter id="ID">
+				<properties>
+					<writeable>false</writeable>
+					<control>EASYSONOS.DUMMY</control>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+			</parameter>
+			<parameter id="IP_ADDRESS">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+			</parameter>
+			<parameter id="STOP">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="STOP">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="STOP">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
 			<parameter id="PAUSE">
 				<properties>
 					<casts>
@@ -3532,6 +3609,12 @@
 				<packets>
 					<packet id="AV_TRANSPORT_URI_SET">
 						<type>set</type>
+					</packet>
+					<packet id="GET_MEDIAINFO">
+						<type>get</type>
+					</packet>
+					<packet id="GET_MEDIAINFO_RESPONSE">
+						<type>event</type>
 					</packet>
 				</packets>
 			</parameter>

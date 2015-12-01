@@ -698,32 +698,92 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						PVariable value = parameter->rpcParameter->convertFromPacket(i->second.value, true);
 						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())
 						{
-							valuesCentral[2]["CURRENT_TITLE"].data.clear();
+							//Clear current track information when uri is empty
+
+							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[2]["CURRENT_TITLE"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("CURRENT_TITLE");
 							rpcValues[2]->push_back(value);
-							valuesCentral[2]["CURRENT_ALBUM"].data.clear();
+
+							parameter2 = &valuesCentral[2]["CURRENT_ALBUM"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("CURRENT_ALBUM");
 							rpcValues[2]->push_back(value);
-							valuesCentral[2]["CURRENT_ARTIST"].data.clear();
+
+							parameter2 = &valuesCentral[2]["CURRENT_ARTIST"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("CURRENT_ARTIST");
 							rpcValues[2]->push_back(value);
-							valuesCentral[2]["CURRENT_ALBUM_ART"].data.clear();
+
+							parameter2 = &valuesCentral[2]["CURRENT_ALBUM_ART"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("CURRENT_ALBUM_ART");
 							rpcValues[2]->push_back(value);
 						}
 						else if(i->first == "NEXT_TRACK_URI" && value->stringValue.empty())
 						{
-							valuesCentral[2]["NEXT_TITLE"].data.clear();
+							//Clear next track information when uri is empty
+
+							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[2]["NEXT_TITLE"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("NEXT_TITLE");
 							rpcValues[2]->push_back(value);
-							valuesCentral[2]["NEXT_ALBUM"].data.clear();
+
+							parameter2 = &valuesCentral[2]["NEXT_ALBUM"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("NEXT_ALBUM");
 							rpcValues[2]->push_back(value);
-							valuesCentral[2]["NEXT_ARTIST"].data.clear();
+
+							parameter2 = &valuesCentral[2]["NEXT_ARTIST"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("NEXT_ARTIST");
 							rpcValues[2]->push_back(value);
-							valuesCentral[2]["NEXT_ALBUM_ART"].data.clear();
+
+							parameter2 = &valuesCentral[2]["NEXT_ALBUM_ART"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
 							valueKeys[2]->push_back("NEXT_ALBUM_ART");
+							rpcValues[2]->push_back(value);
+						}
+						else if(i->first == "CURRENT_TITLE" && value->stringValue.size() > 0 && value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
+						{
+							//Delete track information for radio
+
+							PVariable value(new Variable(VariableType::tString));
+							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[2]["CURRENT_ALBUM"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							valueKeys[2]->push_back("CURRENT_ALBUM");
+							rpcValues[2]->push_back(value);
+
+							parameter2 = &valuesCentral[2]["CURRENT_ARTIST"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							valueKeys[2]->push_back("CURRENT_ARTIST");
+							rpcValues[2]->push_back(value);
+
+							parameter2 = &valuesCentral[2]["CURRENT_ALBUM_ART"];
+							parameter2->data.clear();
+							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							valueKeys[2]->push_back("CURRENT_ALBUM_ART");
 							rpcValues[2]->push_back(value);
 						}
 

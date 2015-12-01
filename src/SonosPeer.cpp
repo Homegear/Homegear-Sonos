@@ -695,8 +695,40 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							}
 						}
 
+						PVariable value = parameter->rpcParameter->convertFromPacket(i->second.value, true);
+						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())
+						{
+							valuesCentral[2]["CURRENT_TITLE"].data.clear();
+							valueKeys[2]->push_back("CURRENT_TITLE");
+							rpcValues[2]->push_back(value);
+							valuesCentral[2]["CURRENT_ALBUM"].data.clear();
+							valueKeys[2]->push_back("CURRENT_ALBUM");
+							rpcValues[2]->push_back(value);
+							valuesCentral[2]["CURRENT_ARTIST"].data.clear();
+							valueKeys[2]->push_back("CURRENT_ARTIST");
+							rpcValues[2]->push_back(value);
+							valuesCentral[2]["CURRENT_ALBUM_ART"].data.clear();
+							valueKeys[2]->push_back("CURRENT_ALBUM_ART");
+							rpcValues[2]->push_back(value);
+						}
+						else if(i->first == "NEXT_TRACK_URI" && value->stringValue.empty())
+						{
+							valuesCentral[2]["NEXT_TITLE"].data.clear();
+							valueKeys[2]->push_back("NEXT_TITLE");
+							rpcValues[2]->push_back(value);
+							valuesCentral[2]["NEXT_ALBUM"].data.clear();
+							valueKeys[2]->push_back("NEXT_ALBUM");
+							rpcValues[2]->push_back(value);
+							valuesCentral[2]["NEXT_ARTIST"].data.clear();
+							valueKeys[2]->push_back("NEXT_ARTIST");
+							rpcValues[2]->push_back(value);
+							valuesCentral[2]["NEXT_ALBUM_ART"].data.clear();
+							valueKeys[2]->push_back("NEXT_ALBUM_ART");
+							rpcValues[2]->push_back(value);
+						}
+
 						valueKeys[*j]->push_back(i->first);
-						rpcValues[*j]->push_back(parameter->rpcParameter->convertFromPacket(i->second.value, true));
+						rpcValues[*j]->push_back(value);
 					}
 				}
 			}

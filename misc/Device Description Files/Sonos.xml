@@ -3454,10 +3454,19 @@
 			</parameter>
 		</variables>
 		<variables id="speaker_valueset--1">
+			<parameter id="PEER_ID">
+				<properties>
+					<writeable>false</writeable>
+					<control>EASYSONOS.PEERID</control>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+			</parameter>
 			<parameter id="ID">
 				<properties>
 					<writeable>false</writeable>
-					<control>EASYSONOS.DUMMY</control>
 					<casts>
 						<rpcBinary/>
 					</casts>

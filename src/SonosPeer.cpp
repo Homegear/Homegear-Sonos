@@ -1182,7 +1182,11 @@ bool SonosPeer::getAllValuesHook2(PParameter parameter, uint32_t channel, PVaria
 {
 	try
 	{
-		if(channel == 1 && parameter->id == "IP_ADDRESS") parameter->convertToPacket(PVariable(new Variable(_ip)), valuesCentral[channel][parameter->id].data);
+		if(channel == 1)
+		{
+			if(parameter->id == "IP_ADDRESS") parameter->convertToPacket(PVariable(new Variable(_ip)), valuesCentral[channel][parameter->id].data);
+			else if(parameter->id == "PEER_ID") parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), valuesCentral[channel][parameter->id].data);
+		}
 	}
 	catch(const std::exception& ex)
     {
@@ -1203,7 +1207,11 @@ PVariable SonosPeer::getValue(int32_t clientID, uint32_t channel, std::string va
 {
 	try
 	{
-		if(channel == 1 && valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
+		if(channel == 1)
+		{
+			if(valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
+			else if(valueKey == "PEER_ID") return PVariable(new Variable((int32_t)_peerID));
+		}
 		return Peer::getValue(clientID, channel, valueKey, requestFromDevice, asynchronous);
 	}
 	catch(const std::exception& ex)

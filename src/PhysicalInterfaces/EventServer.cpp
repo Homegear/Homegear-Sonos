@@ -279,8 +279,8 @@ void EventServer::readClient(std::shared_ptr<BaseLib::SocketOperations> socket, 
 
 			if(http.isFinished())
 			{
-				//std::string debug(&http.getContent()->at(0));
-				//std::cerr << temp << std::endl;
+
+				//std::cerr << std::string(&http.getContent()->at(0)) << std::endl;
 
 				std::vector<char> response;
 				if(http.getHeader()->method == "GET")

@@ -973,7 +973,7 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 				soapValues->push_back(std::pair<std::string, std::string>((*i)->key, std::to_string((*i)->constValueInteger)));
 				continue;
 			}
-			else if(!(*i)->constValueString.empty())
+			else if((*i)->constValueStringSet)
 			{
 				if((*i)->key.empty()) continue;
 				soapValues->push_back(std::pair<std::string, std::string>((*i)->key, (*i)->constValueString));
@@ -1186,6 +1186,10 @@ bool SonosPeer::getAllValuesHook2(PParameter parameter, uint32_t channel, PVaria
 		{
 			if(parameter->id == "IP_ADDRESS") parameter->convertToPacket(PVariable(new Variable(_ip)), valuesCentral[channel][parameter->id].data);
 			else if(parameter->id == "PEER_ID") parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), valuesCentral[channel][parameter->id].data);
+			else if(parameter->id == "AV_TRANSPORT_URI")
+			{
+				getValue(-1, 1, "AV_TRANSPORT_URI", true, false);
+			}
 		}
 	}
 	catch(const std::exception& ex)
@@ -1211,6 +1215,11 @@ PVariable SonosPeer::getValue(int32_t clientID, uint32_t channel, std::string va
 		{
 			if(valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
 			else if(valueKey == "PEER_ID") return PVariable(new Variable((int32_t)_peerID));
+			else if(valueKey == "AV_TRANSPORT_URI" || valueKey == "AV_TRANSPORT_URI_METADATA")
+			{
+				requestFromDevice = true;
+				asynchronous = false;
+			}
 		}
 		return Peer::getValue(clientID, channel, valueKey, requestFromDevice, asynchronous);
 	}

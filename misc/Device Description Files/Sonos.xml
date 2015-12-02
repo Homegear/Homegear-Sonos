@@ -65,7 +65,107 @@
 					<parameterId>AV_TRANSPORT_URI_METADATA</parameterId>
 				</element>
 			</jsonPayload>
-		</packet>-->
+		</packet>
+		<packet id="GET_FAVORITES">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:ContentDirectory:1#Browse</function1>
+			<function2>Browse</function2>
+			<metaString1>/MediaServer/ContentDirectory/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:ContentDirectory:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>ObjectID</key>
+					<constValueString>FV:2</constValueString>
+				</element>
+				<element>
+					<key>BrowseFlag</key>
+					<constValueString>BrowseDirectChildren</constValueString>
+				</element>
+				<element>
+					<key>Filter</key>
+					<constValueString/>
+				</element>
+				<element>
+					<key>StartingIndex</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>RequestedCount</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>SortCriteria</key>
+					<constValueString/>
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="GET_FAVORITES_RESPONSE">
+			<direction>toCentral</direction>
+			<function2>BrowseResponse</function2>
+		</packet>
+		<packet id="GET_PLAYLISTS">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:ContentDirectory:1#Browse</function1>
+			<function2>Browse</function2>
+			<metaString1>/MediaServer/ContentDirectory/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:ContentDirectory:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>ObjectID</key>
+					<constValueString>SQ:</constValueString>
+				</element>
+				<element>
+					<key>BrowseFlag</key>
+					<constValueString>BrowseDirectChildren</constValueString>
+				</element>
+				<element>
+					<key>Filter</key>
+					<constValueString />
+				</element>
+				<element>
+					<key>StartingIndex</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>RequestedCount</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>SortCriteria</key>
+					<constValueString />
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="GET_PLAYLISTS_RESPONSE">
+			<direction>toCentral</direction>
+			<function2>BrowseResponse</function2>
+		</packet>
+		<packet id="ADD_MEMBER">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:GroupManagement:1#AddMember</function1>
+			<function2>AddMember</function2>
+			<metaString1>/GroupManagement/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:GroupManagement:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>MemberID</key>
+					<parameterId>ADD_MEMBER</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="REMOVE_MEMBER">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:GroupManagement:1#RemoveMember</function1>
+			<function2>RemoveMember</function2>
+			<metaString1>/GroupManagement/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:GroupManagement:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>MemberID</key>
+					<parameterId>REMOVE_MEMBER</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
 		<packet id="AV_TRANSPORT_URI_SET">
 			<direction>fromCentral</direction>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI</function1>
@@ -3452,17 +3552,57 @@
 					</packet>
 				</packets>
 			</parameter>
+			<parameter id="FAVORITES">
+				<properties>
+					<casts>
+						<writeable>false</writeable>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="FAVORITES">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="GET_FAVORITES">
+						<type>get</type>
+					</packet>
+					<packet id="GET_FAVORITES_RESPONSE">
+						<type>event</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="PLAYLISTS">
+				<properties>
+					<casts>
+						<writeable>false</writeable>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="PLAYLISTS">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="GET_PLAYLISTS">
+						<type>get</type>
+					</packet>
+					<packet id="GET_PLAYLISTS_RESPONSE">
+						<type>event</type>
+					</packet>
+				</packets>
+			</parameter>
 		</variables>
 		<variables id="speaker_valueset--1">
 			<parameter id="PEER_ID">
 				<properties>
-					<writeable>false</writeable>
+					<!-- Needed for the CCU2. Must be writeable, otherwise it can't be used in the CCU. -->
 					<control>EASYSONOS.PEERID</control>
 					<casts>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString/>
+				<logicalInteger/>
 			</parameter>
 			<parameter id="ID">
 				<properties>
@@ -3594,6 +3734,40 @@
 				</properties>
 				<logicalString/>
 				<physicalInteger groupId=""/>
+			</parameter>
+			<parameter id="ADD_MEMBER">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="ADD_MEMBER">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="ADD_MEMBER">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="REMOVE_MEMBER">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="REMOVE_MEMBER">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="REMOVE_MEMBER">
+						<type>set</type>
+					</packet>
+				</packets>
 			</parameter>
 			<parameter id="ADD_URI_TO_QUEUE">
 				<properties>

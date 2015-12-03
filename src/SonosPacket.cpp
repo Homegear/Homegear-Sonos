@@ -228,9 +228,59 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 			if(!node) return;
 			_functionName = std::string(node->name());
 			if(_functionName.size() > 2) _functionName = _functionName.substr(2);
-			for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+			if(_functionName == "BrowseResponse")
 			{
-				_values->operator [](std::string(subNode->name())) = std::string(subNode->value());
+				for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+				{
+					std::string name(subNode->name());
+					std::string value(subNode->value());
+					if(name == "Result")
+					{
+						_values->operator [](name) = value;
+
+						_currentTrackMetadata.reset(new std::unordered_map<std::string, std::string>());
+						if(value.empty()) continue;
+						std::string xml;
+						BaseLib::Html::unescapeHtmlEntities(value, xml);
+						xml_document<> metadataDoc;
+						metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
+						xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+						if(!metadataNode) continue;
+						metadataNode = metadataNode->first_node("item");
+						if(!metadataNode) continue;
+						for(xml_attribute<>* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+						{
+							_currentTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
+						}
+						for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
+						{
+							std::string metadataName(metadataSubNode->name());
+							if(metadataName == "res")
+							{
+								_currentTrackMetadata->operator [](metadataName) = std::string(metadataSubNode->value());
+								for(xml_attribute<>* metadataAttribute = metadataSubNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+								{
+									_currentTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
+								}
+							}
+							else
+							{
+								_currentTrackMetadata->operator [](std::string(metadataSubNode->name())) = std::string(metadataSubNode->value());
+							}
+						}
+					}
+					else
+					{
+						_values->operator [](name) = value;
+					}
+				}
+			}
+			else
+			{
+				for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+				{
+					_values->operator [](std::string(subNode->name())) = std::string(subNode->value());
+				}
 			}
 		}
 	}

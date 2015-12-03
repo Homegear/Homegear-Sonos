@@ -998,6 +998,7 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 		SonosPacket packet(_ip, frame->metaString1, frame->function1, frame->metaString2, frame->function2, soapValues);
 		packet.getSoapRequest(soapRequest);
 		if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: Sending SOAP request:\n" + soapRequest);
+		std::cerr << "Moin: Sending SOAP request:\n" << soapRequest << std::endl;
 		if(_httpClient)
 		{
 			std::string response;
@@ -1005,6 +1006,7 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 			{
 				_httpClient->sendRequest(soapRequest, response);
 				if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + response);
+				std::cerr << "Moin: Response:\n" << response << std::endl;
 				std::shared_ptr<SonosPacket> responsePacket(new SonosPacket(response));
 				packetReceived(responsePacket);
 				serviceMessages->setUnreach(false, true);

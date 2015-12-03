@@ -3554,8 +3554,8 @@
 			</parameter>
 			<parameter id="FAVORITES">
 				<properties>
+					<writeable>false</writeable>
 					<casts>
-						<writeable>false</writeable>
 						<rpcBinary/>
 					</casts>
 				</properties>
@@ -3574,8 +3574,8 @@
 			</parameter>
 			<parameter id="PLAYLISTS">
 				<properties>
+					<writeable>false</writeable>
 					<casts>
-						<writeable>false</writeable>
 						<rpcBinary/>
 					</casts>
 				</properties>

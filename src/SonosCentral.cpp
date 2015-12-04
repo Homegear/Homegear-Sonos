@@ -758,7 +758,7 @@ std::shared_ptr<SonosPeer> SonosCentral::createPeer(BaseLib::Systems::LogicalDev
 		peer->setIdString(idString);
 		peer->setTypeString(typeString);
 		peer->setFirmwareVersionString(softwareVersion);
-		peer->setRpcDevice(GD::rpcDevices.find(deviceType, 0x10, -1));
+		peer->setRpcDevice(GD::family->getRpcDevices()->find(deviceType, 0x10, -1));
 		if(!peer->getRpcDevice()) return std::shared_ptr<SonosPeer>();
 		peer->initializeCentralConfig();
 		if(save) peer->save(true, true, false); //Save and create peerID

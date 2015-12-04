@@ -36,5 +36,4 @@ namespace Sonos
 	std::shared_ptr<Systems::FamilySettings> GD::settings;
 	std::shared_ptr<ISonosInterface> GD::physicalInterface;
 	BaseLib::Output GD::out;
-	BaseLib::DeviceDescription::Devices GD::rpcDevices(SONOS_FAMILY_ID);
 }

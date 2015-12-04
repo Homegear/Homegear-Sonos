@@ -48,7 +48,6 @@ public:
 	static Sonos* family;
 	static std::shared_ptr<Systems::FamilySettings> settings;
 	static std::shared_ptr<ISonosInterface> physicalInterface;
-	static BaseLib::DeviceDescription::Devices rpcDevices;
 	static BaseLib::Output out;
 private:
 	GD();

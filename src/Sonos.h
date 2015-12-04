@@ -43,7 +43,6 @@ class Sonos : public BaseLib::Systems::DeviceFamily
 public:
 	Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler);
 	virtual ~Sonos();
-	virtual bool init();
 	virtual void dispose();
 
 	virtual bool hasPhysicalInterface() { return true; }

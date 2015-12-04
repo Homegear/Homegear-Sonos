@@ -457,7 +457,7 @@ bool SonosPeer::load(BaseLib::Systems::ICentral* central)
 		std::shared_ptr<BaseLib::Database::DataTable> rows;
 		loadVariables(central, rows);
 
-		_rpcDevice = GD::rpcDevices.find(_deviceType, 0x10, -1);
+		_rpcDevice = GD::family->getRpcDevices()->find(_deviceType, 0x10, -1);
 		if(!_rpcDevice)
 		{
 			GD::out.printError("Error loading Sonos peer " + std::to_string(_peerID) + ": Device type not found: 0x" + BaseLib::HelperFunctions::getHexString((uint32_t)_deviceType.type()) + " Firmware version: " + std::to_string(_firmwareVersion));
@@ -998,7 +998,6 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 		SonosPacket packet(_ip, frame->metaString1, frame->function1, frame->metaString2, frame->function2, soapValues);
 		packet.getSoapRequest(soapRequest);
 		if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: Sending SOAP request:\n" + soapRequest);
-		std::cerr << "Moin: Sending SOAP request:\n" << soapRequest << std::endl;
 		if(_httpClient)
 		{
 			std::string response;
@@ -1006,7 +1005,6 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 			{
 				_httpClient->sendRequest(soapRequest, response);
 				if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + response);
-				std::cerr << "Moin: Response:\n" << response << std::endl;
 				std::shared_ptr<SonosPacket> responsePacket(new SonosPacket(response));
 				packetReceived(responsePacket);
 				serviceMessages->setUnreach(false, true);

@@ -57,7 +57,7 @@ bool Sonos::init()
 	GD::out.printInfo("Loading XML RPC devices...");
 	GD::rpcDevices.load();
 	if(GD::rpcDevices.empty()) return false;
-	return true;
+	return false;
 }
 
 void Sonos::dispose()

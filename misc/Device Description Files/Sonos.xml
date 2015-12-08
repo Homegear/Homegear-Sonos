@@ -102,6 +102,13 @@
 		<packet id="GET_FAVORITES_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>BrowseResponse</function2>
+			<channel>2</channel>
+			<jsonPayload>
+				<element>
+					<key>FV:2</key>
+					<parameterId>FAVORITES</parameterId>
+				</element>
+			</jsonPayload>
 		</packet>
 		<packet id="GET_PLAYLISTS">
 			<direction>fromCentral</direction>
@@ -139,6 +146,101 @@
 		<packet id="GET_PLAYLISTS_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>BrowseResponse</function2>
+			<channel>2</channel>
+			<jsonPayload>
+				<element>
+					<key>SQ:</key>
+					<parameterId>PLAYLISTS</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="GET_RADIO_FAVORITES">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:ContentDirectory:1#Browse</function1>
+			<function2>Browse</function2>
+			<metaString1>/MediaServer/ContentDirectory/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:ContentDirectory:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>ObjectID</key>
+					<constValueString>R:0/0</constValueString>
+				</element>
+				<element>
+					<key>BrowseFlag</key>
+					<constValueString>BrowseDirectChildren</constValueString>
+				</element>
+				<element>
+					<key>Filter</key>
+					<constValueString />
+				</element>
+				<element>
+					<key>StartingIndex</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>RequestedCount</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>SortCriteria</key>
+					<constValueString />
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="GET_RADIO_FAVORITES_RESPONSE">
+			<direction>toCentral</direction>
+			<function2>BrowseResponse</function2>
+			<channel>2</channel>
+			<jsonPayload>
+				<element>
+					<key>R:0/0</key>
+					<parameterId>RADIO_FAVORITES</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="GET_QUEUE_TITLES">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:ContentDirectory:1#Browse</function1>
+			<function2>Browse</function2>
+			<metaString1>/MediaServer/ContentDirectory/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:ContentDirectory:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>ObjectID</key>
+					<constValueString>Q:0</constValueString>
+				</element>
+				<element>
+					<key>BrowseFlag</key>
+					<constValueString>BrowseDirectChildren</constValueString>
+				</element>
+				<element>
+					<key>Filter</key>
+					<constValueString />
+				</element>
+				<element>
+					<key>StartingIndex</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>RequestedCount</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>SortCriteria</key>
+					<constValueString />
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="GET_QUEUE_TITLES_RESPONSE">
+			<direction>toCentral</direction>
+			<function2>BrowseResponse</function2>
+			<channel>2</channel>
+			<jsonPayload>
+				<element>
+					<key>Q:0</key>
+					<parameterId>QUEUE_TITLES</parameterId>
+				</element>
+			</jsonPayload>
 		</packet>
 		<packet id="ADD_MEMBER">
 			<direction>fromCentral</direction>
@@ -985,6 +1087,27 @@
 				</element>
 			</jsonPayload>
 		</packet>
+		<packet id="CURRENT_TRACK_SET">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:AVTransport:1#Seek</function1>
+			<function2>Seek</function2>
+			<metaString1>/MediaRenderer/AVTransport/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:AVTransport:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>InstanceID</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>Unit</key>
+					<constValueString>TRACK_NR</constValueString>
+				</element>
+				<element>
+					<key>Target</key>
+					<parameterId>CURRENT_TRACK</parameterId>
+				</element>
+			</jsonPayload>
+		</packet>
 		<packet id="CURRENT_TRACK_RELATIVE_TIME_SET">
 			<direction>fromCentral</direction>
 			<function1>urn:schemas-upnp-org:service:AVTransport:1#Seek</function1>
@@ -1724,13 +1847,12 @@
 			</parameter>
 			<parameter id="CURRENT_TRACK">
 				<properties>
-					<writeable>false</writeable>
 					<casts>
 						<rpcBinary/>
 					</casts>
 				</properties>
 				<logicalInteger>
-					<minimumValue>0</minimumValue>
+					<minimumValue>1</minimumValue>
 				</logicalInteger>
 				<physicalInteger groupId="CURRENT_TRACK">
 					<operationType>command</operationType>
@@ -1741,6 +1863,9 @@
 					</packet>
 					<packet id="GET_POSITION_INFO_RESPONSE">
 						<type>event</type>
+					</packet>
+					<packet id="CURRENT_TRACK_SET">
+						<type>set</type>
 					</packet>
 				</packets>
 			</parameter>
@@ -3559,10 +3684,10 @@
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString/>
-				<physicalString groupId="FAVORITES">
+				<logicalArray/>
+				<physicalNone groupId="FAVORITES">
 					<operationType>command</operationType>
-				</physicalString>
+				</physicalNone>
 				<packets>
 					<packet id="GET_FAVORITES">
 						<type>get</type>
@@ -3579,15 +3704,55 @@
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString/>
-				<physicalString groupId="PLAYLISTS">
+				<logicalArray/>
+				<physicalNone groupId="PLAYLISTS">
 					<operationType>command</operationType>
-				</physicalString>
+				</physicalNone>
 				<packets>
 					<packet id="GET_PLAYLISTS">
 						<type>get</type>
 					</packet>
 					<packet id="GET_PLAYLISTS_RESPONSE">
+						<type>event</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="RADIO_FAVORITES">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalArray/>
+				<physicalNone groupId="RADIO_FAVORITES">
+					<operationType>command</operationType>
+				</physicalNone>
+				<packets>
+					<packet id="GET_RADIO_FAVORITES">
+						<type>get</type>
+					</packet>
+					<packet id="GET_RADIO_FAVORITES_RESPONSE">
+						<type>event</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="QUEUE_TITLES">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalArray/>
+				<physicalNone groupId="QUEUE_TITLES">
+					<operationType>command</operationType>
+				</physicalNone>
+				<packets>
+					<packet id="GET_QUEUE_TITLES">
+						<type>get</type>
+					</packet>
+					<packet id="GET_QUEUE_TITLES_RESPONSE">
 						<type>event</type>
 					</packet>
 				</packets>
@@ -3701,6 +3866,42 @@
 						<type>set</type>
 					</packet>
 				</packets>
+			</parameter>
+			<parameter id="PLAY_FAVORITE">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="PLAY_PLAYLIST">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="PLAY_RADIO_FAVORITE">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
 			</parameter>
 			<parameter id="LED_STATE">
 				<properties>
@@ -3878,6 +4079,14 @@
 				<physicalString groupId="AV_TRANSPORT_URI_METADATA">
 					<operationType>store</operationType>
 				</physicalString>
+				<packets>
+					<packet id="GET_MEDIAINFO">
+						<type>get</type>
+					</packet>
+					<packet id="GET_MEDIAINFO_RESPONSE">
+						<type>event</type>
+					</packet>
+				</packets>
 			</parameter>
 			<parameter id="PLAY_TTS">
 				<properties>

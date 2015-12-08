@@ -763,7 +763,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							valueKeys[2]->push_back("NEXT_ALBUM_ART");
 							rpcValues[2]->push_back(value);
 						}
-						else if(i->first == "CURRENT_TITLE" && value->stringValue.size() > 0 && value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
+						else if(i->first == "AV_TRANSPORT_URI" && value->stringValue.size() > 0 && value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
 						{
 							//Delete track information for radio
 

@@ -33,7 +33,7 @@ namespace Sonos
 {
 	BaseLib::Obj* GD::bl = nullptr;
 	Sonos* GD::family = nullptr;
-	std::shared_ptr<Systems::FamilySettings> GD::settings;
+	std::string GD::dataPath;
 	std::shared_ptr<ISonosInterface> GD::physicalInterface;
 	BaseLib::Output GD::out;
 }

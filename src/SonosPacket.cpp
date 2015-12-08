@@ -230,49 +230,56 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 			if(_functionName.size() > 2) _functionName = _functionName.substr(2);
 			if(_functionName == "BrowseResponse")
 			{
-				for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+				xml_node<>* subNode = node->first_node("Result");
+				if(!subNode) return;
+				std::string value(subNode->value());
+				std::string xml;
+				BaseLib::Html::unescapeHtmlEntities(value, xml);
+				xml_document<> metadataDoc;
+				metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
+				xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+				if(!metadataNode) return;
+				_browseResult.reset(new std::pair<std::string, BaseLib::PVariable>("", BaseLib::PVariable(new Variable(VariableType::tArray))));
+				for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
 				{
-					std::string name(subNode->name());
-					std::string value(subNode->value());
-					if(name == "Result")
-					{
-						_values->operator [](name) = value;
+					std::string nodeName(metadataSubNode->name());
+					if(nodeName != "item" && nodeName != "container") continue;
+					xml_attribute<>* parentIdAttr = metadataSubNode->first_attribute("parentID");
+					xml_node<>* titleNode = metadataSubNode->first_node("dc:title");
+					xml_node<>* albumArtNode = metadataSubNode->first_node("upnp:albumArtURI");
+					xml_node<>* uriNode = metadataSubNode->first_node("res");
+					xml_node<>* metadataNode = metadataSubNode->first_node("r:resMD");
+					xml_node<>* classNode = metadataSubNode->first_node("upnp:class");
+					xml_node<>* artistNode = metadataSubNode->first_node("dc:creator");
+					xml_node<>* albumNode = metadataSubNode->first_node("upnp:album");
+					if(!parentIdAttr || !titleNode || !uriNode || !classNode) continue;
 
-						_currentTrackMetadata.reset(new std::unordered_map<std::string, std::string>());
-						if(value.empty()) continue;
-						std::string xml;
-						BaseLib::Html::unescapeHtmlEntities(value, xml);
-						xml_document<> metadataDoc;
-						metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-						xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
-						if(!metadataNode) continue;
-						metadataNode = metadataNode->first_node("item");
-						if(!metadataNode) continue;
-						for(xml_attribute<>* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
-						{
-							_currentTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
-						}
-						for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
-						{
-							std::string metadataName(metadataSubNode->name());
-							if(metadataName == "res")
-							{
-								_currentTrackMetadata->operator [](metadataName) = std::string(metadataSubNode->value());
-								for(xml_attribute<>* metadataAttribute = metadataSubNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
-								{
-									_currentTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
-								}
-							}
-							else
-							{
-								_currentTrackMetadata->operator [](std::string(metadataSubNode->name())) = std::string(metadataSubNode->value());
-							}
-						}
-					}
-					else
+					if(_browseResult->first.empty())
 					{
-						_values->operator [](name) = value;
+						std::string parentId(parentIdAttr->value());
+						_browseResult->first = parentId;
 					}
+
+					PVariable item(new Variable(VariableType::tStruct));
+					_browseResult->second->arrayValue->push_back(item);
+
+					std::string metadata;
+					if(metadataNode)
+					{
+						metadata = std::string(metadataNode->value());
+						int32_t pos1 = (signed)metadata.find("&lt;upnp:class&gt;");
+						int32_t pos2 = (signed)metadata.find("&lt;/upnp:class&gt;");
+						if(pos1 < 0 || pos2 < 0) continue;
+						std::string upnpClass(classNode->value());
+						metadata.replace(pos1 + 18, pos2 - pos1 - 18, upnpClass);
+					}
+
+					item->structValue->insert(StructElement("TITLE", PVariable(new Variable(std::string(titleNode->value())))));
+					if(albumNode) item->structValue->insert(StructElement("ALBUM", PVariable(new Variable(std::string(albumNode->value())))));
+					if(artistNode) item->structValue->insert(StructElement("ARTIST", PVariable(new Variable(std::string(artistNode->value())))));
+					if(albumArtNode) item->structValue->insert(StructElement("ALBUMART", PVariable(new Variable(std::string(albumArtNode->value())))));
+					item->structValue->insert(StructElement("AV_TRANSPORT_URI", PVariable(new Variable(std::string(uriNode->value())))));
+					item->structValue->insert(StructElement("AV_TRANSPORT_URI_METADATA", PVariable(new Variable(metadata))));
 				}
 			}
 			else

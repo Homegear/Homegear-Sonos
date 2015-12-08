@@ -61,12 +61,13 @@ public:
 
 	virtual void homegearShuttingDown();
 
-	virtual PVariable deleteDevice(int32_t clientID, std::string serialNumber, int32_t flags);
-	virtual PVariable deleteDevice(int32_t clientID, uint64_t peerID, int32_t flags);
-	virtual PVariable getDeviceInfo(int32_t clientID, uint64_t id, std::map<std::string, bool> fields);
-	virtual PVariable putParamset(int32_t clientID, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset);
-	virtual PVariable putParamset(int32_t clientID, uint64_t peerID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable paramset);
-	virtual PVariable searchDevices(int32_t clientID);
+	virtual PVariable deleteDevice(BaseLib::PRpcClientInfo clientInfo, std::string serialNumber, int32_t flags);
+	virtual PVariable deleteDevice(BaseLib::PRpcClientInfo clientInfo, uint64_t peerID, int32_t flags);
+	virtual PVariable getDeviceInfo(BaseLib::PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields);
+	virtual PVariable putParamset(BaseLib::PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset);
+	virtual PVariable putParamset(BaseLib::PRpcClientInfo clientInfo, uint64_t peerID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable paramset);
+	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo);
+	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo, bool updateOnly);
 protected:
 	std::unique_ptr<BaseLib::SSDP> _ssdp;
 	bool _shuttingDown = false;

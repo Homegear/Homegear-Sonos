@@ -39,7 +39,8 @@ Sonos::Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink*
 {
 	GD::bl = bl;
 	GD::family = this;
-	GD::settings = _settings;
+	GD::dataPath = _settings->get("datapath");
+	if(!GD::dataPath.empty() && GD::dataPath.back() != '/') GD::dataPath.push_back('/');
 	GD::out.init(bl);
 	GD::out.setPrefix("Module Sonos: ");
 	GD::out.printDebug("Debug: Loading module...");

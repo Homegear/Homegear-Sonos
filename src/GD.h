@@ -46,7 +46,7 @@ public:
 
 	static BaseLib::Obj* bl;
 	static Sonos* family;
-	static std::shared_ptr<Systems::FamilySettings> settings;
+	static std::string dataPath;
 	static std::shared_ptr<ISonosInterface> physicalInterface;
 	static BaseLib::Output out;
 private:

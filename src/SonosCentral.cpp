@@ -120,7 +120,7 @@ void SonosCentral::worker()
 
 		std::chrono::milliseconds sleepingTime(200);
 		uint32_t counter = 0;
-		//uint32_t countsPer10Minutes = 100;
+		uint32_t countsPer10Minutes = 100;
 		uint64_t lastPeer;
 		lastPeer = 0;
 
@@ -131,7 +131,7 @@ void SonosCentral::worker()
 			{
 				std::this_thread::sleep_for(sleepingTime);
 				if(_stopWorkerThread || _shuttingDown) return;
-				/* Automatic search
+				// Update devices (most importantly the IP address)
 				if(counter > countsPer10Minutes)
 				{
 					counter = 0;
@@ -144,9 +144,8 @@ void SonosCentral::worker()
 						countsPer10Minutes = 600000 / windowTimePerPeer;
 					}
 					_peersMutex.unlock();
-					searchDevices(-1);
+					searchDevices(nullptr, true);
 				}
-				*/
 				_peersMutex.lock();
 				if(!_peersById.empty())
 				{
@@ -725,7 +724,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
 				index++;
 			}
 
-			PVariable result = searchDevices(-1);
+			PVariable result = searchDevices(nullptr);
 			if(result->errorStruct) stringStream << "Error: " << result->structValue->at("faultString")->stringValue << std::endl;
 			else stringStream << "Search completed successfully." << std::endl;
 			return stringStream.str();
@@ -779,7 +778,7 @@ std::shared_ptr<SonosPeer> SonosCentral::createPeer(BaseLib::Systems::LogicalDev
     return std::shared_ptr<SonosPeer>();
 }
 
-PVariable SonosCentral::deleteDevice(int32_t clientID, std::string serialNumber, int32_t flags)
+PVariable SonosCentral::deleteDevice(BaseLib::PRpcClientInfo clientInfo, std::string serialNumber, int32_t flags)
 {
 	try
 	{
@@ -787,7 +786,7 @@ PVariable SonosCentral::deleteDevice(int32_t clientID, std::string serialNumber,
 		std::shared_ptr<SonosPeer> peer = getPeer(serialNumber);
 		if(!peer) return PVariable(new Variable(VariableType::tVoid));
 
-		return deleteDevice(clientID, peer->getID(), flags);
+		return deleteDevice(clientInfo, peer->getID(), flags);
 	}
 	catch(const std::exception& ex)
     {
@@ -804,7 +803,7 @@ PVariable SonosCentral::deleteDevice(int32_t clientID, std::string serialNumber,
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosCentral::deleteDevice(int32_t clientID, uint64_t peerID, int32_t flags)
+PVariable SonosCentral::deleteDevice(BaseLib::PRpcClientInfo clientInfo, uint64_t peerID, int32_t flags)
 {
 	try
 	{
@@ -834,7 +833,7 @@ PVariable SonosCentral::deleteDevice(int32_t clientID, uint64_t peerID, int32_t 
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosCentral::getDeviceInfo(int32_t clientID, uint64_t id, std::map<std::string, bool> fields)
+PVariable SonosCentral::getDeviceInfo(BaseLib::PRpcClientInfo clientInfo, uint64_t id, std::map<std::string, bool> fields)
 {
 	try
 	{
@@ -843,7 +842,7 @@ PVariable SonosCentral::getDeviceInfo(int32_t clientID, uint64_t id, std::map<st
 			std::shared_ptr<SonosPeer> peer(getPeer(id));
 			if(!peer) return Variable::createError(-2, "Unknown device.");
 
-			return peer->getDeviceInfo(clientID, fields);
+			return peer->getDeviceInfo(clientInfo, fields);
 		}
 		else
 		{
@@ -862,7 +861,7 @@ PVariable SonosCentral::getDeviceInfo(int32_t clientID, uint64_t id, std::map<st
 			{
 				//listDevices really needs a lot of resources, so wait a little bit after each device
 				std::this_thread::sleep_for(std::chrono::milliseconds(3));
-				PVariable info = (*i)->getDeviceInfo(clientID, fields);
+				PVariable info = (*i)->getDeviceInfo(clientInfo, fields);
 				if(!info) continue;
 				array->arrayValue->push_back(info);
 			}
@@ -885,7 +884,7 @@ PVariable SonosCentral::getDeviceInfo(int32_t clientID, uint64_t id, std::map<st
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosCentral::putParamset(int32_t clientID, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset)
+PVariable SonosCentral::putParamset(BaseLib::PRpcClientInfo clientInfo, std::string serialNumber, int32_t channel, ParameterGroup::Type::Enum type, std::string remoteSerialNumber, int32_t remoteChannel, PVariable paramset)
 {
 	try
 	{
@@ -897,7 +896,7 @@ PVariable SonosCentral::putParamset(int32_t clientID, std::string serialNumber, 
 			if(!remotePeer) return Variable::createError(-3, "Remote peer is unknown.");
 			remoteID = remotePeer->getID();
 		}
-		if(peer) return peer->putParamset(clientID, channel, type, remoteID, remoteChannel, paramset);
+		if(peer) return peer->putParamset(clientInfo, channel, type, remoteID, remoteChannel, paramset);
 		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)
@@ -915,12 +914,12 @@ PVariable SonosCentral::putParamset(int32_t clientID, std::string serialNumber, 
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosCentral::putParamset(int32_t clientID, uint64_t peerID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable paramset)
+PVariable SonosCentral::putParamset(BaseLib::PRpcClientInfo clientInfo, uint64_t peerID, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable paramset)
 {
 	try
 	{
 		std::shared_ptr<SonosPeer> peer(getPeer(peerID));
-		if(peer) return peer->putParamset(clientID, channel, type, remoteID, remoteChannel, paramset);
+		if(peer) return peer->putParamset(clientInfo, channel, type, remoteID, remoteChannel, paramset);
 		return Variable::createError(-2, "Unknown device.");
 	}
 	catch(const std::exception& ex)
@@ -938,7 +937,12 @@ PVariable SonosCentral::putParamset(int32_t clientID, uint64_t peerID, int32_t c
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosCentral::searchDevices(int32_t clientID)
+PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo)
+{
+	return searchDevices(clientInfo, false);
+}
+
+PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool updateOnly)
 {
 	try
 	{
@@ -974,7 +978,7 @@ PVariable SonosCentral::searchDevices(int32_t clientID)
 				if(peer->getIp() != i->ip()) peer->setIp(i->ip());
 				if(!softwareVersion.empty() && peer->getFirmwareVersionString() != softwareVersion) peer->setFirmwareVersionString(softwareVersion);
 			}
-			else
+			else if(!updateOnly)
 			{
 				peer = createPeer(BaseLib::Systems::LogicalDeviceType(6, 1), serialNumber, i->ip(), softwareVersion, idString, typeString, true);
 				if(!peer)
@@ -1011,8 +1015,8 @@ PVariable SonosCentral::searchDevices(int32_t clientID)
 				std::string::size_type pos = udn.find(':');
 				if(pos != std::string::npos && pos + 1 < udn.size()) udn = udn.substr(pos + 1);
 				peer->setRinconId(udn);
+				if(!roomName.empty()) peer->setValue(clientInfo, 1, "ROOMNAME", PVariable(new Variable(roomName)));
 			}
-			if(peer && !roomName.empty()) peer->setValue(-1, 1, "ROOMNAME", PVariable(new Variable(roomName)));
 		}
 
 		if(newPeers.size() > 0)
@@ -1020,7 +1024,7 @@ PVariable SonosCentral::searchDevices(int32_t clientID)
 			PVariable deviceDescriptions(new Variable(VariableType::tArray));
 			for(std::vector<std::shared_ptr<SonosPeer>>::iterator i = newPeers.begin(); i != newPeers.end(); ++i)
 			{
-				std::shared_ptr<std::vector<PVariable>> descriptions = (*i)->getDeviceDescriptions(clientID, true, std::map<std::string, bool>());
+				std::shared_ptr<std::vector<PVariable>> descriptions = (*i)->getDeviceDescriptions(clientInfo, true, std::map<std::string, bool>());
 				if(!descriptions) continue;
 				for(std::vector<PVariable>::iterator j = descriptions->begin(); j != descriptions->end(); ++j)
 				{

@@ -55,6 +55,7 @@ class SonosPacket : public BaseLib::Systems::Packet
         std::string soapAction() { return _soapAction; }
         std::string schema() { return _schema; }
         std::string functionName() { return _functionName; }
+        std::shared_ptr<std::pair<std::string, BaseLib::PVariable>> browseResult() { return _browseResult; }
         std::shared_ptr<std::unordered_map<std::string, std::string>> values() { return _values; }
         std::shared_ptr<std::unordered_map<std::string, std::string>> currentTrackMetadata() { return _currentTrackMetadata; }
         std::shared_ptr<std::unordered_map<std::string, std::string>> nextTrackMetadata() { return _nextTrackMetadata; }
@@ -82,6 +83,7 @@ class SonosPacket : public BaseLib::Systems::Packet
         std::shared_ptr<std::unordered_map<std::string, std::string>> _avTransportUriMetaData;
         std::shared_ptr<std::unordered_map<std::string, std::string>> _nextAvTransportUriMetaData;
         std::shared_ptr<std::unordered_map<std::string, std::string>> _enqueuedTransportUriMetaData;
+        std::shared_ptr<std::pair<std::string, BaseLib::PVariable>> _browseResult;
 };
 
 }

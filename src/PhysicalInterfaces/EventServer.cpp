@@ -609,7 +609,7 @@ void EventServer::httpGet(BaseLib::HTTP& http, std::vector<char>& content)
 
 		if(!path.empty() && path.front() == '/') path = path.substr(1);
 		std::string contentPath = _bl->settings.tempPath() + "sonos/" + path;
-		if(!BaseLib::Io::fileExists(contentPath)) contentPath = GD::settings->get("datapath") + path;
+		if(!BaseLib::Io::fileExists(contentPath)) contentPath = GD::dataPath + path;
 		if(!BaseLib::Io::fileExists(contentPath))
 		{
 			getHttpError(404, http.getStatusText(404), "The requested URL was not found on this server.", content);

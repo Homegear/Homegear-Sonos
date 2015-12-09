@@ -119,8 +119,8 @@ void SonosCentral::worker()
 		}
 
 		std::chrono::milliseconds sleepingTime(200);
-		uint32_t counter = 0;
-		uint32_t countsPer10Minutes = 100;
+		uint32_t counter = 1;
+		uint32_t countsPer10Minutes = 0;
 		uint64_t lastPeer;
 		lastPeer = 0;
 
@@ -143,6 +143,7 @@ void SonosCentral::worker()
 						sleepingTime = std::chrono::milliseconds(windowTimePerPeer);
 						countsPer10Minutes = 600000 / windowTimePerPeer;
 					}
+					else countsPer10Minutes = 100;
 					_peersMutex.unlock();
 					searchDevices(nullptr, true);
 				}

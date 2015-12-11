@@ -3,7 +3,7 @@
 		<device id="Sonos">
 			<description>Sonos</description>
 			<typeNumber>0x1</typeNumber>
-			<minFirmwareVersion>0x10</minFirmwareVersion>
+			<minFirmwareVersion>0</minFirmwareVersion>
 		</device>
 	</supportedDevices>
 	<properties/>
@@ -1084,6 +1084,39 @@
 				<element>
 					<key>InstanceID</key>
 					<constValueInteger>0</constValueInteger>
+				</element>
+			</jsonPayload>
+		</packet>
+		<packet id="RAMP_TO_VOLUME">
+			<direction>fromCentral</direction>
+			<function1>urn:schemas-upnp-org:service:RenderingControl:1#RampToVolume</function1>
+			<function2>RampToVolume</function2>
+			<metaString1>/MediaRenderer/RenderingControl/Control</metaString1>
+			<metaString2>urn:schemas-upnp-org:service:RenderingControl:1</metaString2>
+			<jsonPayload>
+				<element>
+					<key>InstanceID</key>
+					<constValueInteger>0</constValueInteger>
+				</element>
+				<element>
+					<key>Channel</key>
+					<constValueString>Master</constValueString>
+				</element>
+				<element>
+					<key>RampType</key>
+					<constValueString>AUTOPLAY_RAMP_TYPE</constValueString>
+				</element>
+				<element>
+					<key>DesiredVolume</key>
+					<parameterId>RAMP_TO_VOLUME</parameterId>
+				</element>
+				<element>
+					<key>ResetVolumeAfter</key>
+					<constValueString>false</constValueString>
+				</element>
+				<element>
+					<key>ProgramURI</key>
+					<constValueString />
 				</element>
 			</jsonPayload>
 		</packet>
@@ -3863,6 +3896,25 @@
 				</physicalInteger>
 				<packets>
 					<packet id="NEXT">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="RAMP_TO_VOLUME">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+					<maximumValue>100</maximumValue>
+				</logicalInteger>
+				<physicalInteger groupId="RAMP_TO_VOLUME">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="RAMP_TO_VOLUME">
 						<type>set</type>
 					</packet>
 				</packets>

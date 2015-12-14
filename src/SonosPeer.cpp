@@ -1299,9 +1299,7 @@ PVariable SonosPeer::getValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		if(serviceMessages->getUnreach()) requestFromDevice = false;
 		if(channel == 1)
 		{
-			if(valueKey == "IP_ADDRESS") return PVariable(new Variable(_ip));
-			else if(valueKey == "PEER_ID") return PVariable(new Variable((int32_t)_peerID));
-			else if(valueKey == "AV_TRANSPORT_URI" || valueKey == "AV_TRANSPORT_URI_METADATA")
+			if(valueKey == "AV_TRANSPORT_URI" || valueKey == "AV_TRANSPORT_URI_METADATA")
 			{
 				if(!serviceMessages->getUnreach())
 				{

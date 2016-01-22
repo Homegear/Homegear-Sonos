@@ -58,7 +58,7 @@ EventServer::~EventServer()
 	try
 	{
 		_stopServer = true;
-		if(_listenThread.joinable()) _listenThread.join();
+		GD::bl->threadManager.join(_listenThread);
 	}
     catch(const std::exception& ex)
     {
@@ -111,8 +111,7 @@ void EventServer::startListening()
 			return;
 		}
 		_stopServer = false;
-		_listenThread = std::thread(&EventServer::mainThread, this);
-		if(_settings->listenThreadPriority > -1) BaseLib::Threads::setThreadPriority(_bl, _listenThread.native_handle(), _settings->listenThreadPriority, _settings->listenThreadPolicy);
+		_bl->threadManager.start(_listenThread, true, _settings->listenThreadPriority, _settings->listenThreadPolicy, &EventServer::mainThread, this);
 		IPhysicalInterface::startListening();
 	}
     catch(const std::exception& ex)
@@ -135,7 +134,7 @@ void EventServer::stopListening()
 	{
 		if(_stopServer) return;
 		_stopServer = true;
-		if(_listenThread.joinable()) _listenThread.join();
+		GD::bl->threadManager.join(_listenThread);
 
 		IPhysicalInterface::stopListening();
 	}

@@ -1399,7 +1399,7 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 			for(Struct::iterator i = variables->structValue->begin(); i != variables->structValue->end(); ++i)
 			{
 				if(i->first.empty() || !i->second) continue;
-				setValue(clientInfo, channel, i->first, i->second);
+				setValue(clientInfo, channel, i->first, i->second, true);
 			}
 		}
 		else
@@ -1423,11 +1423,11 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, PVariable value)
+PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, PVariable value, bool wait)
 {
 	try
 	{
-		Peer::setValue(clientInfo, channel, valueKey, value); //Ignore result, otherwise setHomegerValue might not be executed
+		Peer::setValue(clientInfo, channel, valueKey, value, wait); //Ignore result, otherwise setHomegerValue might not be executed
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(!_centralFeatures) return Variable::createError(-2, "Not a central peer.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");

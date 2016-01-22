@@ -56,11 +56,8 @@ void SonosCentral::dispose(bool wait)
 		GD::out.printDebug("Removing device " + std::to_string(_deviceId) + " from physical device's event queue...");
 		GD::physicalInterface->removeEventHandler(_physicalInterfaceEventhandler);
 		_stopWorkerThread = true;
-		if(_workerThread.joinable())
-		{
-			GD::out.printDebug("Debug: Waiting for worker thread of device " + std::to_string(_deviceId) + "...");
-			_workerThread.join();
-		}
+		GD::out.printDebug("Debug: Waiting for worker thread of device " + std::to_string(_deviceId) + "...");
+		GD::bl->threadManager.join(_workerThread);
 		_ssdp.reset();
 	}
     catch(const std::exception& ex)
@@ -92,8 +89,7 @@ void SonosCentral::init()
 		_ssdp.reset(new BaseLib::SSDP(GD::bl));
 		GD::physicalInterface->addEventHandler((BaseLib::Systems::IPhysicalInterface::IPhysicalInterfaceEventSink*)this);
 
-		_workerThread = std::thread(&SonosCentral::worker, this);
-		BaseLib::Threads::setThreadPriority(_bl, _workerThread.native_handle(), _bl->settings.workerThreadPriority(), _bl->settings.workerThreadPolicy());
+		GD::bl->threadManager.start(_workerThread, true, _bl->settings.workerThreadPriority(), _bl->settings.workerThreadPolicy(), &SonosCentral::worker, this);
 	}
 	catch(const std::exception& ex)
 	{
@@ -1016,7 +1012,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 				std::string::size_type pos = udn.find(':');
 				if(pos != std::string::npos && pos + 1 < udn.size()) udn = udn.substr(pos + 1);
 				peer->setRinconId(udn);
-				if(!roomName.empty()) peer->setValue(clientInfo, 1, "ROOMNAME", PVariable(new Variable(roomName)));
+				if(!roomName.empty()) peer->setValue(clientInfo, 1, "ROOMNAME", PVariable(new Variable(roomName)), true);
 			}
 		}
 

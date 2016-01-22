@@ -58,12 +58,12 @@ std::shared_ptr<BaseLib::Systems::ICentral> SonosPeer::getCentral()
 	return std::shared_ptr<BaseLib::Systems::ICentral>();
 }
 
-SonosPeer::SonosPeer(uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler) : BaseLib::Systems::Peer(GD::bl, parentID, centralFeatures, eventHandler)
+SonosPeer::SonosPeer(uint32_t parentID, IPeerEventSink* eventHandler) : BaseLib::Systems::Peer(GD::bl, parentID, eventHandler)
 {
 	init();
 }
 
-SonosPeer::SonosPeer(int32_t id, std::string serialNumber, uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler) : BaseLib::Systems::Peer(GD::bl, id, -1, serialNumber, parentID, centralFeatures, eventHandler)
+SonosPeer::SonosPeer(int32_t id, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler) : BaseLib::Systems::Peer(GD::bl, id, -1, serialNumber, parentID, eventHandler)
 {
 	init();
 }
@@ -649,7 +649,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 	try
 	{
 		if(!packet) return;
-		if(!_centralFeatures || _disposing) return;
+		if(_disposing) return;
 		if(!_rpcDevice) return;
 		setLastPacketReceived();
 		std::vector<FrameValues> frameValues;
@@ -1343,7 +1343,6 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 	try
 	{
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
-		if(!_centralFeatures) return Variable::createError(-2, "Not a central peer.");
 		if(channel < 0) channel = 0;
 		if(remoteChannel < 0) remoteChannel = 0;
 		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
@@ -1429,7 +1428,6 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 	{
 		Peer::setValue(clientInfo, channel, valueKey, value, wait); //Ignore result, otherwise setHomegerValue might not be executed
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
-		if(!_centralFeatures) return Variable::createError(-2, "Not a central peer.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");
 		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
 		if(setHomegearValue(channel, valueKey, value)) return PVariable(new Variable(VariableType::tVoid));

@@ -61,8 +61,8 @@ public:
 class SonosPeer : public BaseLib::Systems::Peer
 {
 public:
-	SonosPeer(uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler);
-	SonosPeer(int32_t id, std::string serialNumber, uint32_t parentID, bool centralFeatures, IPeerEventSink* eventHandler);
+	SonosPeer(uint32_t parentID, IPeerEventSink* eventHandler);
+	SonosPeer(int32_t id, std::string serialNumber, uint32_t parentID, IPeerEventSink* eventHandler);
 	virtual ~SonosPeer();
 	void init();
 

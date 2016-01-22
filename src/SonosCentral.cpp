@@ -229,7 +229,7 @@ void SonosCentral::loadPeers()
 		{
 			int32_t peerID = row->second.at(0)->intValue;
 			GD::out.printMessage("Loading Sonos peer " + std::to_string(peerID));
-			std::shared_ptr<SonosPeer> peer(new SonosPeer(peerID, row->second.at(3)->textValue, _deviceId, true, this));
+			std::shared_ptr<SonosPeer> peer(new SonosPeer(peerID, row->second.at(3)->textValue, _deviceId, this));
 			if(!peer->load(this)) continue;
 			if(!peer->getRpcDevice()) continue;
 			_peersMutex.lock();
@@ -747,7 +747,7 @@ std::shared_ptr<SonosPeer> SonosCentral::createPeer(BaseLib::Systems::LogicalDev
 {
 	try
 	{
-		std::shared_ptr<SonosPeer> peer(new SonosPeer(_deviceId, true, this));
+		std::shared_ptr<SonosPeer> peer(new SonosPeer(_deviceId, this));
 		peer->setDeviceType(deviceType);
 		peer->setSerialNumber(serialNumber);
 		peer->setIp(ip);

@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Sathya Laufer
+/* Copyright 2013-2016 Sathya Laufer
  *
  * Homegear is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -607,6 +607,13 @@ void EventServer::httpGet(BaseLib::HTTP& http, std::vector<char>& content)
 		std::vector<std::string> headers;
 
 		if(!path.empty() && path.front() == '/') path = path.substr(1);
+		if(!GD::bl->io.directoryExists(GD::bl->settings.tempPath() + "sonos"))
+		{
+			if(!GD::bl->io.createDirectory(GD::bl->settings.tempPath() + "sonos", S_IRWXU | S_IRWXG))
+			{
+				GD::out.printError("Error: Cannot create temp directory \"" + GD::bl->settings.tempPath() + "sonos");
+			}
+		}
 		std::string contentPath = _bl->settings.tempPath() + "sonos/" + path;
 		if(!BaseLib::Io::fileExists(contentPath)) contentPath = GD::dataPath + path;
 		if(!BaseLib::Io::fileExists(contentPath))

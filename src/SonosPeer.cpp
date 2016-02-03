@@ -1448,7 +1448,7 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		std::shared_ptr<std::vector<PVariable>> values(new std::vector<PVariable>());
 
 		rpcParameter->convertToPacket(value, parameter->data);
-		value = rpcParameter->convertFromPacket(parameter->data, false);
+		value = rpcParameter->convertFromPacket(parameter->data, true);
 		if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
 		else saveParameter(0, ParameterGroup::Type::Enum::variables, channel, valueKey, parameter->data);
 

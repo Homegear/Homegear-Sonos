@@ -12,18 +12,13 @@
 			<properties>
 				<internal>true</internal>
 			</properties>
-			<configParameters>maint_ch_master--0</configParameters>
-			<variables>maint_ch_values--0</variables>
+			<configParameters>maint_ch_master</configParameters>
+			<variables>maint_ch_values</variables>
 		</function>
 		<function channel="1" type="SPEAKER" channelCount="1">
 			<properties/>
-			<configParameters>config--1</configParameters>
-			<variables>speaker_valueset--1</variables>
-		</function>
-		<function channel="2" type="SPEAKER_INFO" channelCount="1">
-			<properties/>
-			<configParameters>config--2</configParameters>
-			<variables>speaker_info_valueset--2</variables>
+			<configParameters>speaker_config</configParameters>
+			<variables>speaker_valueset</variables>
 		</function>
 	</functions>
 	<packets>
@@ -102,7 +97,7 @@
 		<packet id="GET_FAVORITES_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>BrowseResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>FV:2</key>
@@ -146,7 +141,7 @@
 		<packet id="GET_PLAYLISTS_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>BrowseResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>SQ:</key>
@@ -190,7 +185,7 @@
 		<packet id="GET_RADIO_FAVORITES_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>BrowseResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>R:0/0</key>
@@ -234,7 +229,7 @@
 		<packet id="GET_QUEUE_TITLES_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>BrowseResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>Q:0</key>
@@ -313,7 +308,7 @@
 		<packet id="GET_POSITION_INFO_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>GetPositionInfoResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>Track</key>
@@ -453,7 +448,7 @@
 		<packet id="INFO">
 			<direction>toCentral</direction>
 			<function2>InfoBroadcast</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>VolumeMaster</key>
@@ -645,11 +640,11 @@
 				</element>
 				<element>
 					<key>AVTransportURIMetaData</key>
-					<parameterId>AV_TRANSPORT_METADATA</parameterId>
+					<parameterId>AV_TRANSPORT_METADATA_INFO</parameterId>
 				</element>
 				<element>
 					<key>NextAVTransportURIMetaData</key>
-					<parameterId>NEXT_AV_TRANSPORT_METADATA</parameterId>
+					<parameterId>NEXT_AV_TRANSPORT_METADATA_INFO</parameterId>
 				</element>
 				<element>
 					<key>r:EnqueuedTransportURIMetaData</key>
@@ -880,7 +875,7 @@
 		<packet id="INFO2">
 			<direction>toCentral</direction>
 			<function2>InfoBroadcast2</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>SystemUpdateID</key>
@@ -989,7 +984,7 @@
 		<packet id="MUTE_GET_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>GetMuteResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>CurrentMute</key>
@@ -1237,7 +1232,7 @@
 		<packet id="SLEEP_TIMER_GET_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>GetRemainingSleepTimerDurationResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>RemainingSleepTimerDuration</key>
@@ -1265,7 +1260,7 @@
 		<packet id="TRANSPORT_STATE_GET_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>GetTransportInfoResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>CurrentTransportState</key>
@@ -1301,7 +1296,7 @@
 		<packet id="VOLUME_GET_RESPONSE">
 			<direction>toCentral</direction>
 			<function2>GetVolumeResponse</function2>
-			<channel>2</channel>
+			<channel>1</channel>
 			<jsonPayload>
 				<element>
 					<key>CurrentVolume</key>
@@ -1332,10 +1327,9 @@
 		</packet>
 	</packets>
 	<parameterGroups>
-		<configParameters id="config--1"/>
-		<configParameters id="config--2"/>
-		<configParameters id="maint_ch_master--0"/>
-		<variables id="maint_ch_values--0">
+		<configParameters id="speaker_config"/>
+		<configParameters id="maint_ch_master"/>
+		<variables id="maint_ch_values">
 			<parameter id="UNREACH">
 				<properties>
 					<writeable>false</writeable>
@@ -1385,7 +1379,432 @@
 				</physicalInteger>
 			</parameter>
 		</variables>
-		<variables id="speaker_info_valueset--2">
+		<variables id="speaker_valueset">
+			<parameter id="PEER_ID">
+				<properties>
+					<!-- Needed for the CCU2. Must be writeable, otherwise it can't be used in the CCU. -->
+					<control>EASYSONOS.PEERID</control>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger/>
+			</parameter>
+			<parameter id="ID">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+			</parameter>
+			<parameter id="IP_ADDRESS">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+			</parameter>
+			<parameter id="STOP">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="STOP">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="STOP">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="PAUSE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="PAUSE">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="PAUSE">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="PLAY">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="PLAY">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="PLAY">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="PREVIOUS">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="PREVIOUS">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="PREVIOUS">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="NEXT">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="NEXT">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="NEXT">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="RAMP_TO_VOLUME">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+					<maximumValue>100</maximumValue>
+				</logicalInteger>
+				<physicalInteger groupId="RAMP_TO_VOLUME">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="RAMP_TO_VOLUME">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="PLAY_FAVORITE">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="PLAY_PLAYLIST">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="PLAY_RADIO_FAVORITE">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="LED_STATE">
+				<properties>
+					<casts>
+						<booleanString>
+							<trueValue>On</trueValue>
+							<falseValue>Off</falseValue>
+						</booleanString>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalBoolean/>
+				<physicalString groupId="LED_STATE">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="LED_GET">
+						<type>get</type>
+					</packet>
+					<packet id="LED_SET">
+						<type>set</type>
+					</packet>
+					<packet id="LED_GET_RESPONSE">
+						<type>event</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="ROOMNAME">
+				<properties>
+					<writeable>false</writeable>
+				</properties>
+				<logicalString/>
+				<physicalInteger groupId=""/>
+			</parameter>
+			<parameter id="ADD_MEMBER">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="ADD_MEMBER">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="ADD_MEMBER">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="REMOVE_MEMBER">
+				<properties>
+					<readable>false</readable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="REMOVE_MEMBER">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="REMOVE_MEMBER">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="ADD_URI_TO_QUEUE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="ADD_URI_TO_QUEUE">
+					<operationType>command</operationType>
+				</physicalString>
+				<packets>
+					<packet id="QUEUE_URI">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="ADD_URI_TO_QUEUE_METADATA">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="ADD_URI_TO_QUEUE_METADATA">
+					<operationType>store</operationType>
+				</physicalString>
+			</parameter>
+			<parameter id="ADD_URI_TO_QUEUE_DESIRED_FIRST_TRACK_NUMBER">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+					<defaultValue>0</defaultValue>
+				</logicalInteger>
+				<physicalInteger groupId="ADD_URI_TO_QUEUE_DESIRED_FIRST_TRACK_NUMBER">
+					<operationType>store</operationType>
+				</physicalInteger>
+			</parameter>
+			<parameter id="ADD_URI_TO_QUEUE_ENQUEUE_NEXT">
+				<properties>
+					<casts>
+						<booleanString>
+							<trueValue>1</trueValue>
+							<falseValue>0</falseValue>
+						</booleanString>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalBoolean>
+					<defaultValue>true</defaultValue>
+				</logicalBoolean>
+				<physicalInteger groupId="ADD_URI_TO_QUEUE_ENQUEUE_NEXT">
+					<operationType>store</operationType>
+				</physicalInteger>
+			</parameter>
+			<parameter id="FIRST_TRACK_NUMBER_ENQUEUED">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+				</logicalInteger>
+				<physicalInteger groupId="FIRST_TRACK_NUMBER_ENQUEUED">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="ADD_URI_TO_QUEUE_RESPONSE">
+						<type>event</type>
+					</packet>
+				</packets>
+			</parameter>
+			<parameter id="PLAY_TTS">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="">
+					<operationType>command</operationType>
+				</physicalString>
+			</parameter>
+			<parameter id="PLAY_TTS_UNMUTE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalBoolean>
+					<defaultValue>true</defaultValue>
+				</logicalBoolean>
+				<physicalBoolean groupId="">
+					<operationType>store</operationType>
+				</physicalBoolean>
+			</parameter>
+			<parameter id="PLAY_TTS_VOLUME">
+				<properties>
+					<signed>true</signed>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>-1</minimumValue>
+					<maximumValue>100</maximumValue>
+				</logicalInteger>
+				<physicalInteger groupId="">
+					<operationType>store</operationType>
+				</physicalInteger>
+			</parameter>
+			<parameter id="PLAY_TTS_LANGUAGE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString>
+					<defaultValue>en</defaultValue>
+				</logicalString>
+				<physicalString groupId="">
+					<operationType>store</operationType>
+				</physicalString>
+			</parameter>
+			<parameter id="PLAY_AUDIO_FILE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="">
+					<operationType>command</operationType>
+				</physicalString>
+			</parameter>
+			<parameter id="PLAY_AUDIO_FILE_UNMUTE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalBoolean>
+					<defaultValue>true</defaultValue>
+				</logicalBoolean>
+				<physicalBoolean groupId="">
+					<operationType>store</operationType>
+				</physicalBoolean>
+			</parameter>
+			<parameter id="PLAY_AUDIO_FILE_VOLUME">
+				<properties>
+					<signed>true</signed>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>-1</minimumValue>
+					<maximumValue>100</maximumValue>
+				</logicalInteger>
+				<physicalInteger groupId="">
+					<operationType>store</operationType>
+				</physicalInteger>
+			</parameter>
+			<parameter id="ENQUEUE_AUDIO_FILE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalString groupId="">
+					<operationType>command</operationType>
+				</physicalString>
+			</parameter>
+			<parameter id="REMOVE_ALL_TRACKS_FROM_QUEUE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="REMOVE_ALL_TRACKS_FROM_QUEUE">
+					<operationType>command</operationType>
+				</physicalInteger>
+				<packets>
+					<packet id="REMOVE_ALL_TRACKS_FROM_QUEUE">
+						<type>set</type>
+					</packet>
+				</packets>
+			</parameter>
 			<parameter id="VOLUME">
 				<properties>
 					<control>EASYSONOS.DUMMY</control>
@@ -2162,18 +2581,24 @@
 			</parameter>
 			<parameter id="AV_TRANSPORT_URI">
 				<properties>
-					<writeable>false</writeable>
 					<casts>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
-				<physicalString groupId="ENQUEUED_TRANSPORT_URI">
+				<logicalString/>
+				<physicalString groupId="AV_TRANSPORT_URI">
 					<operationType>command</operationType>
 				</physicalString>
 				<packets>
+					<packet id="AV_TRANSPORT_URI_SET">
+						<type>set</type>
+					</packet>
+					<packet id="GET_MEDIAINFO">
+						<type>get</type>
+					</packet>
+					<packet id="GET_MEDIAINFO_RESPONSE">
+						<type>event</type>
+					</packet>
 					<packet id="INFO">
 						<type>event</type>
 					</packet>
@@ -2181,19 +2606,22 @@
 			</parameter>
 			<parameter id="AV_TRANSPORT_METADATA">
 				<properties>
-					<writeable>false</writeable>
 					<casts>
 						<rpcBinary/>
 					</casts>
 				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
+				<logicalString/>
 				<physicalString groupId="AV_TRANSPORT_METADATA">
-					<operationType>command</operationType>
+					<operationType>store</operationType>
 				</physicalString>
 				<packets>
 					<packet id="INFO">
+						<type>event</type>
+					</packet>
+					<packet id="GET_MEDIAINFO">
+						<type>get</type>
+					</packet>
+					<packet id="GET_MEDIAINFO_RESPONSE">
 						<type>event</type>
 					</packet>
 				</packets>
@@ -2208,7 +2636,7 @@
 				<logicalString>
 					<defaultValue/>
 				</logicalString>
-				<physicalString groupId="ENQUEUED_TRANSPORT_URI">
+				<physicalString groupId="NEXT_AV_TRANSPORT_URI">
 					<operationType>command</operationType>
 				</physicalString>
 				<packets>
@@ -3787,474 +4215,6 @@
 					</packet>
 					<packet id="GET_QUEUE_TITLES_RESPONSE">
 						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
-		</variables>
-		<variables id="speaker_valueset--1">
-			<parameter id="PEER_ID">
-				<properties>
-					<!-- Needed for the CCU2. Must be writeable, otherwise it can't be used in the CCU. -->
-					<control>EASYSONOS.PEERID</control>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalInteger/>
-			</parameter>
-			<parameter id="ID">
-				<properties>
-					<writeable>false</writeable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-			</parameter>
-			<parameter id="IP_ADDRESS">
-				<properties>
-					<writeable>false</writeable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-			</parameter>
-			<parameter id="STOP">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalAction/>
-				<physicalInteger groupId="STOP">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="STOP">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="PAUSE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalAction/>
-				<physicalInteger groupId="PAUSE">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="PAUSE">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="PLAY">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalAction/>
-				<physicalInteger groupId="PLAY">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="PLAY">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="PREVIOUS">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalAction/>
-				<physicalInteger groupId="PREVIOUS">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="PREVIOUS">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="NEXT">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalAction/>
-				<physicalInteger groupId="NEXT">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="NEXT">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="RAMP_TO_VOLUME">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalInteger>
-					<minimumValue>0</minimumValue>
-					<maximumValue>100</maximumValue>
-				</logicalInteger>
-				<physicalInteger groupId="RAMP_TO_VOLUME">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="RAMP_TO_VOLUME">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="PLAY_FAVORITE">
-				<properties>
-					<readable>false</readable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalNone>
-					<operationType>command</operationType>
-				</physicalNone>
-			</parameter>
-			<parameter id="PLAY_PLAYLIST">
-				<properties>
-					<readable>false</readable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalNone>
-					<operationType>command</operationType>
-				</physicalNone>
-			</parameter>
-			<parameter id="PLAY_RADIO_FAVORITE">
-				<properties>
-					<readable>false</readable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalNone>
-					<operationType>command</operationType>
-				</physicalNone>
-			</parameter>
-			<parameter id="LED_STATE">
-				<properties>
-					<casts>
-						<booleanString>
-							<trueValue>On</trueValue>
-							<falseValue>Off</falseValue>
-						</booleanString>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalBoolean/>
-				<physicalString groupId="LED_STATE">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="LED_GET">
-						<type>get</type>
-					</packet>
-					<packet id="LED_SET">
-						<type>set</type>
-					</packet>
-					<packet id="LED_GET_RESPONSE">
-						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="ROOMNAME">
-				<properties>
-					<writeable>false</writeable>
-				</properties>
-				<logicalString/>
-				<physicalInteger groupId=""/>
-			</parameter>
-			<parameter id="ADD_MEMBER">
-				<properties>
-					<readable>false</readable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="ADD_MEMBER">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="ADD_MEMBER">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="REMOVE_MEMBER">
-				<properties>
-					<readable>false</readable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="REMOVE_MEMBER">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="REMOVE_MEMBER">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="ADD_URI_TO_QUEUE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="ADD_URI_TO_QUEUE">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="QUEUE_URI">
-						<type>set</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="ADD_URI_TO_QUEUE_METADATA">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="ADD_URI_TO_QUEUE_METADATA">
-					<operationType>store</operationType>
-				</physicalString>
-			</parameter>
-			<parameter id="ADD_URI_TO_QUEUE_DESIRED_FIRST_TRACK_NUMBER">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalInteger>
-					<minimumValue>0</minimumValue>
-					<defaultValue>0</defaultValue>
-				</logicalInteger>
-				<physicalInteger groupId="ADD_URI_TO_QUEUE_DESIRED_FIRST_TRACK_NUMBER">
-					<operationType>store</operationType>
-				</physicalInteger>
-			</parameter>
-			<parameter id="ADD_URI_TO_QUEUE_ENQUEUE_NEXT">
-				<properties>
-					<casts>
-						<booleanString>
-							<trueValue>1</trueValue>
-							<falseValue>0</falseValue>
-						</booleanString>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalBoolean>
-					<defaultValue>true</defaultValue>
-				</logicalBoolean>
-				<physicalInteger groupId="ADD_URI_TO_QUEUE_ENQUEUE_NEXT">
-					<operationType>store</operationType>
-				</physicalInteger>
-			</parameter>
-			<parameter id="FIRST_TRACK_NUMBER_ENQUEUED">
-				<properties>
-					<writeable>false</writeable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalInteger>
-					<minimumValue>0</minimumValue>
-				</logicalInteger>
-				<physicalInteger groupId="FIRST_TRACK_NUMBER_ENQUEUED">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="ADD_URI_TO_QUEUE_RESPONSE">
-						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="AV_TRANSPORT_URI">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="AV_TRANSPORT_URI">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="AV_TRANSPORT_URI_SET">
-						<type>set</type>
-					</packet>
-					<packet id="GET_MEDIAINFO">
-						<type>get</type>
-					</packet>
-					<packet id="GET_MEDIAINFO_RESPONSE">
-						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="AV_TRANSPORT_URI_METADATA">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="AV_TRANSPORT_URI_METADATA">
-					<operationType>store</operationType>
-				</physicalString>
-				<packets>
-					<packet id="GET_MEDIAINFO">
-						<type>get</type>
-					</packet>
-					<packet id="GET_MEDIAINFO_RESPONSE">
-						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="PLAY_TTS">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="">
-					<operationType>command</operationType>
-				</physicalString>
-			</parameter>
-			<parameter id="PLAY_TTS_UNMUTE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalBoolean>
-					<defaultValue>true</defaultValue>
-				</logicalBoolean>
-				<physicalBoolean groupId="">
-					<operationType>store</operationType>
-				</physicalBoolean>
-			</parameter>
-			<parameter id="PLAY_TTS_VOLUME">
-				<properties>
-					<signed>true</signed>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalInteger>
-					<minimumValue>-1</minimumValue>
-					<maximumValue>100</maximumValue>
-				</logicalInteger>
-				<physicalInteger groupId="">
-					<operationType>store</operationType>
-				</physicalInteger>
-			</parameter>
-			<parameter id="PLAY_TTS_LANGUAGE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString>
-					<defaultValue>en</defaultValue>
-				</logicalString>
-				<physicalString groupId="">
-					<operationType>store</operationType>
-				</physicalString>
-			</parameter>
-			<parameter id="PLAY_AUDIO_FILE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="">
-					<operationType>command</operationType>
-				</physicalString>
-			</parameter>
-			<parameter id="PLAY_AUDIO_FILE_UNMUTE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalBoolean>
-					<defaultValue>true</defaultValue>
-				</logicalBoolean>
-				<physicalBoolean groupId="">
-					<operationType>store</operationType>
-				</physicalBoolean>
-			</parameter>
-			<parameter id="PLAY_AUDIO_FILE_VOLUME">
-				<properties>
-					<signed>true</signed>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalInteger>
-					<minimumValue>-1</minimumValue>
-					<maximumValue>100</maximumValue>
-				</logicalInteger>
-				<physicalInteger groupId="">
-					<operationType>store</operationType>
-				</physicalInteger>
-			</parameter>
-			<parameter id="ENQUEUE_AUDIO_FILE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString/>
-				<physicalString groupId="">
-					<operationType>command</operationType>
-				</physicalString>
-			</parameter>
-			<parameter id="REMOVE_ALL_TRACKS_FROM_QUEUE">
-				<properties>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalAction/>
-				<physicalInteger groupId="REMOVE_ALL_TRACKS_FROM_QUEUE">
-					<operationType>command</operationType>
-				</physicalInteger>
-				<packets>
-					<packet id="REMOVE_ALL_TRACKS_FROM_QUEUE">
-						<type>set</type>
 					</packet>
 				</packets>
 			</parameter>

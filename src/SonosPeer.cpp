@@ -122,7 +122,7 @@ void SonosPeer::setIp(std::string value)
 	try
 	{
 		Peer::setIp(value);
-		_httpClient.reset(new BaseLib::HTTPClient(GD::bl, _ip, 1400, false));
+		_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
 	}
 	catch(const std::exception& ex)
 	{
@@ -224,7 +224,7 @@ void SonosPeer::worker()
 					if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + response);
 					serviceMessages->setUnreach(false, true);
 				}
-				catch(BaseLib::HTTPClientException& ex)
+				catch(BaseLib::HttpClientException& ex)
 				{
 					GD::out.printWarning("Warning: Error sending value to Sonos device: " + ex.what());
 					serviceMessages->setUnreach(true, false);
@@ -433,7 +433,7 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 			{
 			case 1:
 				_ip = row->second.at(4)->textValue;
-				_httpClient.reset(new BaseLib::HTTPClient(GD::bl, _ip, 1400, false));
+				_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
 				break;
 			}
 		}
@@ -1087,7 +1087,7 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 				packetReceived(responsePacket);
 				serviceMessages->setUnreach(false, true);
 			}
-			catch(BaseLib::HTTPClientException& ex)
+			catch(BaseLib::HttpClientException& ex)
 			{
 				return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
 				serviceMessages->setUnreach(true, false);
@@ -1514,13 +1514,13 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 						_httpClient->sendRequest(soapRequest, response);
 						if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + response);
 					}
-					catch(BaseLib::HTTPException& ex)
+					catch(BaseLib::HttpException& ex)
 					{
 						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
 						GD::out.printMessage("Request was: \n" + soapRequest);
 						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
 					}
-					catch(BaseLib::HTTPClientException& ex)
+					catch(BaseLib::HttpClientException& ex)
 					{
 						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
 						GD::out.printMessage("Request was: \n" + soapRequest);
@@ -1577,7 +1577,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		std::string playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + filename + '\n';
 		std::string playlistFilepath = tempPath + playlistFilename;
 		BaseLib::Io::writeFile(playlistFilepath, playlistContent);
-		playlistFilename = BaseLib::HTTP::encodeURL(playlistFilename);
+		playlistFilename = BaseLib::Http::encodeURL(playlistFilename);
 
 		std::string rinconId;
 		std::string currentTrackUri;

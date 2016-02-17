@@ -220,7 +220,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::SocketOperations> socket, 
 		buffer[bufferMax] = '\0';
 		std::vector<char> packet;
 		int32_t bytesRead;
-		BaseLib::HTTP http;
+		BaseLib::Http http;
 
 		while(!_stopServer)
 		{
@@ -264,7 +264,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::SocketOperations> socket, 
 			{
 				http.process(buffer, bytesRead);
 			}
-			catch(BaseLib::HTTPException& ex)
+			catch(BaseLib::HttpException& ex)
 			{
 				_out.printError("Error: Could not process HTTP packet: " + ex.what() + " Buffer: " + std::string(buffer, bytesRead));
 				http.reset();
@@ -282,10 +282,10 @@ void EventServer::readClient(std::shared_ptr<BaseLib::SocketOperations> socket, 
 				//std::cerr << std::string(&http.getContent()->at(0)) << std::endl;
 
 				std::vector<char> response;
-				if(http.getHeader()->method == "GET")
+				if(http.getHeader().method == "GET")
 				{
-					http.getHeader()->remoteAddress = ipAddress;
-					http.getHeader()->remotePort = port;
+					http.getHeader().remoteAddress = ipAddress;
+					http.getHeader().remotePort = port;
 					httpGet(http, response);
 					if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: Webserver response: " + BaseLib::HelperFunctions::getHexString(response));
 
@@ -306,17 +306,17 @@ void EventServer::readClient(std::shared_ptr<BaseLib::SocketOperations> socket, 
 				}
 				else
 				{
-					BaseLib::HTTP::Header* header = http.getHeader();
+					BaseLib::Http::Header& header = http.getHeader();
 					std::string serialNumber;
-					if(header->fields.find("sid") != header->fields.end())
+					if(header.fields.find("sid") != header.fields.end())
 					{
-						serialNumber = header->fields.at("sid");
+						serialNumber = header.fields.at("sid");
 						if(serialNumber.size() > 24) serialNumber = serialNumber.substr(12, 12); else serialNumber.clear();
 					}
 					if(http.getContentSize() > 0 && !serialNumber.empty())
 					{
 						xml_document<> doc;
-						doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&http.getContent()->at(0));
+						doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&http.getContent().at(0));
 						for(xml_node<>* node = doc.first_node(); node; node = node->next_sibling())
 						{
 							std::string name(node->name());
@@ -599,11 +599,11 @@ void EventServer::getHttpError(int32_t code, std::string codeDescription, std::s
     }
 }
 
-void EventServer::httpGet(BaseLib::HTTP& http, std::vector<char>& content)
+void EventServer::httpGet(BaseLib::Http& http, std::vector<char>& content)
 {
 	try
 	{
-		std::string path = http.getHeader()->path;
+		std::string path = http.getHeader().path;
 		std::vector<std::string> headers;
 
 		if(!path.empty() && path.front() == '/') path = path.substr(1);
@@ -624,7 +624,7 @@ void EventServer::httpGet(BaseLib::HTTP& http, std::vector<char>& content)
 
 		try
 		{
-			_out.printInfo("Client is requesting: " + http.getHeader()->path + " (translated to " + contentPath + ", method: GET)");
+			_out.printInfo("Client is requesting: " + http.getHeader().path + " (translated to " + contentPath + ", method: GET)");
 			std::string ending = "";
 			int32_t pos = path.find_last_of('.');
 			if(pos != (signed)std::string::npos && (unsigned)pos < path.size() - 1) ending = path.substr(pos + 1);
@@ -634,7 +634,7 @@ void EventServer::httpGet(BaseLib::HTTP& http, std::vector<char>& content)
 			std::string contentType = http.getMimeType(ending);
 			if(contentType.empty()) contentType = "application/octet-stream";
 			//Don't return content when method is "HEAD"
-			if(http.getHeader()->method == "GET") contentString = GD::bl->io.getFileContent(contentPath);
+			if(http.getHeader().method == "GET") contentString = GD::bl->io.getFileContent(contentPath);
 			std::string header = getHttpHeader(contentString.size(), contentType, 200, "OK", headers);
 			content.insert(content.end(), header.begin(), header.end());
 			if(!contentString.empty()) content.insert(content.end(), contentString.begin(), contentString.end());

@@ -67,7 +67,7 @@ class EventServer  : public ISonosInterface
         std::string getHttpHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders);
         void getHttpError(int32_t code, std::string codeDescription, std::string longDescription, std::vector<char>& content);
         void getHttpError(int32_t code, std::string codeDescription, std::string longDescription, std::vector<char>& content, std::vector<std::string>& additionalHeaders);
-        void httpGet(BaseLib::HTTP& http, std::vector<char>& content);
+        void httpGet(BaseLib::Http& http, std::vector<char>& content);
 };
 
 }

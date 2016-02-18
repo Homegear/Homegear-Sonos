@@ -425,7 +425,6 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 	{
 		if(!rows) rows = _bl->db->getPeerVariables(_peerID);
 		Peer::loadVariables(central, rows);
-		_databaseMutex.lock();
 		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
 		{
 			_variableDatabaseIDs[row->second.at(2)->intValue] = row->second.at(0)->intValue;
@@ -450,7 +449,6 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
-    _databaseMutex.unlock();
 }
 
 bool SonosPeer::load(BaseLib::Systems::ICentral* central)

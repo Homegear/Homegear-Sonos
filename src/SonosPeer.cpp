@@ -1136,124 +1136,6 @@ PParameterGroup SonosPeer::getParameterSet(int32_t channel, ParameterGroup::Type
 	return PParameterGroup();
 }
 
-PVariable SonosPeer::getDeviceInfo(BaseLib::PRpcClientInfo clientInfo, std::map<std::string, bool> fields)
-{
-	try
-	{
-		PVariable info(Peer::getDeviceInfo(clientInfo, fields));
-		return info;
-	}
-	catch(const std::exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return PVariable();
-}
-
-PVariable SonosPeer::getParamset(BaseLib::PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
-{
-	try
-	{
-		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
-		if(channel < 0) channel = 0;
-		if(remoteChannel < 0) remoteChannel = 0;
-		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
-		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
-		if(type == ParameterGroup::Type::none) type = ParameterGroup::Type::link;
-		PParameterGroup parameterGroup = functionIterator->second->getParameterGroup(type);
-		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
-		PVariable variables(new Variable(VariableType::tStruct));
-
-		for(Parameters::iterator i = parameterGroup->parameters.begin(); i != parameterGroup->parameters.end(); ++i)
-		{
-			if(i->second->id.empty() || !i->second->visible) continue;
-			if(!i->second->visible && !i->second->service && !i->second->internal && !i->second->transform)
-			{
-				GD::out.printDebug("Debug: Omitting parameter " + i->second->id + " because of it's ui flag.");
-				continue;
-			}
-			PVariable element;
-			if(type == ParameterGroup::Type::Enum::variables)
-			{
-				if(!i->second->readable) continue;
-				if(valuesCentral.find(channel) == valuesCentral.end()) continue;
-				if(valuesCentral[channel].find(i->second->id) == valuesCentral[channel].end()) continue;
-				element = i->second->convertFromPacket(valuesCentral[channel][i->second->id].data);
-			}
-			else if(type == ParameterGroup::Type::Enum::config)
-			{
-				if(configCentral.find(channel) == configCentral.end()) continue;
-				if(configCentral[channel].find(i->second->id) == configCentral[channel].end()) continue;
-				element = i->second->convertFromPacket(configCentral[channel][i->second->id].data);
-			}
-			else if(type == ParameterGroup::Type::Enum::link)
-			{
-				return Variable::createError(-3, "Parameter set type is not supported.");
-			}
-
-			if(!element) continue;
-			if(element->type == VariableType::tVoid) continue;
-			variables->structValue->insert(StructElement(i->second->id, element));
-		}
-		return variables;
-	}
-	catch(const std::exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return Variable::createError(-32500, "Unknown application error.");
-}
-
-PVariable SonosPeer::getParamsetDescription(BaseLib::PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel)
-{
-	try
-	{
-		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
-		if(channel < 0) channel = 0;
-		Functions::iterator functionIterator = _rpcDevice->functions.find(channel);
-		if(functionIterator == _rpcDevice->functions.end()) return Variable::createError(-2, "Unknown channel.");
-		if(type == ParameterGroup::Type::none) type = ParameterGroup::Type::link;
-		PParameterGroup parameterGroup = functionIterator->second->getParameterGroup(type);
-		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
-		if(type == ParameterGroup::Type::link && remoteID > 0)
-		{
-			std::shared_ptr<BaseLib::Systems::BasicPeer> remotePeer = getPeer(channel, remoteID, remoteChannel);
-			if(!remotePeer) return Variable::createError(-2, "Unknown remote peer.");
-		}
-
-		return Peer::getParamsetDescription(clientInfo, parameterGroup);
-	}
-	catch(const std::exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
-    return Variable::createError(-32500, "Unknown application error.");
-}
-
 bool SonosPeer::getAllValuesHook2(PRpcClientInfo clientInfo, PParameter parameter, uint32_t channel, PVariable parameters)
 {
 	try
@@ -1337,44 +1219,25 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 
 		if(type == ParameterGroup::Type::Enum::config)
 		{
-			std::map<int32_t, std::map<int32_t, std::vector<uint8_t>>> changedParameters;
-			//allParameters is necessary to temporarily store all values. It is used to set changedParameters.
-			//This is necessary when there are multiple variables per index and not all of them are changed.
-			std::map<int32_t, std::map<int32_t, std::vector<uint8_t>>> allParameters;
+			bool configChanged = false;
 			for(Struct::iterator i = variables->structValue->begin(); i != variables->structValue->end(); ++i)
 			{
 				if(i->first.empty() || !i->second) continue;
-				std::vector<uint8_t> value;
-				if(configCentral[channel].find(i->first) == configCentral[channel].end()) continue;
-				BaseLib::Systems::RPCConfigurationParameter* parameter = &configCentral[channel][i->first];
-				if(!parameter->rpcParameter) continue;
-				parameter->rpcParameter->convertToPacket(i->second, value);
-				std::vector<uint8_t> shiftedValue = value;
-				parameter->rpcParameter->adjustBitPosition(shiftedValue);
-				int32_t intIndex = (int32_t)parameter->rpcParameter->physical->index;
-				int32_t list = parameter->rpcParameter->physical->list;
-				if(list == -1) list = 0;
-				if(allParameters[list].find(intIndex) == allParameters[list].end()) allParameters[list][intIndex] = shiftedValue;
-				else
-				{
-					uint32_t index = 0;
-					for(std::vector<uint8_t>::iterator j = shiftedValue.begin(); j != shiftedValue.end(); ++j)
-					{
-						if(index >= allParameters[list][intIndex].size()) allParameters[list][intIndex].push_back(0);
-						allParameters[list][intIndex].at(index) |= *j;
-						index++;
-					}
-				}
-				parameter->data = value;
-				if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
-				else saveParameter(0, ParameterGroup::Type::Enum::config, channel, i->first, parameter->data);
-				GD::out.printInfo("Info: Parameter " + i->first + " of peer " + std::to_string(_peerID) + " and channel " + std::to_string(channel) + " was set to 0x" + BaseLib::HelperFunctions::getHexString(allParameters[list][intIndex]) + ".");
-				//Only send to device when parameter is of type config
-				if(parameter->rpcParameter->physical->operationType != IPhysical::OperationType::Enum::config && parameter->rpcParameter->physical->operationType != IPhysical::OperationType::Enum::configString) continue;
-				changedParameters[list][intIndex] = allParameters[list][intIndex];
+				std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
+				if(channelIterator == configCentral.end()) continue;
+				std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(i->first);
+				if(parameterIterator == channelIterator->second.end()) continue;
+				BaseLib::Systems::RPCConfigurationParameter& parameter = parameterIterator->second;
+				if(!parameter.rpcParameter) continue;
+				parameter.rpcParameter->convertToPacket(i->second, parameter.data);
+				if(parameter.databaseID > 0) saveParameter(parameter.databaseID, parameter.data);
+				else saveParameter(0, ParameterGroup::Type::Enum::config, channel, i->first, parameter.data);
+				GD::out.printInfo("Info: Parameter " + i->first + " of peer " + std::to_string(_peerID) + " and channel " + std::to_string(channel) + " was set to 0x" + BaseLib::HelperFunctions::getHexString(parameter.data) + ".");
+				if(parameter.rpcParameter->physical->operationType != IPhysical::OperationType::Enum::config && parameter.rpcParameter->physical->operationType != IPhysical::OperationType::Enum::configString) continue;
+				configChanged = true;
 			}
 
-			if(!changedParameters.empty() && !changedParameters.begin()->second.empty()) raiseRPCUpdateDevice(_peerID, channel, _serialNumber + ":" + std::to_string(channel), 0);
+			if(configChanged) raiseRPCUpdateDevice(_peerID, channel, _serialNumber + ":" + std::to_string(channel), 0);
 		}
 		else if(type == ParameterGroup::Type::Enum::variables)
 		{

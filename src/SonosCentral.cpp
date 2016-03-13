@@ -959,7 +959,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 			if(GD::bl->debugLevel >= 5)
 			{
 				GD::out.printDebug("Debug: Search response:");
-				info->print();
+				info->print(true, false);
 			}
 			std::string serialNumber = info->structValue->at("serialNum")->stringValue;
 			std::string::size_type pos = serialNumber.find(':');

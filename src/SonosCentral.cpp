@@ -311,6 +311,33 @@ std::shared_ptr<SonosPeer> SonosCentral::getPeer(std::string serialNumber)
     return std::shared_ptr<SonosPeer>();
 }
 
+std::shared_ptr<SonosPeer> SonosCentral::getPeerByRinconId(std::string rinconId)
+{
+	try
+	{
+		std::lock_guard<std::mutex> peersGuard(_peersMutex);
+		for(std::map<uint64_t, std::shared_ptr<BaseLib::Systems::Peer>>::iterator i = _peersById.begin(); i != _peersById.end(); ++i)
+		{
+			std::shared_ptr<SonosPeer> peer = std::dynamic_pointer_cast<SonosPeer>(i->second);
+			if(!peer) continue;
+			if(peer->getRinconId() == rinconId) return peer;
+		}
+	}
+	catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return std::shared_ptr<SonosPeer>();
+}
+
 void SonosCentral::savePeers(bool full)
 {
 	try
@@ -775,6 +802,92 @@ std::shared_ptr<SonosPeer> SonosCentral::createPeer(BaseLib::Systems::LogicalDev
     return std::shared_ptr<SonosPeer>();
 }
 
+PVariable SonosCentral::addLink(BaseLib::PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannelIndex, std::string receiverSerialNumber, int32_t receiverChannelIndex, std::string name, std::string description)
+{
+	try
+	{
+		if(senderSerialNumber.empty()) return Variable::createError(-2, "Given sender address is empty.");
+		if(receiverSerialNumber.empty()) return Variable::createError(-2, "Given receiver address is empty.");
+		std::shared_ptr<SonosPeer> sender = getPeer(senderSerialNumber);
+		std::shared_ptr<SonosPeer> receiver = getPeer(receiverSerialNumber);
+		if(!sender) return Variable::createError(-2, "Sender device not found.");
+		if(!receiver) return Variable::createError(-2, "Receiver device not found.");
+		return addLink(clientInfo, sender->getID(), senderChannelIndex, receiver->getID(), receiverChannelIndex, name, description);
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable SonosCentral::addLink(BaseLib::PRpcClientInfo clientInfo, uint64_t senderID, int32_t senderChannelIndex, uint64_t receiverID, int32_t receiverChannelIndex, std::string name, std::string description)
+{
+	try
+	{
+		if(senderID == 0) return Variable::createError(-2, "Sender id is not set.");
+		if(receiverID == 0) return Variable::createError(-2, "Receiver is not set.");
+		if(senderID == receiverID) return Variable::createError(-2, "Sender and receiver are the same.");
+		std::shared_ptr<SonosPeer> sender = getPeer(senderID);
+		std::shared_ptr<SonosPeer> receiver = getPeer(receiverID);
+		if(!sender) return Variable::createError(-2, "Sender device not found.");
+		if(!receiver) return Variable::createError(-2, "Receiver device not found.");
+
+		if(sender->getValue(BaseLib::PRpcClientInfo(new BaseLib::RpcClientInfo()), 1, "AV_TRANSPORT_URI", false, false)->stringValue.compare(0, 9, "x-rincon:") == 0) return Variable::createError(-101, "Sender is already part of a group.");
+
+		BaseLib::PVariable result = receiver->setValue(BaseLib::PRpcClientInfo(new BaseLib::RpcClientInfo()), 1, "AV_TRANSPORT_URI", BaseLib::PVariable(new BaseLib::Variable("x-rincon:" + sender->getRinconId())), true);
+		if(result->errorStruct) return result;
+
+		std::shared_ptr<BaseLib::Systems::BasicPeer> senderPeer(new BaseLib::Systems::BasicPeer());
+		senderPeer->address = sender->getAddress();
+		senderPeer->channel = 1;
+		senderPeer->id = sender->getID();
+		senderPeer->serialNumber = sender->getSerialNumber();
+		senderPeer->hasSender = true;
+		senderPeer->isSender = true;
+		senderPeer->linkDescription = description;
+		senderPeer->linkName = name;
+
+		std::shared_ptr<BaseLib::Systems::BasicPeer> receiverPeer(new BaseLib::Systems::BasicPeer());
+		receiverPeer->address = receiver->getAddress();
+		receiverPeer->channel = 1;
+		receiverPeer->id = receiver->getID();
+		receiverPeer->serialNumber = receiver->getSerialNumber();
+		receiverPeer->hasSender = true;
+		receiverPeer->linkDescription = description;
+		receiverPeer->linkName = name;
+
+		sender->addPeer(receiverPeer);
+		receiver->addPeer(senderPeer);
+
+		raiseRPCUpdateDevice(sender->getID(), 1, sender->getSerialNumber() + ":" + std::to_string(1), 1);
+		raiseRPCUpdateDevice(receiver->getID(), 1, receiver->getSerialNumber() + ":" + std::to_string(1), 1);
+
+		return PVariable(new Variable(VariableType::tVoid));
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
 PVariable SonosCentral::deleteDevice(BaseLib::PRpcClientInfo clientInfo, std::string serialNumber, int32_t flags)
 {
 	try
@@ -932,6 +1045,89 @@ PVariable SonosCentral::putParamset(BaseLib::PRpcClientInfo clientInfo, uint64_t
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable SonosCentral::removeLink(BaseLib::PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannelIndex, std::string receiverSerialNumber, int32_t receiverChannelIndex)
+{
+	try
+	{
+		if(senderSerialNumber.empty()) return Variable::createError(-2, "Given sender address is empty.");
+		if(receiverSerialNumber.empty()) return Variable::createError(-2, "Given receiver address is empty.");
+		std::shared_ptr<SonosPeer> sender = getPeer(senderSerialNumber);
+		std::shared_ptr<SonosPeer> receiver = getPeer(receiverSerialNumber);
+		if(!sender) return Variable::createError(-2, "Sender device not found.");
+		if(!receiver) return Variable::createError(-2, "Receiver device not found.");
+		return removeLink(clientInfo, sender->getID(), senderChannelIndex, receiver->getID(), receiverChannelIndex);
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable SonosCentral::removeLink(BaseLib::PRpcClientInfo clientInfo, uint64_t senderID, int32_t senderChannelIndex, uint64_t receiverID, int32_t receiverChannelIndex)
+{
+	try
+	{
+		if(senderID == 0) return Variable::createError(-2, "Sender id is not set.");
+		if(receiverID == 0) return Variable::createError(-2, "Receiver id is not set.");
+		std::shared_ptr<SonosPeer> sender = getPeer(senderID);
+		std::shared_ptr<SonosPeer> receiver = getPeer(receiverID);
+		if(!sender) return Variable::createError(-2, "Sender device not found.");
+		if(!receiver) return Variable::createError(-2, "Receiver device not found.");
+		if(!sender->getPeer(1, receiver->getID()) && !receiver->getPeer(1, sender->getID())) return Variable::createError(-6, "Devices are not paired to each other.");
+
+		std::string receiverUri = receiver->getValue(BaseLib::PRpcClientInfo(new BaseLib::RpcClientInfo()), 1, "AV_TRANSPORT_URI", false, false)->stringValue;
+		std::string senderRinconId = sender->getRinconId();
+		if(receiverUri.compare(0, 9, "x-rincon:") != 0 || receiverUri.compare(9, senderRinconId.size(), senderRinconId) != 0)
+		{
+			std::string senderUri = sender->getValue(BaseLib::PRpcClientInfo(new BaseLib::RpcClientInfo()), 1, "AV_TRANSPORT_URI", false, false)->stringValue;
+			std::string receiverRinconId = receiver->getRinconId();
+			if(senderUri.compare(0, 9, "x-rincon:") == 0 && senderUri.compare(9, receiverRinconId.size(), receiverRinconId) == 0)
+			{
+				sender.swap(receiver);
+			}
+			else
+			{
+				sender->removePeer(receiver->getID());
+				receiver->removePeer(sender->getID());
+				return Variable::createError(-6, "Devices are not paired to each other.");
+			}
+		}
+
+		sender->removePeer(receiver->getID());
+		receiver->removePeer(sender->getID());
+
+		BaseLib::PVariable result = receiver->setValue(BaseLib::PRpcClientInfo(new BaseLib::RpcClientInfo()), 1, "AV_TRANSPORT_URI", BaseLib::PVariable(new BaseLib::Variable("x-rincon-queue:" + receiver->getRinconId() + "#0")), true);
+		if(result->errorStruct) return result;
+
+		raiseRPCUpdateDevice(sender->getID(), 1, sender->getSerialNumber() + ":" + std::to_string(1), 1);
+		raiseRPCUpdateDevice(receiver->getID(), 1, receiver->getSerialNumber() + ":" + std::to_string(1), 1);
+
+		return PVariable(new Variable(VariableType::tVoid));
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return Variable::createError(-32500, "Unknown application error.");
 }
 
 PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo)

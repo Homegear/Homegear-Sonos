@@ -138,6 +138,32 @@ void SonosPeer::setIp(std::string value)
 	}
 }
 
+std::string SonosPeer::getRinconId()
+{
+	try
+	{
+		if(!_rpcDevice) return "";
+		Functions::iterator functionIterator = _rpcDevice->functions.find(1);
+		if(functionIterator == _rpcDevice->functions.end()) return "";
+		PParameter parameter = functionIterator->second->variables->getParameter("ID");
+		if(!parameter) return "";
+		return parameter->convertFromPacket(valuesCentral[1]["ID"].data)->stringValue;
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+	return "";
+}
+
 void SonosPeer::setRinconId(std::string value)
 {
 	try
@@ -356,6 +382,174 @@ std::string SonosPeer::handleCliCommand(std::string command)
     return "Error executing command. See log file for more details.\n";
 }
 
+void SonosPeer::addPeer(std::shared_ptr<BaseLib::Systems::BasicPeer> peer)
+{
+	try
+	{
+
+		if(_rpcDevice->functions.find(1) == _rpcDevice->functions.end()) return;
+		for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = _peers[1].begin(); i != _peers[1].end(); ++i)
+		{
+			if((*i)->id == peer->id)
+			{
+				_peers[1].erase(i);
+				break;
+			}
+		}
+		_peers[1].push_back(peer);
+		savePeers();
+	}
+	catch(const std::exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void SonosPeer::removePeer(uint64_t id)
+{
+	try
+	{
+		if(_peers.find(1) == _peers.end()) return;
+		std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+
+		for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = _peers[1].begin(); i != _peers[1].end(); ++i)
+		{
+			if((*i)->id == id)
+			{
+				_peers[1].erase(i);
+				savePeers();
+				return;
+			}
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void SonosPeer::savePeers()
+{
+	try
+	{
+		std::vector<uint8_t> serializedData;
+		serializePeers(serializedData);
+		saveVariable(12, serializedData);
+	}
+	catch(const std::exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void SonosPeer::serializePeers(std::vector<uint8_t>& encodedData)
+{
+	try
+	{
+		BaseLib::BinaryEncoder encoder(_bl);
+		encoder.encodeInteger(encodedData, _peers.size());
+		for(std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>>::const_iterator i = _peers.begin(); i != _peers.end(); ++i)
+		{
+			encoder.encodeInteger(encodedData, i->first);
+			encoder.encodeInteger(encodedData, i->second.size());
+			for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+			{
+				if(!*j) continue;
+				encoder.encodeBoolean(encodedData, (*j)->isSender);
+				encoder.encodeInteger(encodedData, (*j)->id);
+				encoder.encodeInteger(encodedData, (*j)->address);
+				encoder.encodeInteger(encodedData, (*j)->channel);
+				encoder.encodeString(encodedData, (*j)->serialNumber);
+				encoder.encodeBoolean(encodedData, (*j)->isVirtual);
+				encoder.encodeString(encodedData, (*j)->linkName);
+				encoder.encodeString(encodedData, (*j)->linkDescription);
+				encoder.encodeInteger(encodedData, (*j)->data.size());
+				encodedData.insert(encodedData.end(), (*j)->data.begin(), (*j)->data.end());
+			}
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
+void SonosPeer::unserializePeers(std::shared_ptr<std::vector<char>> serializedData)
+{
+	try
+	{
+		BaseLib::BinaryDecoder decoder(_bl);
+		uint32_t position = 0;
+		uint32_t peersSize = decoder.decodeInteger(*serializedData, position);
+		for(uint32_t i = 0; i < peersSize; i++)
+		{
+			uint32_t channel = decoder.decodeInteger(*serializedData, position);
+			uint32_t peerCount = decoder.decodeInteger(*serializedData, position);
+			for(uint32_t j = 0; j < peerCount; j++)
+			{
+				std::shared_ptr<BaseLib::Systems::BasicPeer> basicPeer(new BaseLib::Systems::BasicPeer());
+				basicPeer->hasSender = true;
+				basicPeer->isSender = decoder.decodeBoolean(*serializedData, position);
+				basicPeer->id = decoder.decodeInteger(*serializedData, position);
+				basicPeer->address = decoder.decodeInteger(*serializedData, position);
+				basicPeer->channel = decoder.decodeInteger(*serializedData, position);
+				basicPeer->serialNumber = decoder.decodeString(*serializedData, position);
+				basicPeer->isVirtual = decoder.decodeBoolean(*serializedData, position);
+				_peers[channel].push_back(basicPeer);
+				basicPeer->linkName = decoder.decodeString(*serializedData, position);
+				basicPeer->linkDescription = decoder.decodeString(*serializedData, position);
+				uint32_t dataSize = decoder.decodeInteger(*serializedData, position);
+				if(position + dataSize <= serializedData->size()) basicPeer->data.insert(basicPeer->data.end(), serializedData->begin() + position, serializedData->begin() + position + dataSize);
+				position += dataSize;
+			}
+		}
+	}
+	catch(const std::exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+}
+
 std::string SonosPeer::printConfig()
 {
 	try
@@ -433,6 +627,9 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 			case 1:
 				_ip = row->second.at(4)->textValue;
 				_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
+				break;
+			case 12:
+				unserializePeers(row->second.at(5)->binaryValue);
 				break;
 			}
 		}
@@ -682,11 +879,6 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						rpcValues[1].reset(new std::vector<PVariable>());
 					}
 
-					parameter->data = i->second.value;
-					if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
-					else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter->data);
-					if(_bl->debugLevel >= 4) GD::out.printInfo("Info: " + i->first + " of peer " + std::to_string(_peerID) + " with serial number " + _serialNumber + ":" + std::to_string(*j) + " was set to 0x" + BaseLib::HelperFunctions::getHexString(i->second.value) + ".");
-
 					if(parameter->rpcParameter)
 					{
 						//Process service messages
@@ -767,32 +959,103 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							valueKeys[1]->push_back("NEXT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
-						else if(i->first == "AV_TRANSPORT_URI" && value->stringValue.size() > 0 && value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
+						else if(i->first == "AV_TRANSPORT_URI" && value->stringValue.size() > 0)
 						{
-							//Delete track information for radio
+							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
+							BaseLib::PVariable oldValue = parameter->rpcParameter->convertFromPacket(parameter->data, true);
 
-							PVariable value(new Variable(VariableType::tString));
-							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["CURRENT_ALBUM"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
-							valueKeys[1]->push_back("CURRENT_ALBUM");
-							rpcValues[1]->push_back(value);
+							//Update links
+							if(oldValue->stringValue.size() > 9 && oldValue->stringValue.compare(0, 9, "x-rincon:") == 0 && oldValue->stringValue != value->stringValue)
+							{
+								std::string oldRinconId = oldValue->stringValue.substr(9);
+								std::shared_ptr<SonosPeer> oldPeer = central->getPeerByRinconId(oldRinconId);
+								if(oldPeer)
+								{
+									oldPeer->removePeer(_peerID);
+									removePeer(oldPeer->getID());
+								}
+								if(value->stringValue.size() > 9 && value->stringValue.compare(0, 9, "x-rincon:") == 0)
+								{
+									std::string newRinconId = value->stringValue.substr(9);
+									std::shared_ptr<SonosPeer> newPeer = central->getPeerByRinconId(newRinconId);
+									if(newPeer)
+									{
+										std::shared_ptr<BaseLib::Systems::BasicPeer> senderPeer(new BaseLib::Systems::BasicPeer());
+										senderPeer->address = newPeer->getAddress();
+										senderPeer->channel = 1;
+										senderPeer->id = newPeer->getID();
+										senderPeer->serialNumber = newPeer->getSerialNumber();
+										senderPeer->hasSender = true;
+										senderPeer->isSender = true;
+										addPeer(senderPeer);
 
-							parameter2 = &valuesCentral[1]["CURRENT_ARTIST"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
-							valueKeys[1]->push_back("CURRENT_ARTIST");
-							rpcValues[1]->push_back(value);
+										std::shared_ptr<BaseLib::Systems::BasicPeer> receiverPeer(new BaseLib::Systems::BasicPeer());
+										receiverPeer->address = _address;
+										receiverPeer->channel = 1;
+										receiverPeer->id = _peerID;
+										receiverPeer->serialNumber = _serialNumber;
+										receiverPeer->hasSender = true;
+										newPeer->addPeer(receiverPeer);
+									}
+								}
+							}
+							else if(value->stringValue.size() > 9 && value->stringValue.compare(0, 9, "x-rincon:") == 0)
+							{
+								std::string newRinconId = value->stringValue.substr(9);
+								std::shared_ptr<SonosPeer> newPeer = central->getPeerByRinconId(newRinconId);
+								if(newPeer)
+								{
+									std::shared_ptr<BaseLib::Systems::BasicPeer> senderPeer(new BaseLib::Systems::BasicPeer());
+									senderPeer->address = newPeer->getAddress();
+									senderPeer->channel = 1;
+									senderPeer->id = newPeer->getID();
+									senderPeer->serialNumber = newPeer->getSerialNumber();
+									senderPeer->hasSender = true;
+									senderPeer->isSender = true;
+									addPeer(senderPeer);
 
-							parameter2 = &valuesCentral[1]["CURRENT_ALBUM_ART"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
-							valueKeys[1]->push_back("CURRENT_ALBUM_ART");
-							rpcValues[1]->push_back(value);
+									std::shared_ptr<BaseLib::Systems::BasicPeer> receiverPeer(new BaseLib::Systems::BasicPeer());
+									receiverPeer->address = _address;
+									receiverPeer->channel = 1;
+									receiverPeer->id = _peerID;
+									receiverPeer->serialNumber = _serialNumber;
+									receiverPeer->hasSender = true;
+									newPeer->addPeer(receiverPeer);
+								}
+							}
+
+							if(value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
+							{
+								//Delete track information for radio
+
+								PVariable value(new Variable(VariableType::tString));
+								BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["CURRENT_ALBUM"];
+								parameter2->data.clear();
+								if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+								valueKeys[1]->push_back("CURRENT_ALBUM");
+								rpcValues[1]->push_back(value);
+
+								parameter2 = &valuesCentral[1]["CURRENT_ARTIST"];
+								parameter2->data.clear();
+								if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+								valueKeys[1]->push_back("CURRENT_ARTIST");
+								rpcValues[1]->push_back(value);
+
+								parameter2 = &valuesCentral[1]["CURRENT_ALBUM_ART"];
+								parameter2->data.clear();
+								if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+								valueKeys[1]->push_back("CURRENT_ALBUM_ART");
+								rpcValues[1]->push_back(value);
+							}
 						}
+
+						parameter->data = i->second.value;
+						if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
+						else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter->data);
+						if(_bl->debugLevel >= 4) GD::out.printInfo("Info: " + i->first + " of peer " + std::to_string(_peerID) + " with serial number " + _serialNumber + ":" + std::to_string(*j) + " was set to 0x" + BaseLib::HelperFunctions::getHexString(i->second.value) + ".");
 
 						valueKeys[*j]->push_back(i->first);
 						rpcValues[*j]->push_back(value);
@@ -1387,7 +1650,12 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 						GD::out.printMessage("Request was: \n" + soapRequest);
 						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
 					}
-
+					catch(BaseLib::Exception& ex)
+					{
+						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+						GD::out.printMessage("Request was: \n" + soapRequest);
+						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+					}
 				}
 			}
 		}

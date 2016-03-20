@@ -74,13 +74,19 @@ public:
 	virtual void setIp(std::string value);
 	// }}}
 
+	virtual std::string getRinconId();
 	virtual void setRinconId(std::string value);
 
 	void worker();
 	virtual std::string handleCliCommand(std::string command);
 
 	virtual bool load(BaseLib::Systems::ICentral* central);
-    virtual void savePeers() {}
+    void serializePeers(std::vector<uint8_t>& encodedData);
+    void unserializePeers(std::shared_ptr<std::vector<char>> serializedData);
+    virtual void savePeers();
+	bool hasPeers(int32_t channel) { if(_peers.find(channel) == _peers.end() || _peers[channel].empty()) return false; else return true; }
+	void addPeer(std::shared_ptr<BaseLib::Systems::BasicPeer> peer);
+	void removePeer(uint64_t id);
 
 	virtual int32_t getChannelGroupedWith(int32_t channel) { return -1; }
 	virtual int32_t getNewFirmwareVersion() { return 0; }

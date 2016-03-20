@@ -16,7 +16,14 @@
 			<variables>maint_ch_values</variables>
 		</function>
 		<function channel="1" type="SPEAKER" channelCount="1">
-			<properties/>
+			<properties>
+				<linkSenderFunctionTypes>
+					<type>SPEAKER</type>
+				</linkSenderFunctionTypes>
+				<linkReceiverFunctionTypes>
+					<type>SPEAKER</type>
+				</linkReceiverFunctionTypes>
+			</properties>
 			<configParameters>speaker_config</configParameters>
 			<variables>speaker_valueset</variables>
 		</function>
@@ -57,7 +64,7 @@
 				</element>
 				<element>
 					<key>CurrentURIMetaData</key>
-					<parameterId>AV_TRANSPORT_URI_METADATA</parameterId>
+					<parameterId>AV_TRANSPORT_METADATA</parameterId>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -280,7 +287,7 @@
 				</element>
 				<element>
 					<key>CurrentURIMetaData</key>
-					<parameterId>AV_TRANSPORT_URI_METADATA</parameterId>
+					<parameterId>AV_TRANSPORT_METADATA</parameterId>
 				</element>
 			</jsonPayload>
 		</packet>
@@ -301,7 +308,7 @@
 				</element>
 				<element>
 					<key>CurrentURIMetaData</key>
-					<parameterId>AV_TRANSPORT_URI_METADATA</parameterId>
+					<parameterId>AV_TRANSPORT_METADATA</parameterId>
 				</element>
 			</jsonPayload>
 		</packet>

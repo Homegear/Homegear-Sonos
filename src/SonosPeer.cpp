@@ -1376,13 +1376,7 @@ PParameterGroup SonosPeer::getParameterSet(int32_t channel, ParameterGroup::Type
 {
 	try
 	{
-		PParameterGroup parameterGroup = _rpcDevice->functions.at(channel)->getParameterGroup(type);
-		if(parameterGroup->parameters.empty())
-		{
-			GD::out.printDebug("Debug: Parameter set of type " + std::to_string(type) + " not found for channel " + std::to_string(channel));
-			return PParameterGroup();
-		}
-		return parameterGroup;
+		return _rpcDevice->functions.at(channel)->getParameterGroup(type);
 	}
 	catch(const std::exception& ex)
 	{

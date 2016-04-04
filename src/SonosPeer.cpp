@@ -388,15 +388,16 @@ void SonosPeer::addPeer(std::shared_ptr<BaseLib::Systems::BasicPeer> peer)
 	{
 
 		if(_rpcDevice->functions.find(1) == _rpcDevice->functions.end()) return;
-		for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = _peers[1].begin(); i != _peers[1].end(); ++i)
+		std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>& channel1Peers = _peers[1];
+		for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = channel1Peers.begin(); i != channel1Peers.end(); ++i)
 		{
 			if((*i)->id == peer->id)
 			{
-				_peers[1].erase(i);
+				channel1Peers.erase(i);
 				break;
 			}
 		}
-		_peers[1].push_back(peer);
+		channel1Peers.push_back(peer);
 		savePeers();
 	}
 	catch(const std::exception& ex)
@@ -420,11 +421,12 @@ void SonosPeer::removePeer(uint64_t id)
 		if(_peers.find(1) == _peers.end()) return;
 		std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
 
-		for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = _peers[1].begin(); i != _peers[1].end(); ++i)
+		std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>& channel1Peers = _peers[1];
+		for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = channel1Peers.begin(); i != channel1Peers.end(); ++i)
 		{
 			if((*i)->id == id)
 			{
-				_peers[1].erase(i);
+				channel1Peers.erase(i);
 				savePeers();
 				return;
 			}
@@ -1350,8 +1352,8 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 			}
 			catch(BaseLib::HttpClientException& ex)
 			{
-				return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
 				serviceMessages->setUnreach(true, false);
+				return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
 			}
 		}
 

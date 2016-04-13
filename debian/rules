@@ -13,6 +13,12 @@ override_dh_auto_install:
 	chmod 755 $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6
 	chmod 644 $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6/*
 
+	mkdir -p $(CURDIR)/debian/homegear-sonos/var/lib/homegear
+	cp -R $(CURDIR)/misc/State\ Directory/* $(CURDIR)/debian/homegear-sonos/var/lib/homegear
+	chown -R root:root $(CURDIR)/debian/homegear-sonos/var/lib/homegear
+	find $(CURDIR)/debian/homegear-sonos/var/lib/homegear -type d -exec chmod 550 {} \;
+	find $(CURDIR)/debian/homegear-sonos/var/lib/homegear -type f -exec chmod 440 {} \;
+
 override_dh_strip:
 	dh_strip --dbg-package=homegear-sonos
 

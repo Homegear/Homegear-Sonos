@@ -1057,7 +1057,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						parameter->data = i->second.value;
 						if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
 						else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter->data);
-						if(_bl->debugLevel >= 4) GD::out.printInfo("Info: " + i->first + " of peer " + std::to_string(_peerID) + " with serial number " + _serialNumber + ":" + std::to_string(*j) + " was set to 0x" + BaseLib::HelperFunctions::getHexString(i->second.value) + ".");
+						if(_bl->debugLevel >= 4) GD::out.printInfo("Info: " + i->first + " of peer " + std::to_string(_peerID) + " with serial number " + _serialNumber + ":" + std::to_string(*j) + " was set.");
 
 						valueKeys[*j]->push_back(i->first);
 						rpcValues[*j]->push_back(value);

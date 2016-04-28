@@ -35,8 +35,8 @@ echo $filename;
 class IVONA_TTS
 {
     static  $utc_tz;
-    const   ACCESS_KEY = 'GDNAICFUYDKBS466QBEQ'; // HIER DEINEN ACCESS KEY EINTRAGEN!!
-    const   SECRET_KEY = 'KAgD6iZ4Sff8KuCR0JleXYhJLqnd6Ln+Ksu3bFzs'; // HIER DEINEN SECRET KEY EINTRAGEN!!
+    const   ACCESS_KEY = ''; // HIER DEINEN ACCESS KEY EINTRAGEN!!
+    const   SECRET_KEY = ''; // HIER DEINEN SECRET KEY EINTRAGEN!!
 
     function save_mp3($text, $filename, $language="de-DE", $voice="Marlene", $rate="default", $volume="default") {
          $payload['Input'] = array();

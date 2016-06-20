@@ -30,7 +30,7 @@
 #ifndef SONOS_H_
 #define SONOS_H_
 
-#include "homegear-base/BaseLib.h"
+#include <homegear-base/BaseLib.h>
 
 namespace Sonos
 {

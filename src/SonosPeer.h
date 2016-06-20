@@ -30,7 +30,7 @@
 #ifndef SONOSPEER_H_
 #define SONOSPEER_H_
 
-#include "homegear-base/BaseLib.h"
+#include <homegear-base/BaseLib.h>
 
 #include <list>
 

@@ -30,7 +30,7 @@
 #ifndef SONOSPACKET_H_
 #define SONOSPACKET_H_
 
-#include "homegear-base/BaseLib.h"
+#include <homegear-base/BaseLib.h>
 #include "homegear-base/Encoding/RapidXml/rapidxml.hpp"
 
 #include <unordered_map>

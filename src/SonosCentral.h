@@ -30,7 +30,7 @@
 #ifndef SONOSCENTRAL_H_
 #define SONOSCENTRAL_H_
 
-#include "homegear-base/BaseLib.h"
+#include <homegear-base/BaseLib.h>
 #include "SonosPeer.h"
 
 #include <memory>

@@ -1516,7 +1516,6 @@
 			</parameter>
 			<parameter id="PLAY_FAVORITE">
 				<properties>
-					<readable>false</readable>
 					<casts>
 						<rpcBinary/>
 					</casts>
@@ -1528,7 +1527,6 @@
 			</parameter>
 			<parameter id="PLAY_PLAYLIST">
 				<properties>
-					<readable>false</readable>
 					<casts>
 						<rpcBinary/>
 					</casts>
@@ -1540,7 +1538,6 @@
 			</parameter>
 			<parameter id="PLAY_RADIO_FAVORITE">
 				<properties>
-					<readable>false</readable>
 					<casts>
 						<rpcBinary/>
 					</casts>
@@ -1742,9 +1739,9 @@
 				<logicalString>
 					<defaultValue>en</defaultValue>
 				</logicalString>
-				<physicalString groupId="">
+				<physicalNone>
 					<operationType>store</operationType>
-				</physicalString>
+				</physicalNone>
 			</parameter>
 			<parameter id="PLAY_AUDIO_FILE">
 				<properties>
@@ -1753,9 +1750,9 @@
 					</casts>
 				</properties>
 				<logicalString/>
-				<physicalString groupId="">
+				<physicalNone>
 					<operationType>command</operationType>
-				</physicalString>
+				</physicalNone>
 			</parameter>
 			<parameter id="PLAY_AUDIO_FILE_UNMUTE">
 				<properties>

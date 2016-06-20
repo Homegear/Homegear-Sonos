@@ -1866,10 +1866,16 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 
 			if(transportState == "PLAYING")
 			{
+				GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Resuming playback, because TRANSPORT_STATE was PLAYING.");
 				execute("Play");
 				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(volumeState)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
 			}
-			else execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", std::to_string(volumeState)) }));
+			else
+			{
+				GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Not resuming playback, because TRANSPORT_STATE was " + transportState + ".");
+				execute("Pause");
+				execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", std::to_string(volumeState)) }));
+			}
 		}
 	}
 	catch(const std::exception& ex)

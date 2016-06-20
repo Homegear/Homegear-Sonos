@@ -33,7 +33,7 @@
 #define SONOS_FAMILY_ID 6
 #define SONOS_FAMILY_NAME "Sonos"
 
-#include "homegear-base/BaseLib.h"
+#include <homegear-base/BaseLib.h>
 #include "Sonos.h"
 #include "PhysicalInterfaces/ISonosInterface.h"
 

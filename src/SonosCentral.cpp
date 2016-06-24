@@ -54,7 +54,7 @@ void SonosCentral::dispose(bool wait)
 		if(_disposing) return;
 		_disposing = true;
 		GD::out.printDebug("Removing device " + std::to_string(_deviceId) + " from physical device's event queue...");
-		GD::physicalInterface->removeEventHandler(_physicalInterfaceEventhandler);
+		GD::physicalInterface->removeEventHandler(_physicalInterfaceEventhandlers[GD::physicalInterface->getID()]);
 		_stopWorkerThread = true;
 		GD::out.printDebug("Debug: Waiting for worker thread of device " + std::to_string(_deviceId) + "...");
 		GD::bl->threadManager.join(_workerThread);
@@ -87,7 +87,7 @@ void SonosCentral::init()
 		_initialized = true;
 
 		_ssdp.reset(new BaseLib::SSDP(GD::bl));
-		GD::physicalInterface->addEventHandler((BaseLib::Systems::IPhysicalInterface::IPhysicalInterfaceEventSink*)this);
+		_physicalInterfaceEventhandlers[GD::physicalInterface->getID()] = GD::physicalInterface->addEventHandler((BaseLib::Systems::IPhysicalInterface::IPhysicalInterfaceEventSink*)this);
 
 		GD::bl->threadManager.start(_workerThread, true, _bl->settings.workerThreadPriority(), _bl->settings.workerThreadPolicy(), &SonosCentral::worker, this);
 	}

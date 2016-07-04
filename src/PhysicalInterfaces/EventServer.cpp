@@ -176,7 +176,7 @@ void EventServer::mainThread()
 				clientFileDescriptor = getClientSocketDescriptor(ipAddress, port);
 				if(!clientFileDescriptor || clientFileDescriptor->descriptor == -1) continue;
 
-				std::shared_ptr<BaseLib::SocketOperations> socket(new BaseLib::SocketOperations(GD::bl, clientFileDescriptor));
+				std::shared_ptr<BaseLib::TcpSocket> socket(new BaseLib::TcpSocket(GD::bl, clientFileDescriptor));
 				readClient(socket, ipAddress, port);
 			}
 			catch(const std::exception& ex)
@@ -209,7 +209,7 @@ void EventServer::mainThread()
     GD::bl->fileDescriptorManager.shutdown(_serverFileDescriptor);
 }
 
-void EventServer::readClient(std::shared_ptr<BaseLib::SocketOperations> socket, const std::string& ipAddress, int32_t port)
+void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const std::string& ipAddress, int32_t port)
 {
 	try
 	{

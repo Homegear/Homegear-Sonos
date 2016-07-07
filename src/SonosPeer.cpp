@@ -966,6 +966,21 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
 							BaseLib::PVariable oldValue = parameter->rpcParameter->convertFromPacket(parameter->data, true);
 
+							//Update IS_MASTER
+							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["IS_MASTER"];
+							if(parameter2->rpcParameter)
+							{
+								BaseLib::PVariable isMaster(new BaseLib::Variable(value->stringValue.size() < 9 || value->stringValue.compare(0, 9, "x-rincon:") != 0));
+								if(parameter2->data.empty() || (bool)parameter2->data.back() != isMaster->booleanValue)
+								{
+									parameter2->rpcParameter->convertToPacket(isMaster, parameter2->data);
+									if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+									valueKeys[1]->push_back("IS_MASTER");
+									rpcValues[1]->push_back(isMaster);
+								}
+							}
+
 							//Update links
 							if(oldValue->stringValue.size() > 9 && oldValue->stringValue.compare(0, 9, "x-rincon:") == 0 && oldValue->stringValue != value->stringValue)
 							{
@@ -1589,6 +1604,20 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 				execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", "0") }));
 				execute("Play");
 				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(currentVolume)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
+			}
+			else if(valueKey == "ADD_SPEAKER")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->integerValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->addLink(clientInfo, _peerID, 1, linkPeer->getID(), 1, "Dynamic Sonos Link", "");
+			}
+			else if(valueKey == "REMOVE_SPEAKER")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->integerValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->removeLink(clientInfo, _peerID, 1, linkPeer->getID(), 1);
 			}
 			else
 			{

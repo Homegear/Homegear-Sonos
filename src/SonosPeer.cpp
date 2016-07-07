@@ -784,7 +784,7 @@ void SonosPeer::getValuesFromPacket(std::shared_ptr<SonosPacket> packet, std::ve
 						if(frame->channel == -2)
 						{
 							startChannel = 0;
-							endChannel = (_rpcDevice->functions.end()--)->first;
+							endChannel = _rpcDevice->functions.rbegin()->first;
 						}
 						else endChannel = startChannel;
 						for(int32_t l = startChannel; l <= endChannel; l++)
@@ -1574,6 +1574,21 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 			{
 				BaseLib::PVariable result = playBrowsableContent(value->stringValue, "R:0/0", "RADIO_FAVORITES");
 				if(result->errorStruct) return result;
+			}
+			else if(valueKey == "PLAY_FADE")
+			{
+				int32_t currentVolume = 20;
+				std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+				if(channelOneIterator == valuesCentral.end()) return Variable::createError(-2, "Channel 1 not found.");
+				std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("VOLUME");
+				if(parameterIterator != channelOneIterator->second.end())
+				{
+					PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+					if(variable) currentVolume = variable->integerValue;
+				}
+				execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", "0") }));
+				execute("Play");
+				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(currentVolume)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
 			}
 			else
 			{

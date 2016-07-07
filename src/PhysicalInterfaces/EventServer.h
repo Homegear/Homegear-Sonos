@@ -63,7 +63,7 @@ class EventServer  : public ISonosInterface
         void getSocketDescriptor();
         std::shared_ptr<BaseLib::FileDescriptor> getClientSocketDescriptor(std::string& ipAddress, int32_t& port);
         void mainThread();
-        void readClient(std::shared_ptr<BaseLib::SocketOperations> socket, const std::string& ipAddress, int32_t port);
+        void readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const std::string& ipAddress, int32_t port);
         std::string getHttpHeader(uint32_t contentLength, std::string contentType, int32_t code, std::string codeDescription, std::vector<std::string>& additionalHeaders);
         void getHttpError(int32_t code, std::string codeDescription, std::string longDescription, std::vector<char>& content);
         void getHttpError(int32_t code, std::string codeDescription, std::string longDescription, std::vector<char>& content, std::vector<std::string>& additionalHeaders);

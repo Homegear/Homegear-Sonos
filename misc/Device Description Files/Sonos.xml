@@ -1463,6 +1463,17 @@
 					</packet>
 				</packets>
 			</parameter>
+			<parameter id="PLAY_FADE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalInteger groupId="PLAY_FADE">
+					<operationType>command</operationType>
+				</physicalInteger>
+			</parameter>
 			<parameter id="PREVIOUS">
 				<properties>
 					<casts>

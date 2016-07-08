@@ -1441,6 +1441,28 @@
 					<operationType>command</operationType>
 				</physicalNone>
 			</parameter>
+			<parameter id="ADD_SPEAKER_BY_SERIAL">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="REMOVE_SPEAKER_BY_SERIAL">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
 			<parameter id="IS_MASTER">
 				<properties>
 					<writeable>false</writeable>

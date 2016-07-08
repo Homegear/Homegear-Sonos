@@ -1619,6 +1619,20 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
 				central->removeLink(clientInfo, _peerID, 1, linkPeer->getID(), 1);
 			}
+			else if(valueKey == "ADD_SPEAKER_BY_SERIAL")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->stringValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->addLink(clientInfo, _peerID, 1, linkPeer->getID(), 1, "Dynamic Sonos Link", "");
+			}
+			else if(valueKey == "REMOVE_SPEAKER_BY_SERIAL")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->stringValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->removeLink(clientInfo, _peerID, 1, linkPeer->getID(), 1);
+			}
 			else
 			{
 				if(rpcParameter->setPackets.empty()) return Variable::createError(-6, "parameter is read only");

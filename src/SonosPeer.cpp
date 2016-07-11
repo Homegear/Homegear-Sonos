@@ -1938,7 +1938,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 	}
 	catch(const std::exception& ex)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what() + " Filename: " + filename);
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, std::string(ex.what()) + " Filename: " + filename);
     }
     catch(BaseLib::Exception& ex)
     {

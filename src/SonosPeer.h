@@ -175,6 +175,11 @@ protected:
 		 * {@inheritDoc}
 		 */
 		virtual bool getAllValuesHook2(PRpcClientInfo clientInfo, PParameter parameter, uint32_t channel, PVariable parameters);
+
+		/**
+		 * {@inheritDoc}
+		 */
+		virtual bool getParamsetHook2(PRpcClientInfo clientInfo, PParameter parameter, uint32_t channel, PVariable parameters);
 	// }}}
 };
 

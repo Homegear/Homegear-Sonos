@@ -1781,7 +1781,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		std::string tempPath = GD::bl->settings.tempPath() + "sonos/";
 		if(!GD::bl->io.directoryExists(tempPath))
 		{
-			if(GD::bl->io.createDirectory(tempPath, S_IRWXU | S_IRWXG) == -1)
+			if(GD::bl->io.createDirectory(tempPath, S_IRWXU | S_IRWXG) == false)
 			{
 				GD::out.printError("Error: Could not create temporary directory \"" + tempPath + '"');
 				return;

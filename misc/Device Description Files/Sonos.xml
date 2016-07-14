@@ -18,10 +18,10 @@
 		<function channel="1" type="SPEAKER" channelCount="1">
 			<properties>
 				<linkSenderFunctionTypes>
-					<type>SPEAKER</type>
+					<type>SPEAKER_LINK</type>
 				</linkSenderFunctionTypes>
 				<linkReceiverFunctionTypes>
-					<type>SPEAKER</type>
+					<type>SPEAKER_LINK</type>
 				</linkReceiverFunctionTypes>
 			</properties>
 			<configParameters>speaker_config</configParameters>
@@ -1414,6 +1414,66 @@
 					</casts>
 				</properties>
 				<logicalString/>
+			</parameter>
+			<parameter id="ADD_SPEAKER">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>1</minimumValue>
+				</logicalInteger>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="REMOVE_SPEAKER">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>1</minimumValue>
+				</logicalInteger>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="ADD_SPEAKER_BY_SERIAL">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="REMOVE_SPEAKER_BY_SERIAL">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="IS_MASTER">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalBoolean/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
 			</parameter>
 			<parameter id="STOP">
 				<properties>

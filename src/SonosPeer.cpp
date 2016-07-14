@@ -966,6 +966,21 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
 							BaseLib::PVariable oldValue = parameter->rpcParameter->convertFromPacket(parameter->data, true);
 
+							//Update IS_MASTER
+							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["IS_MASTER"];
+							if(parameter2->rpcParameter)
+							{
+								BaseLib::PVariable isMaster(new BaseLib::Variable(value->stringValue.size() < 9 || value->stringValue.compare(0, 9, "x-rincon:") != 0));
+								if(parameter2->data.empty() || (bool)parameter2->data.back() != isMaster->booleanValue)
+								{
+									parameter2->rpcParameter->convertToPacket(isMaster, parameter2->data);
+									if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
+									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+									valueKeys[1]->push_back("IS_MASTER");
+									rpcValues[1]->push_back(isMaster);
+								}
+							}
+
 							//Update links
 							if(oldValue->stringValue.size() > 9 && oldValue->stringValue.compare(0, 9, "x-rincon:") == 0 && oldValue->stringValue != value->stringValue)
 							{
@@ -1428,6 +1443,39 @@ bool SonosPeer::getAllValuesHook2(PRpcClientInfo clientInfo, PParameter paramete
     return false;
 }
 
+bool SonosPeer::getParamsetHook2(PRpcClientInfo clientInfo, PParameter parameter, uint32_t channel, PVariable parameters)
+{
+	try
+	{
+		if(channel == 1)
+		{
+			if(parameter->id == "IP_ADDRESS") parameter->convertToPacket(PVariable(new Variable(_ip)), valuesCentral[channel][parameter->id].data);
+			else if(parameter->id == "PEER_ID") parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), valuesCentral[channel][parameter->id].data);
+			else if(parameter->id == "AV_TRANSPORT_URI" || parameter->id == "AV_TRANSPORT_URI_METADATA")
+			{
+				getValue(clientInfo, 1, parameter->id, true, false);
+			}
+			else if(parameter->id == "PLAYLISTS" || parameter->id == "FAVORITES" || parameter->id == "RADIO_FAVORITES" || parameter->id == "QUEUE_TITLES")
+			{
+				getValue(clientInfo, 1, parameter->id, true, false);
+			}
+		}
+	}
+	catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return false;
+}
+
 PVariable SonosPeer::getValue(BaseLib::PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous)
 {
 	try
@@ -1590,6 +1638,34 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 				execute("Play");
 				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(currentVolume)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
 			}
+			else if(valueKey == "ADD_SPEAKER")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->integerValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->addLink(clientInfo, _peerID, 1, linkPeer->getID(), 1, "Dynamic Sonos Link", "");
+			}
+			else if(valueKey == "REMOVE_SPEAKER")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->integerValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->removeLink(clientInfo, _peerID, 1, linkPeer->getID(), 1);
+			}
+			else if(valueKey == "ADD_SPEAKER_BY_SERIAL")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->stringValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->addLink(clientInfo, _peerID, 1, linkPeer->getID(), 1, "Dynamic Sonos Link", "");
+			}
+			else if(valueKey == "REMOVE_SPEAKER_BY_SERIAL")
+			{
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::shared_ptr<SonosPeer> linkPeer = central->getPeer(value->stringValue);
+				if(!linkPeer) return Variable::createError(-5, "Unknown remote peer.");
+				central->removeLink(clientInfo, _peerID, 1, linkPeer->getID(), 1);
+			}
 			else
 			{
 				if(rpcParameter->setPackets.empty()) return Variable::createError(-6, "parameter is read only");
@@ -1703,6 +1779,14 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 	{
 		if(filename.size() < 5) return;
 		std::string tempPath = GD::bl->settings.tempPath() + "sonos/";
+		if(!GD::bl->io.directoryExists(tempPath))
+		{
+			if(GD::bl->io.createDirectory(tempPath, S_IRWXU | S_IRWXG) == false)
+			{
+				GD::out.printError("Error: Could not create temporary directory \"" + tempPath + '"');
+				return;
+			}
+		}
 
 		if(now)
 		{
@@ -1895,15 +1979,15 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 	}
 	catch(const std::exception& ex)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, std::string(ex.what()) + " Filename: " + filename);
     }
     catch(BaseLib::Exception& ex)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what() + " Filename: " + filename);
     }
     catch(...)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, "Filename: " + filename);
     }
 }
 

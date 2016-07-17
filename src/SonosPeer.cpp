@@ -897,6 +897,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						}
 
 						PVariable value = parameter->rpcParameter->convertFromPacket(i->second.value, true);
+						if(i->first == "CURRENT_TRACK") _currentTrack = value->integerValue;
 						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())
 						{
 							//Clear current track information when uri is empty
@@ -1926,11 +1927,12 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
 				if(variable) trackNumber = variable->integerValue;
 			}
+			_currentTrack = trackNumber;
 
 			execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(trackNumber)) }));
 			execute("Play");
 
-			while(!serviceMessages->getUnreach())
+			while(!serviceMessages->getUnreach() && _currentTrack == trackNumber)
 			{
 				execute("GetPositionInfo");
 
@@ -1951,7 +1953,12 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 					if(!variable || (variable->stringValue != "PLAYING" && variable->stringValue != "TRANSITIONING")) break;
 				}
 				else break;
-				std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+				for(int32_t i = 0; i < 10; i++)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+					if(_currentTrack != trackNumber) break;
+				}
 			}
 
 			//Pause often causes errors at this point

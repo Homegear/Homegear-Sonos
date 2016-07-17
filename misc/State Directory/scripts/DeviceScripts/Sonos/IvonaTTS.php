@@ -6,14 +6,18 @@
 if($argc != 3) die("Wrong parameter count. Please provice the language as first and the string to say as second parameter. E. g.: IvonaTTS.php de \"Hello World\"");
 
 $language = $argv[1];
-$path = "/var/lib/homegear/tmp/sonos/";
+$path = \Homegear\Homegear::TEMP_PATH."sonos/";
 
 if(!file_exists($path))
 {
-	if(!mkdir($path, 0777, true)) die("Could not create directory $path");
+	if(!mkdir($path, 0775, true)) die("Could not create directory $path");
 }
 
-$ivona = new IVONA_TTS();
+IVONA_TTS::$accessKey = \Homegear\Homegear::getFamilySetting(6, 'ivonattsaccesskey');
+IVONA_TTS::$secretKey = \Homegear\Homegear::getFamilySetting(6, 'ivonattssecretkey');
+if(!IVONA_TTS::$accessKey || !IVONA_TTS::$secretKey) die("Please specify \"ivonaTtsAccessKey\" and \"ivonaTtsSecretKey\" in \"sonos.conf\".");
+
+$ivona = new IVONA_TTS($accessKey, $secretKey);
 
 $words = $argv[2]; //escapeshellarg($argv[2]);
 $filename = $path.md5($words)."-".$language.".mp3";
@@ -35,8 +39,8 @@ echo $filename;
 class IVONA_TTS
 {
     static  $utc_tz;
-    const   ACCESS_KEY = ''; // HIER DEINEN ACCESS KEY EINTRAGEN!!
-    const   SECRET_KEY = ''; // HIER DEINEN SECRET KEY EINTRAGEN!!
+    static  $accessKey = '';
+    static  $secretKey = '';
 
     function save_mp3($text, $filename, $language="de-DE", $voice="Marlene", $rate="default", $volume="default") {
          $payload['Input'] = array();
@@ -61,7 +65,7 @@ class IVONA_TTS
         $shortdate  = $datestamp->format( "Ymd" );
         // establish the signing key
         {
-            $ksecret    = 'AWS4' . self::SECRET_KEY;
+            $ksecret    = 'AWS4' . self::$secretKey;
             $kdate      = hash_hmac( 'sha256', $shortdate, $ksecret, true );
             $kregion    = hash_hmac( 'sha256', 'eu-west-1', $kdate, true );
             $kservice   = hash_hmac( 'sha256', 'tts', $kregion, true );
@@ -78,7 +82,7 @@ class IVONA_TTS
         $signed_request     = hash( 'sha256', $canonical_request );
         $sign_string        = "AWS4-HMAC-SHA256\n{$longdate}\n$shortdate/eu-west-1/tts/aws4_request\n" . $signed_request;
         $signature          = hash_hmac( 'sha256', $sign_string, $ksigning );
-        $params['Authorization'] = "AWS4-HMAC-SHA256 Credential=" . self::ACCESS_KEY . "/$shortdate/eu-west-1/tts/aws4_request, " .
+        $params['Authorization'] = "AWS4-HMAC-SHA256 Credential=" . self::$accessKey . "/$shortdate/eu-west-1/tts/aws4_request, " .
                                    "SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, " .
                                    "Signature=$signature";
           $params['content-length'] = strlen( $payload ) ;

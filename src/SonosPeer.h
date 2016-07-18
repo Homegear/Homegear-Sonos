@@ -103,6 +103,8 @@ public:
 	 */
     virtual void homegearShuttingDown();
 
+    void setVolume(int32_t volume, bool ramp = false);
+
 	//RPC methods
 	virtual PVariable getValue(BaseLib::PRpcClientInfo clientInfo, uint32_t channel, std::string valueKey, bool requestFromDevice, bool asynchronous);
 	virtual PVariable putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool onlyPushing = false);
@@ -133,6 +135,7 @@ protected:
 	std::shared_ptr<BaseLib::RPC::RPCEncoder> _binaryEncoder;
 	std::shared_ptr<BaseLib::RPC::RPCDecoder> _binaryDecoder;
 	std::shared_ptr<BaseLib::HttpClient> _httpClient;
+	int32_t _currentTrack = 0;
 	int32_t _lastAvTransportSubscription = 0;
 	int32_t _lastPositionInfo = 0;
 	int32_t _lastAvTransportInfo = 0;

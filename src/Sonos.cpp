@@ -39,7 +39,7 @@ Sonos::Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink*
 {
 	GD::bl = bl;
 	GD::family = this;
-	GD::dataPath = _settings->get("datapath");
+	GD::dataPath = _settings->getString("datapath");
 	if(!GD::dataPath.empty() && GD::dataPath.back() != '/') GD::dataPath.push_back('/');
 	GD::out.init(bl);
 	GD::out.setPrefix("Module Sonos: ");

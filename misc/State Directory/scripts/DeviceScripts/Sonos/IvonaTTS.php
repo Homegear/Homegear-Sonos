@@ -21,12 +21,12 @@ $ivona = new IVONA_TTS($accessKey, $secretKey);
 
 $words = $argv[2]; //escapeshellarg($argv[2]);
 $filename = $path.md5($words)."-".$language.".mp3";
-if(file_exists($filename)) touch($filename);
+if(file_exists($filename) && filesize($filename) > 1024) touch($filename);
 else $ivona->save_mp3($words, $filename);
 
 echo $filename;
 
-
+exit(0);
 
 
 ///////////////////////////////////////////////////////////////////////////////////////

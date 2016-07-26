@@ -1838,8 +1838,6 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		silence10sPlaylistFilename = BaseLib::Http::encodeURL(silence10sPlaylistFilename);
 
 		std::string rinconId;
-		std::string currentTrackUri;
-		std::string currentTrackMetadata;
 		std::string currentTransportUri;
 		std::string currentTransportUriMetadata;
 		std::string transportState;
@@ -1862,35 +1860,25 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		}
 		if(now)
 		{
-			//execute("GetMediaInfo");
+			execute("GetMediaInfo");
 
-			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("CURRENT_TRACK_URI");
-			if(parameterIterator != channelOneIterator->second.end())
-			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
-				if(variable) currentTrackUri = variable->stringValue;
-			}
-
-			parameterIterator = channelOneIterator->second.find("CURRENT_TRACK_METADATA");
-			if(parameterIterator != channelOneIterator->second.end())
-			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
-				if(variable) currentTrackMetadata = variable->stringValue;
-			}
-
-			parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_URI");
+			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_URI");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
 				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
 				if(variable) currentTransportUri = variable->stringValue;
-				if(currentTransportUri.compare(0, 14, "x-rincon-queue") != 0) setQueue = true;
-			}
+				if(currentTransportUri.compare(0, 14, "x-rincon-queue") != 0)
+				{
+					GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Currently playing non-rincon queue (e. g. radio).");
+					setQueue = true;
 
-			parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_URI_METADATA");
-			if(parameterIterator != channelOneIterator->second.end())
-			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
-				if(variable) currentTransportUriMetadata = variable->stringValue;
+					parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_METADATA");
+					if(parameterIterator != channelOneIterator->second.end())
+					{
+						PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+						if(variable) currentTransportUriMetadata = variable->stringValue;
+					}
+				}
 			}
 
 			parameterIterator = channelOneIterator->second.find("VOLUME");
@@ -2033,7 +2021,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			if(transportState == "PLAYING")
 			{
 				GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Resuming playback, because TRANSPORT_STATE was PLAYING.");
-				//execute("Play");
+				if(setQueue) execute("Play");
 
 				for(int32_t i = 0; i < 10; i++)
 				{
@@ -2043,7 +2031,6 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 					if(parameterIterator != channelOneIterator->second.end())
 					{
 						PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
-						std::cerr << "Moin " << variable->stringValue << std::endl;
 						if(!variable || (variable->stringValue != "TRANSITIONING")) break;
 					}
 				}

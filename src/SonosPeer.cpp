@@ -1636,7 +1636,7 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 					if(variable) currentVolume = variable->integerValue;
 				}
 				execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", "0") }));
-				execute("Play");
+				//execute("Play");
 				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(currentVolume)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
 			}
 			else if(valueKey == "ADD_SPEAKER")
@@ -1810,13 +1810,13 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			}
 		}
 
-		/*if(now)
+		if(now)
 		{
 			execute("GetPositionInfo");
 			execute("GetVolume");
 			execute("GetMute");
 			execute("GetTransportInfo");
-		}*/
+		}
 
 		std::string playlistFilename = filename.substr(0, filename.size() - 4) + ".m3u";
 		BaseLib::HelperFunctions::stringReplace(playlistFilename, "/", "_");
@@ -1825,11 +1825,17 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		BaseLib::Io::writeFile(playlistFilepath, playlistContent);
 		playlistFilename = BaseLib::Http::encodeURL(playlistFilename);
 
-		std::string silencePlaylistFilename = "silence.m3u";
-		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence.mp3\n";
-		std::string silencePlaylistFilepath = tempPath + silencePlaylistFilename;
+		std::string silence2sPlaylistFilename = "silence_2s.m3u";
+		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_2s.mp3\n";
+		std::string silencePlaylistFilepath = tempPath + silence2sPlaylistFilename;
 		BaseLib::Io::writeFile(silencePlaylistFilepath, playlistContent);
-		silencePlaylistFilename = BaseLib::Http::encodeURL(silencePlaylistFilename);
+		silence2sPlaylistFilename = BaseLib::Http::encodeURL(silence2sPlaylistFilename);
+
+		std::string silence10sPlaylistFilename = "silence_10s.m3u";
+		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_10s.mp3\n";
+		silencePlaylistFilepath = tempPath + silence10sPlaylistFilename;
+		BaseLib::Io::writeFile(silencePlaylistFilepath, playlistContent);
+		silence10sPlaylistFilename = BaseLib::Http::encodeURL(silence10sPlaylistFilename);
 
 		std::string rinconId;
 		std::string currentTrackUri;
@@ -1951,35 +1957,39 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			}
 		}
 
-		std::string playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + silencePlaylistFilename;
+		std::string playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + silence10sPlaylistFilename;
 		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }));
 
 		playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + playlistFilename;
+		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }));
+
+		playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + silence2sPlaylistFilename;
 		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }));
 
 		if(now)
 		{
 			execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", "x-rincon-queue:" + rinconId + "#0"), SoapValuePair("CurrentURIMetaData", "") }));
 
-			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
-			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("FIRST_TRACK_NUMBER_ENQUEUED");
-			int32_t trackNumber = 0;
-			if(parameterIterator != channelOneIterator->second.end())
+			//std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+			//std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("FIRST_TRACK_NUMBER_ENQUEUED");
+			/*if(parameterIterator != channelOneIterator->second.end())
 			{
 				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
 				if(variable) trackNumber = variable->integerValue;
-			}
-			_currentTrack = trackNumber;
+			}*/
+			_currentTrack = 1;
 
-			execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(trackNumber)) }));
+			execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(1)) }));
 			execute("Play");
 
-			while(!serviceMessages->getUnreach() && _currentTrack == trackNumber)
+			std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+			while(!serviceMessages->getUnreach() && (_currentTrack == 1 || _currentTrack == 2))
 			{
 				for(int32_t i = 0; i < 50; i++)
 				{
 					std::this_thread::sleep_for(std::chrono::milliseconds(100));
-					if(_currentTrack != trackNumber) break;
+					if(_currentTrack != 1 && _currentTrack != 2) break;
 				}
 
 				execute("GetPositionInfo");
@@ -1988,7 +1998,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				if(parameterIterator != channelOneIterator->second.end())
 				{
 					PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
-					if(!variable || trackNumber != variable->integerValue) break;
+					if(!variable || (variable->integerValue != 1 && variable->integerValue != 2)) break;
 				}
 				else break;
 
@@ -2012,8 +2022,9 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				peer->setVolume(0);
 			}
 			if(muteState) execute("SetMute", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredMute", std::to_string((int32_t)muteState)) }));
-			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(trackNumber)) }));
-			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(trackNumber)) }));
+			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(1)) }));
+			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(1)) }));
+			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(1)) }));
 			if(trackNumberState > 0) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(trackNumberState)) }));
 			if(!seekTimeState.empty()) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "REL_TIME"), SoapValuePair("Target", seekTimeState) }));
 
@@ -2022,7 +2033,22 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			if(transportState == "PLAYING")
 			{
 				GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Resuming playback, because TRANSPORT_STATE was PLAYING.");
-				execute("Play");
+				//execute("Play");
+
+				for(int32_t i = 0; i < 10; i++)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+					std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("TRANSPORT_STATE");
+					if(parameterIterator != channelOneIterator->second.end())
+					{
+						PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+						std::cerr << "Moin " << variable->stringValue << std::endl;
+						if(!variable || (variable->stringValue != "TRANSITIONING")) break;
+					}
+				}
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(volumeState)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
 				for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 				{

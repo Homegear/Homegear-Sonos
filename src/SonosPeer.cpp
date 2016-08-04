@@ -671,6 +671,17 @@ bool SonosPeer::load(BaseLib::Systems::ICentral* central)
 		serviceMessages.reset(new BaseLib::Systems::ServiceMessages(_bl, _peerID, _serialNumber, this));
 		serviceMessages->load();
 
+		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+		if(channelOneIterator != valuesCentral.end())
+		{
+			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("VOLUME");
+			if(parameterIterator != channelOneIterator->second.end())
+			{
+				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				if(variable) _currentVolume = variable->integerValue;
+			}
+		}
+
 		return true;
 	}
 	catch(const std::exception& ex)
@@ -1069,6 +1080,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 								rpcValues[1]->push_back(value);
 							}
 						}
+						else if(i->first == "VOLUME") _currentVolume = value->integerValue;
 
 						parameter->data = i->second.value;
 						if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
@@ -1626,18 +1638,29 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 			}
 			else if(valueKey == "PLAY_FADE")
 			{
-				int32_t currentVolume = 20;
-				std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
-				if(channelOneIterator == valuesCentral.end()) return Variable::createError(-2, "Channel 1 not found.");
-				std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("VOLUME");
-				if(parameterIterator != channelOneIterator->second.end())
-				{
-					PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
-					if(variable) currentVolume = variable->integerValue;
-				}
+				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+				std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>> peerMap = getPeers();
+				std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>> peers = peerMap[1];
+
 				execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", "0") }));
-				//execute("Play");
-				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(currentVolume)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
+				std::vector<int32_t> peerVolumes;
+				peerVolumes.reserve(peers.size());
+				for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
+				{
+					std::shared_ptr<SonosPeer> peer = central->getPeer((*i)->id);
+					if(!peer) continue;
+					peerVolumes.push_back(peer->getVolume());
+					peer->setVolume(0, false);
+				}
+				execute("Play");
+				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(_currentVolume)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
+				int32_t j = 0;
+				for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i, ++j)
+				{
+					std::shared_ptr<SonosPeer> peer = central->getPeer((*i)->id);
+					if(!peer) continue;
+					peer->setVolume(peerVolumes.at(j), true);
+				}
 			}
 			else if(valueKey == "ADD_SPEAKER")
 			{
@@ -1670,6 +1693,8 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 			else
 			{
 				if(rpcParameter->setPackets.empty()) return Variable::createError(-6, "parameter is read only");
+
+				if(valueKey == "VOLUME") _currentVolume = value->integerValue;
 
 				std::string setRequest = rpcParameter->setPackets.front()->id;
 				if(_rpcDevice->packetsById.find(setRequest) == _rpcDevice->packetsById.end()) return Variable::createError(-6, "No frame was found for parameter " + valueKey);
@@ -1778,6 +1803,7 @@ void SonosPeer::setVolume(int32_t volume, bool ramp)
 {
 	try
 	{
+		_currentVolume = volume;
 		if(ramp) execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(volume)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
 		else execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", std::to_string(volume)) }));
 	}

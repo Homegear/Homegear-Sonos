@@ -103,6 +103,7 @@ public:
 	 */
     virtual void homegearShuttingDown();
 
+    int32_t getVolume() { return _currentVolume; }
     void setVolume(int32_t volume, bool ramp = false);
 
 	//RPC methods
@@ -136,6 +137,7 @@ protected:
 	std::shared_ptr<BaseLib::RPC::RPCDecoder> _binaryDecoder;
 	std::shared_ptr<BaseLib::HttpClient> _httpClient;
 	int32_t _currentTrack = 0;
+	int32_t _currentVolume = 0;
 	int32_t _lastAvTransportSubscription = 0;
 	int32_t _lastPositionInfo = 0;
 	int32_t _lastAvTransportInfo = 0;

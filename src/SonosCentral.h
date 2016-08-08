@@ -74,7 +74,7 @@ public:
 	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo);
 	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo, bool updateOnly);
 protected:
-	std::unique_ptr<BaseLib::SSDP> _ssdp;
+	std::unique_ptr<BaseLib::Ssdp> _ssdp;
 	bool _shuttingDown = false;
 
 	bool _stopWorkerThread = false;

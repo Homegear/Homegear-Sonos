@@ -86,7 +86,7 @@ void SonosCentral::init()
 		if(_initialized) return; //Prevent running init two times
 		_initialized = true;
 
-		_ssdp.reset(new BaseLib::SSDP(GD::bl));
+		_ssdp.reset(new BaseLib::Ssdp(GD::bl));
 		_physicalInterfaceEventhandlers[GD::physicalInterface->getID()] = GD::physicalInterface->addEventHandler((BaseLib::Systems::IPhysicalInterface::IPhysicalInterfaceEventSink*)this);
 
 		GD::bl->threadManager.start(_workerThread, true, _bl->settings.workerThreadPriority(), _bl->settings.workerThreadPolicy(), &SonosCentral::worker, this);
@@ -1141,11 +1141,11 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 	try
 	{
 		std::string stHeader("urn:schemas-upnp-org:device:ZonePlayer:1");
-		std::vector<BaseLib::SSDPInfo> devices;
+		std::vector<BaseLib::SsdpInfo> devices;
 		std::vector<std::shared_ptr<SonosPeer>> newPeers;
 		_ssdp->searchDevices(stHeader, 5000, devices);
 
-		for(std::vector<BaseLib::SSDPInfo>::iterator i = devices.begin(); i != devices.end(); ++i)
+		for(std::vector<BaseLib::SsdpInfo>::iterator i = devices.begin(); i != devices.end(); ++i)
 		{
 			PVariable info = i->info();
 			if(!info ||	info->structValue->find("serialNum") == info->structValue->end() || info->structValue->find("UDN") == info->structValue->end())

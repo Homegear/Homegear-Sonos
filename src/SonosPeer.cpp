@@ -90,8 +90,8 @@ SonosPeer::~SonosPeer()
 
 void SonosPeer::init()
 {
-	_binaryEncoder.reset(new BaseLib::RPC::RPCEncoder(GD::bl));
-	_binaryDecoder.reset(new BaseLib::RPC::RPCDecoder(GD::bl));
+	_binaryEncoder.reset(new BaseLib::Rpc::RpcEncoder(GD::bl));
+	_binaryDecoder.reset(new BaseLib::Rpc::RpcDecoder(GD::bl));
 
 	_upnpFunctions.insert(UpnpFunctionPair("AddURIToQueue", UpnpFunctionEntry("urn:schemas-upnp-org:service:AVTransport:1", "/MediaRenderer/AVTransport/Control", PSoapValues(new SoapValues()))));
 	_upnpFunctions.insert(UpnpFunctionPair("Browse", UpnpFunctionEntry("urn:schemas-upnp-org:service:ContentDirectory:1", "/MediaServer/ContentDirectory/Control", PSoapValues(new SoapValues()))));

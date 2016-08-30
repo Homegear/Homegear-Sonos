@@ -1209,7 +1209,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 				std::string::size_type pos = udn.find(':');
 				if(pos != std::string::npos && pos + 1 < udn.size()) udn = udn.substr(pos + 1);
 				peer->setRinconId(udn);
-				if(!roomName.empty()) peer->setValue(clientInfo, 1, "ROOMNAME", PVariable(new Variable(roomName)), true);
+				if(!roomName.empty()) peer->setRoomName(roomName, updateOnly);
 			}
 		}
 

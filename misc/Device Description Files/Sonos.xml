@@ -1647,9 +1647,11 @@
 			<parameter id="ROOMNAME">
 				<properties>
 					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
 				</properties>
 				<logicalString/>
-				<physicalInteger groupId=""/>
 			</parameter>
 			<parameter id="ADD_MEMBER">
 				<properties>

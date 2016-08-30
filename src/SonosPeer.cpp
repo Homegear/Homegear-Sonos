@@ -173,8 +173,47 @@ void SonosPeer::setRinconId(std::string value)
 		if(functionIterator == _rpcDevice->functions.end()) return;
 		PParameter parameter = functionIterator->second->variables->getParameter("ID");
 		if(!parameter) return;
-		parameter->convertToPacket(PVariable(new Variable(value)), valuesCentral[1]["ID"].data);
-		saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ID", valuesCentral[1]["ID"].data);
+		BaseLib::Systems::RPCConfigurationParameter& parameterData = valuesCentral[1]["ID"];
+		parameter->convertToPacket(PVariable(new Variable(value)), parameterData.data);
+		if(parameterData.databaseID > 0) saveParameter(parameterData.databaseID, parameterData.data);
+		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ID", parameterData.data);
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
+void SonosPeer::setRoomName(std::string value, bool broadCastEvent)
+{
+	try
+	{
+		if(!_rpcDevice) return;
+		Functions::iterator functionIterator = _rpcDevice->functions.find(1);
+		if(functionIterator == _rpcDevice->functions.end()) return;
+		PParameter parameter = functionIterator->second->variables->getParameter("ROOMNAME");
+		if(!parameter) return;
+		PVariable variable(new Variable(value));
+		BaseLib::Systems::RPCConfigurationParameter& parameterData = valuesCentral[1]["ROOMNAME"];
+		parameter->convertToPacket(variable, valuesCentral[1]["ROOMNAME"].data);
+		if(parameterData.databaseID > 0) saveParameter(parameterData.databaseID, parameterData.data);
+		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ROOMNAME", parameterData.data);
+
+		if(broadCastEvent)
+		{
+			std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>{ "ROOMNAME" });
+			std::shared_ptr<std::vector<PVariable>> values(new std::vector<PVariable>{ variable });
+			raiseEvent(_peerID, 1, valueKeys, values);
+			raiseRPCEvent(_peerID, 1, _serialNumber + ":" + std::to_string(1), valueKeys, values);
+		}
 	}
 	catch(const std::exception& ex)
 	{

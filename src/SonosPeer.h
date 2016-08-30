@@ -77,6 +77,8 @@ public:
 	virtual std::string getRinconId();
 	virtual void setRinconId(std::string value);
 
+	virtual void setRoomName(std::string value, bool broadCastEvent);
+
 	void worker();
 	virtual std::string handleCliCommand(std::string command);
 

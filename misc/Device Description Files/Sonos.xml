@@ -3576,25 +3576,6 @@
 					</packet>
 				</packets>
 			</parameter>
-			<parameter id="NEXT_ALBUM">
-				<properties>
-					<writeable>false</writeable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
-				<physicalString groupId="NEXT_ALBUM">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="INFO">
-						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
 			<parameter id="NEXT_TITLE">
 				<properties>
 					<writeable>false</writeable>

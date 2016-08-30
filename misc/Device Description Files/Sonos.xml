@@ -1647,9 +1647,11 @@
 			<parameter id="ROOMNAME">
 				<properties>
 					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
 				</properties>
 				<logicalString/>
-				<physicalInteger groupId=""/>
 			</parameter>
 			<parameter id="ADD_MEMBER">
 				<properties>
@@ -3547,25 +3549,6 @@
 					<defaultValue/>
 				</logicalString>
 				<physicalString groupId="NEXT_ALBUM_ART">
-					<operationType>command</operationType>
-				</physicalString>
-				<packets>
-					<packet id="INFO">
-						<type>event</type>
-					</packet>
-				</packets>
-			</parameter>
-			<parameter id="NEXT_ALBUM">
-				<properties>
-					<writeable>false</writeable>
-					<casts>
-						<rpcBinary/>
-					</casts>
-				</properties>
-				<logicalString>
-					<defaultValue/>
-				</logicalString>
-				<physicalString groupId="NEXT_ALBUM">
 					<operationType>command</operationType>
 				</physicalString>
 				<packets>

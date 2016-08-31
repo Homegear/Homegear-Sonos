@@ -292,7 +292,7 @@ void SonosPeer::worker()
 				catch(BaseLib::HttpClientException& ex)
 				{
 					GD::out.printWarning("Warning: Error sending value to Sonos device: " + ex.what());
-					serviceMessages->setUnreach(true, false);
+					if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
 				}
 			}
 		}
@@ -1175,6 +1175,13 @@ void SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 				packetReceived(responsePacket);
 				serviceMessages->setUnreach(false, true);
 			}
+			catch(BaseLib::HttpClientException& ex)
+			{
+				if(ignoreErrors) return;
+				GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+				GD::out.printMessage("Request was: \n" + request);
+				if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
+			}
 			catch(BaseLib::Exception& ex)
 			{
 				if(ignoreErrors) return;
@@ -1419,7 +1426,7 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 			}
 			catch(BaseLib::HttpClientException& ex)
 			{
-				serviceMessages->setUnreach(true, false);
+				if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
 				return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
 			}
 		}

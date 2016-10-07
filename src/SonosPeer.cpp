@@ -287,16 +287,16 @@ void SonosPeer::worker()
 					}
 					catch(BaseLib::HttpClientException& ex)
 					{
-						GD::out.printInfo("Info: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
 						if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
 					}
 					catch(BaseLib::Exception& ex)
 					{
-						GD::out.printInfo("Info: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
 					}
 					catch(const std::exception& ex)
 					{
-						GD::out.printInfo("Info: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
 					}
 				}
 			}

@@ -266,33 +266,38 @@ void SonosPeer::worker()
 		if(BaseLib::HelperFunctions::getTimeSeconds() - _lastAvTransportSubscription > 300)
 		{
 			_lastAvTransportSubscription = BaseLib::HelperFunctions::getTimeSeconds();
-			if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: Peer " + std::to_string(_peerID) + " is calling SubscribeMRAVTransport...");
-			std::string subscriptionPacket1 = "SUBSCRIBE /ZoneGroupTopology/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
-			std::string subscriptionPacket2 = "SUBSCRIBE /MediaRenderer/RenderingControl/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
-			std::string subscriptionPacket3 = "SUBSCRIBE /MediaRenderer/AVTransport/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
-			std::string subscriptionPacket4 = "SUBSCRIBE /MediaServer/ContentDirectory/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
-			std::string subscriptionPacket5 = "SUBSCRIBE /AlarmClock/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
-			std::string subscriptionPacket6 = "SUBSCRIBE /SystemProperties/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
-			std::string subscriptionPacket7 = "SUBSCRIBE /MusicServices/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
+			std::vector<std::string> subscriptionPackets(7);
+			subscriptionPackets.at(0) = "SUBSCRIBE /ZoneGroupTopology/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
+			subscriptionPackets.at(1) = "SUBSCRIBE /MediaRenderer/RenderingControl/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
+			subscriptionPackets.at(2) = "SUBSCRIBE /MediaRenderer/AVTransport/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
+			subscriptionPackets.at(3) = "SUBSCRIBE /MediaServer/ContentDirectory/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
+			subscriptionPackets.at(4) = "SUBSCRIBE /AlarmClock/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
+			subscriptionPackets.at(5) = "SUBSCRIBE /SystemProperties/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
+			subscriptionPackets.at(6) = "SUBSCRIBE /MusicServices/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
 			if(_httpClient)
 			{
-				std::string response;
-				try
+				for(int32_t i = 0; i < subscriptionPackets.size(); i++)
 				{
-					_httpClient->sendRequest(subscriptionPacket1, response, true);
-					_httpClient->sendRequest(subscriptionPacket2, response, true);
-					_httpClient->sendRequest(subscriptionPacket3, response, true);
-					_httpClient->sendRequest(subscriptionPacket4, response, true);
-					_httpClient->sendRequest(subscriptionPacket5, response, true);
-					_httpClient->sendRequest(subscriptionPacket6, response, true);
-					_httpClient->sendRequest(subscriptionPacket7, response, true);
-					if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + response);
-					serviceMessages->setUnreach(false, true);
-				}
-				catch(BaseLib::HttpClientException& ex)
-				{
-					GD::out.printWarning("Warning: Error sending value to Sonos device: " + ex.what());
-					if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
+					std::string response;
+					try
+					{
+						_httpClient->sendRequest(subscriptionPackets.at(i), response, true);
+						if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + response);
+						serviceMessages->setUnreach(false, true);
+					}
+					catch(BaseLib::HttpClientException& ex)
+					{
+						GD::out.printInfo("Info: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+						if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
+					}
+					catch(BaseLib::Exception& ex)
+					{
+						GD::out.printInfo("Info: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+					}
+					catch(const std::exception& ex)
+					{
+						GD::out.printInfo("Info: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+					}
 				}
 			}
 		}

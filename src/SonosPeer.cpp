@@ -276,7 +276,7 @@ void SonosPeer::worker()
 			subscriptionPackets.at(6) = "SUBSCRIBE /MusicServices/Event HTTP/1.1\r\nHOST: " + _ip + ":1400\r\nCALLBACK: <http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + ">\r\nNT: upnp:event\r\nTIMEOUT: Second-1800\r\nContent-Length: 0\r\n\r\n";
 			if(_httpClient)
 			{
-				for(int32_t i = 0; i < subscriptionPackets.size(); i++)
+				for(uint32_t i = 0; i < subscriptionPackets.size(); i++)
 				{
 					std::string response;
 					try
@@ -704,7 +704,7 @@ bool SonosPeer::load(BaseLib::Systems::ICentral* central)
 		_rpcDevice = GD::family->getRpcDevices()->find(_deviceType, 0x10, -1);
 		if(!_rpcDevice)
 		{
-			GD::out.printError("Error loading Sonos peer " + std::to_string(_peerID) + ": Device type not found: 0x" + BaseLib::HelperFunctions::getHexString((uint32_t)_deviceType.type()) + " Firmware version: " + std::to_string(_firmwareVersion));
+			GD::out.printError("Error loading Sonos peer " + std::to_string(_peerID) + ": Device type not found: 0x" + BaseLib::HelperFunctions::getHexString(_deviceType) + " Firmware version: " + std::to_string(_firmwareVersion));
 			return false;
 		}
 		initializeTypeString();

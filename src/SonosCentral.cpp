@@ -584,7 +584,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
 					else if(filterType == "type")
 					{
 						int32_t deviceType = BaseLib::Math::getNumber(filterValue, true);
-						if((int32_t)i->second->getDeviceType().type() != deviceType) continue;
+						if((int32_t)i->second->getDeviceType() != deviceType) continue;
 					}
 
 					stringStream << std::setw(idWidth) << std::setfill(' ') << std::to_string(i->second->getID()) << bar;
@@ -598,7 +598,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
 					else name.resize(nameWidth + (name.size() - nameSize), ' ');
 					stringStream << name << bar
 						<< std::setw(serialWidth) << i->second->getSerialNumber() << bar
-						<< std::setw(typeWidth1) << BaseLib::HelperFunctions::getHexString(i->second->getDeviceType().type(), 4) << bar;
+						<< std::setw(typeWidth1) << BaseLib::HelperFunctions::getHexString(i->second->getDeviceType(), 4) << bar;
 					if(i->second->getRpcDevice())
 					{
 						std::string typeString = i->second->getTypeString();
@@ -717,7 +717,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
 			if(!_currentPeer) stringStream << "This peer is not paired to this central." << std::endl;
 			else
 			{
-				stringStream << "Peer with id " << std::hex << std::to_string(id) << " and device type 0x" << _bl->hf.getHexString(_currentPeer->getDeviceType().type()) << " selected." << std::dec << std::endl;
+				stringStream << "Peer with id " << std::hex << std::to_string(id) << " and device type 0x" << _bl->hf.getHexString(_currentPeer->getDeviceType()) << " selected." << std::dec << std::endl;
 				stringStream << "For information about the peer's commands type: \"help\"" << std::endl;
 			}
 			return stringStream.str();
@@ -771,7 +771,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
     return "Error executing command. See log file for more details.\n";
 }
 
-std::shared_ptr<SonosPeer> SonosCentral::createPeer(BaseLib::Systems::LogicalDeviceType deviceType, std::string serialNumber, std::string ip, std::string softwareVersion, std::string idString, std::string typeString, bool save)
+std::shared_ptr<SonosPeer> SonosCentral::createPeer(uint32_t deviceType, std::string serialNumber, std::string ip, std::string softwareVersion, std::string idString, std::string typeString, bool save)
 {
 	try
 	{
@@ -1174,7 +1174,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 			}
 			else if(!updateOnly)
 			{
-				peer = createPeer(BaseLib::Systems::LogicalDeviceType(6, 1), serialNumber, i->ip(), softwareVersion, idString, typeString, true);
+				peer = createPeer(1, serialNumber, i->ip(), softwareVersion, idString, typeString, true);
 				if(!peer)
 				{
 					GD::out.printWarning("Warning: No matching XML file found for device with IP: " + i->ip());

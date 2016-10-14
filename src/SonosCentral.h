@@ -80,7 +80,7 @@ protected:
 	bool _stopWorkerThread = false;
 	std::thread _workerThread;
 
-	std::shared_ptr<SonosPeer> createPeer(BaseLib::Systems::LogicalDeviceType deviceType, std::string serialNumber, std::string ip, std::string softwareVersion, std::string idString, std::string typeString, bool save = true);
+	std::shared_ptr<SonosPeer> createPeer(uint32_t deviceType, std::string serialNumber, std::string ip, std::string softwareVersion, std::string idString, std::string typeString, bool save = true);
 	void deletePeer(uint64_t id);
 	virtual void worker();
 	virtual void init();

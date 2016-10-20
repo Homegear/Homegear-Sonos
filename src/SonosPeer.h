@@ -143,6 +143,7 @@ protected:
 	int32_t _lastAvTransportSubscription = 0;
 	int32_t _lastPositionInfo = 0;
 	int32_t _lastAvTransportInfo = 0;
+	std::timed_mutex _playLocalFileMutex;
 
 	typedef std::map<std::string, UpnpFunctionEntry> UpnpFunctions;
 	typedef std::pair<std::string, UpnpFunctionEntry> UpnpFunctionPair;

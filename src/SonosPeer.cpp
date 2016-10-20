@@ -123,6 +123,7 @@ void SonosPeer::setIp(std::string value)
 	{
 		Peer::setIp(value);
 		_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
+		_httpClient->setTimeout(2000);
 	}
 	catch(const std::exception& ex)
 	{
@@ -236,7 +237,7 @@ void SonosPeer::worker()
 		if(_shuttingDown || deleting) return;
 		std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>());
 		std::shared_ptr<std::vector<PVariable>> rpcValues(new std::vector<PVariable>());
-		if( BaseLib::HelperFunctions::getTimeSeconds() - _lastPositionInfo > 5)
+		if( BaseLib::HelperFunctions::getTimeSeconds() - _lastPositionInfo > 5 && !serviceMessages->getUnreach())
 		{
 			_lastPositionInfo = BaseLib::HelperFunctions::getTimeSeconds();
 			//Get position info if TRANSPORT_STATE is PLAYING
@@ -288,15 +289,21 @@ void SonosPeer::worker()
 					catch(BaseLib::HttpClientException& ex)
 					{
 						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
-						if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
+						if(ex.responseCode() == -1)
+						{
+							serviceMessages->setUnreach(true, false);
+							break;
+						}
 					}
 					catch(BaseLib::Exception& ex)
 					{
 						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+						break;
 					}
 					catch(const std::exception& ex)
 					{
 						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
+						break;
 					}
 				}
 			}
@@ -673,6 +680,7 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 			case 1:
 				_ip = row->second.at(4)->textValue;
 				_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
+				_httpClient->setTimeout(2000);
 				break;
 			case 12:
 				unserializePeers(row->second.at(5)->binaryValue);
@@ -1877,6 +1885,17 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 {
 	try
 	{
+		std::unique_lock<std::timed_mutex> playLocalFileGuard(_playLocalFileMutex, std::chrono::milliseconds(1000));
+		if(!playLocalFileGuard)
+		{
+			GD::out.printWarning("Warning: Not playing file " + filename + ", because a file is already being played back.");
+			return;
+		}
+		if(serviceMessages->getUnreach())
+		{
+			GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+			return;
+		}
 		if(filename.size() < 5) return;
 		std::string tempPath = GD::bl->settings.tempPath() + "sonos/";
 		if(!GD::bl->io.directoryExists(tempPath))
@@ -1891,9 +1910,29 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		if(now)
 		{
 			execute("GetPositionInfo");
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			execute("GetVolume");
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			execute("GetMute");
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			execute("GetTransportInfo");
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 		}
 
 		std::string playlistFilename = filename.substr(0, filename.size() - 4) + ".m3u";
@@ -1939,6 +1978,11 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		if(now)
 		{
 			execute("GetMediaInfo");
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 
 			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_URI");
 			if(parameterIterator != channelOneIterator->second.end())
@@ -2009,6 +2053,11 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			}
 
 			execute("Pause", true);
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 
 			if(unmute && muteState) execute("SetMute", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredMute", "0") }));
 			if(volume > 0)
@@ -2021,20 +2070,45 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 					peer->setVolume(volume);
 				}
 			}
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 		}
 
 		std::string playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + silence10sPlaylistFilename;
 		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }));
+		if(serviceMessages->getUnreach())
+		{
+			GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+			return;
+		}
 
 		playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + playlistFilename;
 		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }));
+		if(serviceMessages->getUnreach())
+		{
+			GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+			return;
+		}
 
 		playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + silence2sPlaylistFilename;
 		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }));
+		if(serviceMessages->getUnreach())
+		{
+			GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+			return;
+		}
 
 		if(now)
 		{
 			execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", "x-rincon-queue:" + rinconId + "#0"), SoapValuePair("CurrentURIMetaData", "") }));
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 
 			//std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 			//std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("FIRST_TRACK_NUMBER_ENQUEUED");
@@ -2046,7 +2120,17 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			_currentTrack = 1;
 
 			execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(1)) }));
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			execute("Play");
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
@@ -2081,6 +2165,11 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 
 			//Pause often causes errors at this point
 			execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", "0") }));
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 			{
 				std::shared_ptr<SonosPeer> peer = central->getPeer((*i)->id);
@@ -2089,17 +2178,42 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			}
 			if(muteState) execute("SetMute", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredMute", std::to_string((int32_t)muteState)) }));
 			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(1)) }));
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(1)) }));
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			execute("RemoveTrackFromQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("ObjectID", "Q:0/" + std::to_string(1)) }));
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 			if(trackNumberState > 0) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(trackNumberState)) }));
 			if(!seekTimeState.empty()) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "REL_TIME"), SoapValuePair("Target", seekTimeState) }));
 
 			if(setQueue) execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", currentTransportUri), SoapValuePair("CurrentURIMetaData", currentTransportUriMetadata) }));
+			if(serviceMessages->getUnreach())
+			{
+				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+				return;
+			}
 
 			if(transportState == "PLAYING")
 			{
 				GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Resuming playback, because TRANSPORT_STATE was PLAYING.");
 				if(setQueue) execute("Play");
+				if(serviceMessages->getUnreach())
+				{
+					GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+					return;
+				}
 
 				for(int32_t i = 0; i < 10; i++)
 				{
@@ -2115,6 +2229,12 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(volumeState)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
+				if(serviceMessages->getUnreach())
+				{
+					GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
+					return;
+				}
+
 				for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 				{
 					std::shared_ptr<SonosPeer> peer = central->getPeer((*i)->id);

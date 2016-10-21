@@ -675,6 +675,12 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 {
 	try
 	{
+		std::string settingName = "readtimeout";
+		BaseLib::Systems::FamilySettings::PFamilySetting readTimeoutSetting = GD::family->getFamilySetting(settingName);
+		int32_t readTimeout = 5000;
+		if(readTimeoutSetting) readTimeout = readTimeoutSetting->integerValue;
+		if(readTimeout < 1 || readTimeout > 120000) readTimeout = 5000;
+
 		if(!rows) rows = _bl->db->getPeerVariables(_peerID);
 		Peer::loadVariables(central, rows);
 		for(BaseLib::Database::DataTable::iterator row = rows->begin(); row != rows->end(); ++row)
@@ -684,11 +690,6 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 			{
 			case 1:
 				_ip = row->second.at(4)->textValue;
-				std::string settingName = "readtimeout";
-				BaseLib::Systems::FamilySettings::PFamilySetting readTimeoutSetting = GD::family->getFamilySetting(settingName);
-				int32_t readTimeout = 5000;
-				if(readTimeoutSetting) readTimeout = readTimeoutSetting->integerValue;
-				if(readTimeout < 1 || readTimeout > 120000) readTimeout = 5000;
 				_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
 				_httpClient->setTimeout(readTimeout);
 				break;

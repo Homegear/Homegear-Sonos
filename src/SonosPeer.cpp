@@ -122,8 +122,13 @@ void SonosPeer::setIp(std::string value)
 	try
 	{
 		Peer::setIp(value);
+		std::string settingName = "readtimeout";
+		BaseLib::Systems::FamilySettings::PFamilySetting readTimeoutSetting = GD::family->getFamilySetting(settingName);
+		int32_t readTimeout = 2000;
+		if(readTimeoutSetting) readTimeout = readTimeoutSetting->integerValue;
+		if(readTimeout < 1 || readTimeout > 120000) readTimeout = 2000;
 		_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
-		_httpClient->setTimeout(2000);
+		_httpClient->setTimeout(readTimeout);
 	}
 	catch(const std::exception& ex)
 	{
@@ -679,8 +684,13 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 			{
 			case 1:
 				_ip = row->second.at(4)->textValue;
+				std::string settingName = "readtimeout";
+				BaseLib::Systems::FamilySettings::PFamilySetting readTimeoutSetting = GD::family->getFamilySetting(settingName);
+				int32_t readTimeout = 2000;
+				if(readTimeoutSetting) readTimeout = readTimeoutSetting->integerValue;
+				if(readTimeout < 1 || readTimeout > 120000) readTimeout = 2000;
 				_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
-				_httpClient->setTimeout(2000);
+				_httpClient->setTimeout(readTimeout);
 				break;
 			case 12:
 				unserializePeers(row->second.at(5)->binaryValue);

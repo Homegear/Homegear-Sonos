@@ -2206,8 +2206,8 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
 				return;
 			}
-			if(trackNumberState > 0) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(trackNumberState)) }));
-			if(!seekTimeState.empty()) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "REL_TIME"), SoapValuePair("Target", seekTimeState) }));
+			if(trackNumberState > 0) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(trackNumberState)) }), true);
+			if(!seekTimeState.empty()) execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "REL_TIME"), SoapValuePair("Target", seekTimeState) }), true);
 
 			if(setQueue) execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", currentTransportUri), SoapValuePair("CurrentURIMetaData", currentTransportUriMetadata) }));
 			if(serviceMessages->getUnreach())
@@ -2219,7 +2219,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			if(transportState == "PLAYING")
 			{
 				GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Resuming playback, because TRANSPORT_STATE was PLAYING.");
-				if(setQueue) execute("Play");
+				if(setQueue) execute("Play", true);
 				if(serviceMessages->getUnreach())
 				{
 					GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
@@ -2239,7 +2239,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				}
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
-				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(volumeState)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }));
+				execute("RampToVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("RampType", "AUTOPLAY_RAMP_TYPE"), SoapValuePair("DesiredVolume", std::to_string(volumeState)), SoapValuePair("ResetVolumeAfter", "false"), SoapValuePair("ProgramURI", "") }), true);
 				if(serviceMessages->getUnreach())
 				{
 					GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
@@ -2256,7 +2256,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			else
 			{
 				GD::out.printInfo("Info (peer " + std::to_string(_peerID) + "): Not resuming playback, because TRANSPORT_STATE was " + transportState + ".");
-				execute("Pause");
+				execute("Pause", true);
 				execute("SetVolume", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredVolume", std::to_string(volumeState)) }));
 				for(std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>::iterator i = peers.begin(); i != peers.end(); ++i)
 				{

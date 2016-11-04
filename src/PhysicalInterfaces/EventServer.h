@@ -51,7 +51,7 @@ class EventServer  : public ISonosInterface
         std::string ttsProgram() { return _settings->ttsProgram; }
         std::string dataPath() { return _settings->dataPath; }
     protected:
-        bool _stopServer = true;
+        std::atomic_bool _stopServer;
         int64_t _lastAction = 0;
         std::string _listenAddress;
         int32_t _listenPort = 7373;

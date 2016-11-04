@@ -35,7 +35,7 @@
 namespace Sonos
 {
 
-Sonos::Sonos(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler) : BaseLib::Systems::DeviceFamily(bl, eventHandler, SONOS_FAMILY_ID, SONOS_FAMILY_NAME)
+Sonos::Sonos(BaseLib::SharedObjects* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler) : BaseLib::Systems::DeviceFamily(bl, eventHandler, SONOS_FAMILY_ID, SONOS_FAMILY_NAME)
 {
 	GD::bl = bl;
 	GD::family = this;

@@ -41,6 +41,8 @@ EventServer::EventServer(std::shared_ptr<BaseLib::Systems::PhysicalInterfaceSett
 
 	signal(SIGPIPE, SIG_IGN);
 
+	_stopServer = true;
+
 	if(!settings)
 	{
 		_out.printCritical("Critical: Error initializing. Settings pointer is empty.");

@@ -89,6 +89,9 @@ void SonosCentral::init()
 		_ssdp.reset(new BaseLib::Ssdp(GD::bl));
 		_physicalInterfaceEventhandlers[GD::physicalInterface->getID()] = GD::physicalInterface->addEventHandler((BaseLib::Systems::IPhysicalInterface::IPhysicalInterfaceEventSink*)this);
 
+		_stopWorkerThread = false;
+		_shuttingDown = false;
+
 		GD::bl->threadManager.start(_workerThread, true, _bl->settings.workerThreadPriority(), _bl->settings.workerThreadPolicy(), &SonosCentral::worker, this);
 	}
 	catch(const std::exception& ex)
@@ -115,8 +118,8 @@ void SonosCentral::worker()
 		}
 
 		std::chrono::milliseconds sleepingTime(200);
-		uint32_t counter = 1;
-		uint32_t countsPer10Minutes = 0;
+		uint32_t counter = 0;
+		uint32_t countsPer10Minutes = BaseLib::HelperFunctions::getRandomNumber(50, 3000);
 		uint64_t lastPeer;
 		lastPeer = 0;
 

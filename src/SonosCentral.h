@@ -75,9 +75,9 @@ public:
 	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo, bool updateOnly);
 protected:
 	std::unique_ptr<BaseLib::Ssdp> _ssdp;
-	bool _shuttingDown = false;
+	std::atomic_bool _shuttingDown;
 
-	bool _stopWorkerThread = false;
+	std::atomic_bool _stopWorkerThread;
 	std::thread _workerThread;
 
 	std::shared_ptr<SonosPeer> createPeer(uint32_t deviceType, std::string serialNumber, std::string ip, std::string softwareVersion, std::string idString, std::string typeString, bool save = true);

@@ -31,7 +31,7 @@
 #include "../config.h"
 #include "GD.h"
 
-BaseLib::Systems::DeviceFamily* SonosFactory::createDeviceFamily(BaseLib::Obj* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler)
+BaseLib::Systems::DeviceFamily* SonosFactory::createDeviceFamily(BaseLib::SharedObjects* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler)
 {
 	return new Sonos::Sonos(bl, eventHandler);
 }

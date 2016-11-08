@@ -1183,7 +1183,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
     }
 }
 
-void SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
+bool SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 {
 	try
 	{
@@ -1198,17 +1198,18 @@ void SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 				std::shared_ptr<SonosPacket> responsePacket(new SonosPacket(response));
 				packetReceived(responsePacket);
 				serviceMessages->setUnreach(false, true);
+				return true;
 			}
 			catch(BaseLib::HttpClientException& ex)
 			{
-				if(ignoreErrors) return;
+				if(ignoreErrors) return false;
 				GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
 				GD::out.printMessage("Request was: \n" + request);
 				if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
 			}
 			catch(BaseLib::Exception& ex)
 			{
-				if(ignoreErrors) return;
+				if(ignoreErrors) return false;
 				GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
 				GD::out.printMessage("Request was: \n" + request);
 				serviceMessages->setUnreach(true, false);
@@ -1227,6 +1228,7 @@ void SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
+	return false;
 }
 
 void SonosPeer::execute(std::string& functionName, std::string& service, std::string& path, std::shared_ptr<std::vector<std::pair<std::string, std::string>>>& soapValues, bool ignoreErrors)
@@ -1284,7 +1286,7 @@ void SonosPeer::execute(std::string functionName, bool ignoreErrors)
 	}
 }
 
-void SonosPeer::execute(std::string functionName, PSoapValues soapValues, bool ignoreErrors)
+bool SonosPeer::execute(std::string functionName, PSoapValues soapValues, bool ignoreErrors)
 {
 	try
 	{
@@ -1292,13 +1294,13 @@ void SonosPeer::execute(std::string functionName, PSoapValues soapValues, bool i
 		if(functionEntry == _upnpFunctions.end())
 		{
 			GD::out.printError("Error: Tried to execute unknown function: " + functionName);
-			return;
+			return false;
 		}
 		std::string soapRequest;
 		std::string headerSoapRequest = functionEntry->second.service() + '#' + functionName;
 		SonosPacket packet(_ip, functionEntry->second.path(), headerSoapRequest, functionEntry->second.service(), functionName, soapValues);
 		packet.getSoapRequest(soapRequest);
-		sendSoapRequest(soapRequest, ignoreErrors);
+		return sendSoapRequest(soapRequest, ignoreErrors);
 	}
 	catch(const std::exception& ex)
 	{
@@ -1312,7 +1314,7 @@ void SonosPeer::execute(std::string functionName, PSoapValues soapValues, bool i
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
-
+	return false;
 }
 
 PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browseId, std::string listVariable)
@@ -2089,7 +2091,12 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		}
 
 		std::string playlistUri = "http://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + '/' + silence10sPlaylistFilename;
-		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }));
+		bool result = execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", playlistUri), SoapValuePair("EnqueuedURIMetaData", ""), SoapValuePair("DesiredFirstTrackNumberEnqueued", "1"), SoapValuePair("EnqueueAsNext", "1") }), true);
+		if(!result)
+		{
+			GD::out.printWarning("Warning: Can't play file " + filename + ", because the speaker is not master.");
+			return;
+		}
 		if(serviceMessages->getUnreach())
 		{
 			GD::out.printWarning("Warning: Not playing file " + filename + ", because a speaker is unreachable.");
@@ -2298,6 +2305,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			bool unmute = true;
 			int32_t volume = -1;
 			std::string language;
+			std::string voice;
 
 			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 			if(channelOneIterator == valuesCentral.end())
@@ -2328,14 +2336,26 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
 				{
 					GD::out.printError("Error: Language is not alphanumeric.");
-					language = "en";
+					language = "en-US";
+				}
+			}
+
+			parameterIterator = channelOneIterator->second.find("PLAY_TTS_VOICE");
+			if(parameterIterator != channelOneIterator->second.end())
+			{
+				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				if(variable) voice = variable->stringValue;
+				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
+				{
+					GD::out.printError("Error: Voice is not alphanumeric.");
+					language = "Justin";
 				}
 			}
 
 			std::string audioPath = GD::bl->settings.tempPath() + "sonos/";
 			std::string filename;
 			BaseLib::HelperFunctions::stringReplace(value->stringValue, "\"", "");
-			std::string execPath = ttsProgram + ' ' + language + " \"" + value->stringValue + "\"";
+			std::string execPath = ttsProgram + ' ' + language + ' ' + voice + " \"" + value->stringValue + "\"";
 			if(BaseLib::HelperFunctions::exec(execPath, filename) != 0)
 			{
 				GD::out.printError("Error: Error executing program to generate TTS audio file: \"" + ttsProgram + ' ' + language + ' ' + value->stringValue + "\"");

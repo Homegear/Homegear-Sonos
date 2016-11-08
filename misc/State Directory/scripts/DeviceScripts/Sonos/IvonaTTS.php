@@ -3,10 +3,19 @@
 /* By Tim Greve */
 /****************/
 
-if($argc != 3) die("Wrong parameter count. Please provice the language as first and the string to say as second parameter. E. g.: IvonaTTS.php de \"Hello World\"");
+if($argc != 4) die("Wrong parameter count. Please provice the language as first, the voice as second and the string to say as thrid parameter. E. g.: IvonaTTS.php de-DE Marlene \"Hello World\"");
 
 $language = $argv[1];
+if($language == 'de') $language = 'de-DE';
+else if($language == 'fr') $language = 'fr-FR';
+else if($language == 'en') $language = 'en-US';
+$voice = $argv[2];
 $path = \Homegear\Homegear::TEMP_PATH."sonos/";
+
+if($language == 'de-DE' && $voice != 'Marlene' && $voice != 'Hans') $voice = 'Marlene';
+else if($language == 'en-US' && $voice != 'Justin' && $voice != 'Salli' && $voice != 'Joey' && $voice != 'Kimberly' && $voice != 'Kendra' && $voice != 'Eric' && $voice != 'Jennifer' && $voice != 'Ivy' && $voice != 'Chipmunk') $voice = 'Justin';
+else if($language == 'en-GB' && $voice != 'Amy' && $voice != 'Brian' && $voice != 'Emma') $voice = 'Amy';
+else if($language == 'fr-FR' && $voice != 'Celine' && $voice != 'Mathieu') $voice = 'Celine';
 
 if(!file_exists($path))
 {
@@ -19,10 +28,10 @@ if(!IVONA_TTS::$accessKey || !IVONA_TTS::$secretKey) die("Please specify \"ivona
 
 $ivona = new IVONA_TTS($accessKey, $secretKey);
 
-$words = $argv[2]; //escapeshellarg($argv[2]);
+$words = $argv[3]; //escapeshellarg($argv[2]);
 $filename = $path.md5($words)."-".$language.".mp3";
 if(file_exists($filename) && filesize($filename) > 1024) touch($filename);
-else $ivona->save_mp3($words, $filename);
+else $ivona->save_mp3($words, $filename, $language, $voice);
 
 echo $filename;
 

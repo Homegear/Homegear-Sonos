@@ -1810,7 +1810,20 @@
 					</casts>
 				</properties>
 				<logicalString>
-					<defaultValue>en</defaultValue>
+					<defaultValue>en-US</defaultValue>
+				</logicalString>
+				<physicalNone>
+					<operationType>store</operationType>
+				</physicalNone>
+			</parameter>
+			<parameter id="PLAY_TTS_VOICE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString>
+					<defaultValue>Justin</defaultValue>
 				</logicalString>
 				<physicalNone>
 					<operationType>store</operationType>

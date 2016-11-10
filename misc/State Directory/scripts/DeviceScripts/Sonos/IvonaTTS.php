@@ -29,7 +29,7 @@ if(!IVONA_TTS::$accessKey || !IVONA_TTS::$secretKey) die("Please specify \"ivona
 $ivona = new IVONA_TTS($accessKey, $secretKey);
 
 $words = $argv[3]; //escapeshellarg($argv[2]);
-$filename = $path.md5($words)."-".$language.".mp3";
+$filename = $path.md5($words)."-".$language."-".$voice.".mp3";
 if(file_exists($filename) && filesize($filename) > 1024) touch($filename);
 else $ivona->save_mp3($words, $filename, $language, $voice);
 

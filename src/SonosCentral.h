@@ -80,10 +80,13 @@ protected:
 	std::atomic_bool _stopWorkerThread;
 	std::thread _workerThread;
 
+	uint32_t _tempMaxAge = 720;
+
 	std::shared_ptr<SonosPeer> createPeer(uint32_t deviceType, std::string serialNumber, std::string ip, std::string softwareVersion, std::string idString, std::string typeString, bool save = true);
 	void deletePeer(uint64_t id);
 	virtual void worker();
 	virtual void init();
+	void deleteOldTempFiles();
 };
 
 }

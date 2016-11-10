@@ -737,11 +737,18 @@ bool SonosPeer::load(BaseLib::Systems::ICentral* central)
 		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 		if(channelOneIterator != valuesCentral.end())
 		{
-			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("VOLUME");
+			auto parameterIterator = channelOneIterator->second.find("VOLUME");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
 				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
 				if(variable) _currentVolume = variable->integerValue;
+			}
+
+			parameterIterator = channelOneIterator->second.find("IS_MASTER");
+			if(parameterIterator != channelOneIterator->second.end())
+			{
+				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				if(variable) _isMaster = variable->booleanValue;
 			}
 		}
 
@@ -1045,8 +1052,9 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["IS_MASTER"];
 							if(parameter2->rpcParameter)
 							{
-								BaseLib::PVariable isMaster(new BaseLib::Variable(value->stringValue.size() < 9 || value->stringValue.compare(0, 9, "x-rincon:") != 0));
-								if(parameter2->data.empty() || (bool)parameter2->data.back() != isMaster->booleanValue)
+								_isMaster = value->stringValue.size() < 9 || value->stringValue.compare(0, 9, "x-rincon:") != 0;
+								BaseLib::PVariable isMaster(new BaseLib::Variable(_isMaster));
+								if(parameter2->data.empty() || (bool)parameter2->data.back() != _isMaster)
 								{
 									parameter2->rpcParameter->convertToPacket(isMaster, parameter2->data);
 									if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
@@ -1664,6 +1672,38 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 {
 	try
 	{
+		if(!_isMaster && (
+				valueKey == "NEXT" ||
+				valueKey == "PAUSE" ||
+				valueKey == "PLAY" ||
+				valueKey == "PLAY_AUDIO_FILE" ||
+				valueKey == "PLAY_AUDIO_FILE_UNMUTE" ||
+				valueKey == "PLAY_AUDIO_FILE_VOLUME" ||
+				valueKey == "PLAY_FADE" ||
+				valueKey == "PLAY_FAVORITE" ||
+				valueKey == "PLAY_PLAYLIST" ||
+				valueKey == "PLAY_RADIO_FAVORITE" ||
+				valueKey == "PLAY_TTS" ||
+				valueKey == "PLAY_TTS_LANGUAGE" ||
+				valueKey == "PLAY_TTS_UNMUTE" ||
+				valueKey == "PLAY_TTS VOICE" ||
+				valueKey == "PLAY_TTS_VOLUME" ||
+				valueKey == "PREVIOUS" ||
+				valueKey == "STOP"))
+		{
+			std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+			std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>> peerMap = getPeers();
+			std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>> peers = peerMap[1];
+
+			for(auto basicPeer : peers)
+			{
+				if(!basicPeer->isSender) continue;
+				std::shared_ptr<SonosPeer> peer = central->getPeer(basicPeer->id);
+				if(!peer) continue;
+				return peer->setValue(clientInfo, channel, valueKey, value, wait);
+			}
+		}
+
 		Peer::setValue(clientInfo, channel, valueKey, value, wait); //Ignore result, otherwise setHomegerValue might not be executed
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");

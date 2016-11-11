@@ -76,7 +76,7 @@ EventServer::~EventServer()
     }
 }
 
-void EventServer::getAddress()
+void EventServer::setListenAddress()
 {
 	try
 	{
@@ -111,12 +111,14 @@ void EventServer::startListening()
 	try
 	{
 		stopListening();
-		getAddress();
+		setListenAddress();
 		if(_listenAddress.empty())
 		{
 			GD::out.printError("Error: Could not get listen automatically. Please specify it in sonos.conf");
 			return;
 		}
+		_ipAddress = _listenAddress;
+		_hostname = _listenAddress;
 		_stopServer = false;
 		_bl->threadManager.start(_listenThread, true, _settings->listenThreadPriority, _settings->listenThreadPolicy, &EventServer::mainThread, this);
 		IPhysicalInterface::startListening();

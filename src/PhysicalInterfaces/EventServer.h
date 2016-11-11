@@ -59,7 +59,7 @@ class EventServer  : public ISonosInterface
         std::shared_ptr<BaseLib::FileDescriptor> _serverFileDescriptor;
         std::vector<char> _httpOkHeader;
 
-        void getAddress();
+        void setListenAddress();
         void getSocketDescriptor();
         std::shared_ptr<BaseLib::FileDescriptor> getClientSocketDescriptor(std::string& ipAddress, int32_t& port);
         void mainThread();

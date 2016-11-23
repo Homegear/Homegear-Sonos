@@ -31,7 +31,7 @@
 
 namespace Sonos
 {
-	BaseLib::Obj* GD::bl = nullptr;
+	BaseLib::SharedObjects* GD::bl = nullptr;
 	Sonos* GD::family = nullptr;
 	std::string GD::dataPath;
 	std::shared_ptr<ISonosInterface> GD::physicalInterface;

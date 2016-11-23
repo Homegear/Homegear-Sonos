@@ -45,7 +45,7 @@ class GD
 public:
 	virtual ~GD();
 
-	static BaseLib::Obj* bl;
+	static BaseLib::SharedObjects* bl;
 	static Sonos* family;
 	static std::string dataPath;
 	static std::shared_ptr<ISonosInterface> physicalInterface;

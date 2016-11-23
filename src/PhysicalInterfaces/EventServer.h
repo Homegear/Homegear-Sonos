@@ -51,7 +51,7 @@ class EventServer  : public ISonosInterface
         std::string ttsProgram() { return _settings->ttsProgram; }
         std::string dataPath() { return _settings->dataPath; }
     protected:
-        bool _stopServer = true;
+        std::atomic_bool _stopServer;
         int64_t _lastAction = 0;
         std::string _listenAddress;
         int32_t _listenPort = 7373;
@@ -59,7 +59,7 @@ class EventServer  : public ISonosInterface
         std::shared_ptr<BaseLib::FileDescriptor> _serverFileDescriptor;
         std::vector<char> _httpOkHeader;
 
-        void getAddress();
+        void setListenAddress();
         void getSocketDescriptor();
         std::shared_ptr<BaseLib::FileDescriptor> getClientSocketDescriptor(std::string& ipAddress, int32_t& port);
         void mainThread();

@@ -89,7 +89,50 @@ void SonosCentral::init()
 		_ssdp.reset(new BaseLib::Ssdp(GD::bl));
 		_physicalInterfaceEventhandlers[GD::physicalInterface->getID()] = GD::physicalInterface->addEventHandler((BaseLib::Systems::IPhysicalInterface::IPhysicalInterfaceEventSink*)this);
 
+		_stopWorkerThread = false;
+		_shuttingDown = false;
+
+		std::string settingName = "tempmaxage";
+		BaseLib::Systems::FamilySettings::PFamilySetting tempMaxAgeSetting = GD::family->getFamilySetting(settingName);
+		if(tempMaxAgeSetting) _tempMaxAge = tempMaxAgeSetting->integerValue;
+		if(_tempMaxAge < 1) _tempMaxAge = 1;
+		else if(_tempMaxAge > 87600) _tempMaxAge = 87600;
+
 		GD::bl->threadManager.start(_workerThread, true, _bl->settings.workerThreadPriority(), _bl->settings.workerThreadPolicy(), &SonosCentral::worker, this);
+	}
+	catch(const std::exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(BaseLib::Exception& ex)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+	}
+	catch(...)
+	{
+		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+}
+
+void SonosCentral::deleteOldTempFiles()
+{
+	try
+	{
+		std::string sonosTempPath = GD::bl->settings.tempPath() + "/sonos/";
+		if(!GD::bl->io.directoryExists(sonosTempPath)) return;
+
+		auto tempFiles = GD::bl->io.getFiles(sonosTempPath, false);
+		for(auto tempFile : tempFiles)
+		{
+			std::string path = sonosTempPath + tempFile;
+			if(GD::bl->io.getFileLastModifiedTime(path) < ((int32_t)BaseLib::HelperFunctions::getTimeSeconds() - ((int32_t)_tempMaxAge * 3600)))
+			{
+				if(!GD::bl->io.deleteFile(path))
+				{
+					GD::out.printCritical("Critical: deleting temporary file \"" + path + "\": " + strerror(errno));
+				}
+			}
+		}
 	}
 	catch(const std::exception& ex)
 	{
@@ -115,8 +158,8 @@ void SonosCentral::worker()
 		}
 
 		std::chrono::milliseconds sleepingTime(200);
-		uint32_t counter = 1;
-		uint32_t countsPer10Minutes = 0;
+		uint32_t counter = 0;
+		uint32_t countsPer10Minutes = BaseLib::HelperFunctions::getRandomNumber(50, 3000);
 		uint64_t lastPeer;
 		lastPeer = 0;
 
@@ -142,6 +185,7 @@ void SonosCentral::worker()
 					else countsPer10Minutes = 100;
 					_peersMutex.unlock();
 					searchDevices(nullptr, true);
+					deleteOldTempFiles();
 				}
 				_peersMutex.lock();
 				if(!_peersById.empty())

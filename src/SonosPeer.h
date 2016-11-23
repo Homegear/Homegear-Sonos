@@ -135,6 +135,7 @@ protected:
 
 	bool _shuttingDown = false;
 	bool _getOneMorePositionInfo = true;
+	bool _isMaster = false;
 	std::shared_ptr<BaseLib::Rpc::RpcEncoder> _binaryEncoder;
 	std::shared_ptr<BaseLib::Rpc::RpcDecoder> _binaryDecoder;
 	std::shared_ptr<BaseLib::HttpClient> _httpClient;
@@ -170,9 +171,9 @@ protected:
 
 	void execute(std::string functionName, bool ignoreErrors = false);
 
-	void execute(std::string functionName, PSoapValues soapValues, bool ignoreErrors = false);
+	bool execute(std::string functionName, PSoapValues soapValues, bool ignoreErrors = false);
 
-	void sendSoapRequest(std::string& request, bool ignoreErrors = false);
+	bool sendSoapRequest(std::string& request, bool ignoreErrors = false);
 
 	void playLocalFile(std::string filename, bool now, bool unmute, int32_t volume);
 

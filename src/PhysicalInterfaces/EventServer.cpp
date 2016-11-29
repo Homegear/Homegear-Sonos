@@ -471,17 +471,20 @@ std::shared_ptr<BaseLib::FileDescriptor> EventServer::getClientSocketDescriptor(
 		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		fd_set readFileDescriptor;
+		int32_t nfds = 0;
 		FD_ZERO(&readFileDescriptor);
-		GD::bl->fileDescriptorManager.lock();
-		int32_t nfds = _serverFileDescriptor->descriptor + 1;
-		if(nfds <= 0)
 		{
-			GD::bl->fileDescriptorManager.unlock();
-			GD::out.printError("Error: Server file descriptor is invalid.");
-			return fileDescriptor;
+			auto fileDescriptorGuard = GD::bl->fileDescriptorManager.getLock();
+			fileDescriptorGuard.lock();
+			nfds = _serverFileDescriptor->descriptor + 1;
+			if(nfds <= 0)
+			{
+				fileDescriptorGuard.unlock();
+				GD::out.printError("Error: Server file descriptor is invalid.");
+				return fileDescriptor;
+			}
+			FD_SET(_serverFileDescriptor->descriptor, &readFileDescriptor);
 		}
-		FD_SET(_serverFileDescriptor->descriptor, &readFileDescriptor);
-		GD::bl->fileDescriptorManager.unlock();
 		if(!select(nfds, &readFileDescriptor, NULL, NULL, &timeout)) return fileDescriptor;
 
 		struct sockaddr_storage clientInfo;

@@ -3,7 +3,7 @@
 /* By Tim Greve */
 /****************/
 
-if($argc != 4) die("Wrong parameter count. Please provice the language as first, the voice as second and the string to say as thrid parameter. E. g.: IvonaTTS.php de-DE Marlene \"Hello World\"");
+if($argc < 4) die("Wrong parameter count. Please provide the language as first, the voice as second and the string to say as third parameter. E. g.: IvonaTTS.php en-US Salli \"Hello World\"");
 
 $language = $argv[1];
 if($language == 'de') $language = 'de-DE';

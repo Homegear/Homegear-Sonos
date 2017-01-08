@@ -688,16 +688,13 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 			_variableDatabaseIDs[row->second.at(2)->intValue] = row->second.at(0)->intValue;
 			switch(row->second.at(2)->intValue)
 			{
-			case 1:
-				_ip = row->second.at(4)->textValue;
-				_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
-				_httpClient->setTimeout(readTimeout);
-				break;
 			case 12:
 				unserializePeers(row->second.at(5)->binaryValue);
 				break;
 			}
 		}
+		_httpClient.reset(new BaseLib::HttpClient(GD::bl, _ip, 1400, false));
+		_httpClient->setTimeout(readTimeout);
 	}
 	catch(const std::exception& ex)
     {
@@ -775,7 +772,6 @@ void SonosPeer::saveVariables()
 	{
 		if(_peerID == 0) return;
 		Peer::saveVariables();
-		saveVariable(1, _ip);
 	}
 	catch(const std::exception& ex)
     {

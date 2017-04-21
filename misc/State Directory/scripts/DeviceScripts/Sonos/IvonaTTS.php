@@ -22,9 +22,9 @@ if(!file_exists($path))
 	if(!mkdir($path, 0775, true)) die("Could not create directory $path");
 }
 
-IVONA_TTS::$accessKey = \Homegear\Homegear::getFamilySetting(6, 'ivonattsaccesskey');
-IVONA_TTS::$secretKey = \Homegear\Homegear::getFamilySetting(6, 'ivonattssecretkey');
-if(!IVONA_TTS::$accessKey || !IVONA_TTS::$secretKey) die("Please specify \"ivonaTtsAccessKey\" and \"ivonaTtsSecretKey\" in \"sonos.conf\".");
+IVONA_TTS::$accessKey = \Homegear\Homegear::getFamilySetting(6, 'ttsusername');
+IVONA_TTS::$secretKey = \Homegear\Homegear::getFamilySetting(6, 'ttskey');
+if(!IVONA_TTS::$accessKey || !IVONA_TTS::$secretKey) die("Please specify \"ttsUsername\" (Ivona access key) and \"ttsKey\" (Ivona secret key) in \"sonos.conf\".");
 
 $ivona = new IVONA_TTS($accessKey, $secretKey);
 

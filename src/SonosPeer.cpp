@@ -153,7 +153,8 @@ std::string SonosPeer::getRinconId()
 		if(functionIterator == _rpcDevice->functions.end()) return "";
 		PParameter parameter = functionIterator->second->variables->getParameter("ID");
 		if(!parameter) return "";
-		return parameter->convertFromPacket(valuesCentral[1]["ID"].data)->stringValue;
+		std::vector<uint8_t> parameterData = valuesCentral[1]["ID"].getBinaryData();
+		return parameter->convertFromPacket(parameterData)->stringValue;
 	}
 	catch(const std::exception& ex)
 	{
@@ -179,10 +180,12 @@ void SonosPeer::setRinconId(std::string value)
 		if(functionIterator == _rpcDevice->functions.end()) return;
 		PParameter parameter = functionIterator->second->variables->getParameter("ID");
 		if(!parameter) return;
-		BaseLib::Systems::RPCConfigurationParameter& parameterData = valuesCentral[1]["ID"];
-		parameter->convertToPacket(PVariable(new Variable(value)), parameterData.data);
-		if(parameterData.databaseID > 0) saveParameter(parameterData.databaseID, parameterData.data);
-		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ID", parameterData.data);
+		BaseLib::Systems::RpcConfigurationParameter& configParameter = valuesCentral[1]["ID"];
+		std::vector<uint8_t> parameterData;
+		parameter->convertToPacket(PVariable(new Variable(value)), parameterData);
+		configParameter.setBinaryData(parameterData);
+		if(configParameter.databaseId > 0) saveParameter(configParameter.databaseId, parameterData);
+		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ID", parameterData);
 	}
 	catch(const std::exception& ex)
 	{
@@ -208,10 +211,12 @@ void SonosPeer::setRoomName(std::string value, bool broadCastEvent)
 		PParameter parameter = functionIterator->second->variables->getParameter("ROOMNAME");
 		if(!parameter) return;
 		PVariable variable(new Variable(value));
-		BaseLib::Systems::RPCConfigurationParameter& parameterData = valuesCentral[1]["ROOMNAME"];
-		parameter->convertToPacket(variable, valuesCentral[1]["ROOMNAME"].data);
-		if(parameterData.databaseID > 0) saveParameter(parameterData.databaseID, parameterData.data);
-		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ROOMNAME", parameterData.data);
+		BaseLib::Systems::RpcConfigurationParameter& configParameter = valuesCentral[1]["ROOMNAME"];
+		std::vector<uint8_t> parameterData;
+		parameter->convertToPacket(variable, parameterData);
+		configParameter.setBinaryData(parameterData);
+		if(configParameter.databaseId > 0) saveParameter(configParameter.databaseId, parameterData);
+		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ROOMNAME", parameterData);
 
 		if(broadCastEvent)
 		{
@@ -246,13 +251,14 @@ void SonosPeer::worker()
 		{
 			_lastPositionInfo = BaseLib::HelperFunctions::getTimeSeconds();
 			//Get position info if TRANSPORT_STATE is PLAYING
-			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelIterator = valuesCentral.find(1);
+			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelIterator = valuesCentral.find(1);
 			if(channelIterator != valuesCentral.end())
 			{
-				std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelIterator->second.find("TRANSPORT_STATE");
+				std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelIterator->second.find("TRANSPORT_STATE");
 				if(parameterIterator != channelIterator->second.end())
 				{
-					PVariable transportState = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+					std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+					PVariable transportState = _binaryDecoder->decodeResponse(parameterData);
 					if(transportState)
 					{
 						if(transportState->stringValue == "PLAYING" || _getOneMorePositionInfo)
@@ -615,15 +621,16 @@ std::string SonosPeer::printConfig()
 		std::ostringstream stringStream;
 		stringStream << "MASTER" << std::endl;
 		stringStream << "{" << std::endl;
-		for(std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::const_iterator i = configCentral.begin(); i != configCentral.end(); ++i)
+		for(std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator i = configCentral.begin(); i != configCentral.end(); ++i)
 		{
 			stringStream << "\t" << "Channel: " << std::dec << i->first << std::endl;
 			stringStream << "\t{" << std::endl;
-			for(std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+			for(std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator j = i->second.begin(); j != i->second.end(); ++j)
 			{
 				stringStream << "\t\t[" << j->first << "]: ";
 				if(!j->second.rpcParameter) stringStream << "(No RPC parameter) ";
-				for(std::vector<uint8_t>::const_iterator k = j->second.data.begin(); k != j->second.data.end(); ++k)
+				std::vector<uint8_t> parameterData = j->second.getBinaryData();
+				for(std::vector<uint8_t>::const_iterator k = parameterData.begin(); k != parameterData.end(); ++k)
 				{
 					stringStream << std::hex << std::setfill('0') << std::setw(2) << (int32_t)*k << " ";
 				}
@@ -635,15 +642,16 @@ std::string SonosPeer::printConfig()
 
 		stringStream << "VALUES" << std::endl;
 		stringStream << "{" << std::endl;
-		for(std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::const_iterator i = valuesCentral.begin(); i != valuesCentral.end(); ++i)
+		for(std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator i = valuesCentral.begin(); i != valuesCentral.end(); ++i)
 		{
 			stringStream << "\t" << "Channel: " << std::dec << i->first << std::endl;
 			stringStream << "\t{" << std::endl;
-			for(std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+			for(std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator j = i->second.begin(); j != i->second.end(); ++j)
 			{
 				stringStream << "\t\t[" << j->first << "]: ";
 				if(!j->second.rpcParameter) stringStream << "(No RPC parameter) ";
-				for(std::vector<uint8_t>::const_iterator k = j->second.data.begin(); k != j->second.data.end(); ++k)
+				std::vector<uint8_t> parameterData = j->second.getBinaryData();
+				for(std::vector<uint8_t>::const_iterator k = parameterData.begin(); k != parameterData.end(); ++k)
 				{
 					stringStream << std::hex << std::setfill('0') << std::setw(2) << (int32_t)*k << " ";
 				}
@@ -731,20 +739,22 @@ bool SonosPeer::load(BaseLib::Systems::ICentral* central)
 		serviceMessages.reset(new BaseLib::Systems::ServiceMessages(_bl, _peerID, _serialNumber, this));
 		serviceMessages->load();
 
-		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 		if(channelOneIterator != valuesCentral.end())
 		{
 			auto parameterIterator = channelOneIterator->second.find("VOLUME");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) _currentVolume = variable->integerValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("IS_MASTER");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) _isMaster = variable->booleanValue;
 			}
 		}
@@ -943,8 +953,8 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 				{
 					if(std::find(i->second.channels.begin(), i->second.channels.end(), *j) == i->second.channels.end()) continue;
 
-					BaseLib::Systems::RPCConfigurationParameter* parameter = &valuesCentral[*j][i->first];
-					if(parameter->data == i->second.value) continue;
+					BaseLib::Systems::RpcConfigurationParameter& parameter = valuesCentral[*j][i->first];
+					if(parameter.equals(i->second.value)) continue;
 
 					if(!valueKeys[*j] || !rpcValues[*j])
 					{
@@ -958,103 +968,108 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						rpcValues[1].reset(new std::vector<PVariable>());
 					}
 
-					if(parameter->rpcParameter)
+					if(parameter.rpcParameter)
 					{
 						//Process service messages
-						if(parameter->rpcParameter->service && !i->second.value.empty())
+						if(parameter.rpcParameter->service && !i->second.value.empty())
 						{
-							if(parameter->rpcParameter->logical->type == ILogical::Type::Enum::tEnum)
+							if(parameter.rpcParameter->logical->type == ILogical::Type::Enum::tEnum)
 							{
 								serviceMessages->set(i->first, i->second.value.at(i->second.value.size() - 1), *j);
 							}
-							else if(parameter->rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
+							else if(parameter.rpcParameter->logical->type == ILogical::Type::Enum::tBoolean)
 							{
 								serviceMessages->set(i->first, (bool)i->second.value.at(i->second.value.size() - 1));
 							}
 						}
 
-						PVariable value = parameter->rpcParameter->convertFromPacket(i->second.value, true);
+						PVariable value = parameter.rpcParameter->convertFromPacket(i->second.value, true);
 						if(i->first == "CURRENT_TRACK") _currentTrack = value->integerValue;
 						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())
 						{
 							//Clear current track information when uri is empty
+							std::vector<uint8_t> emptyData;
 
-							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["CURRENT_TITLE"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["CURRENT_TITLE"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("CURRENT_TITLE");
 							rpcValues[1]->push_back(value);
 
-							parameter2 = &valuesCentral[1]["CURRENT_ALBUM"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							parameter2 = valuesCentral[1]["CURRENT_ALBUM"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("CURRENT_ALBUM");
 							rpcValues[1]->push_back(value);
 
-							parameter2 = &valuesCentral[1]["CURRENT_ARTIST"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							parameter2 = valuesCentral[1]["CURRENT_ARTIST"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("CURRENT_ARTIST");
 							rpcValues[1]->push_back(value);
 
-							parameter2 = &valuesCentral[1]["CURRENT_ALBUM_ART"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							parameter2 = valuesCentral[1]["CURRENT_ALBUM_ART"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("CURRENT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
 						else if(i->first == "NEXT_TRACK_URI" && value->stringValue.empty())
 						{
 							//Clear next track information when uri is empty
+							std::vector<uint8_t> emptyData;
 
-							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["NEXT_TITLE"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["NEXT_TITLE"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("NEXT_TITLE");
 							rpcValues[1]->push_back(value);
 
-							parameter2 = &valuesCentral[1]["NEXT_ALBUM"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							parameter2 = valuesCentral[1]["NEXT_ALBUM"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("NEXT_ALBUM");
 							rpcValues[1]->push_back(value);
 
-							parameter2 = &valuesCentral[1]["NEXT_ARTIST"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							parameter2 = valuesCentral[1]["NEXT_ARTIST"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("NEXT_ARTIST");
 							rpcValues[1]->push_back(value);
 
-							parameter2 = &valuesCentral[1]["NEXT_ALBUM_ART"];
-							parameter2->data.clear();
-							if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+							parameter2 = valuesCentral[1]["NEXT_ALBUM_ART"];
+							parameter2.setBinaryData(emptyData);
+							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 							valueKeys[1]->push_back("NEXT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
 						else if(i->first == "AV_TRANSPORT_URI" && value->stringValue.size() > 0)
 						{
 							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
-							BaseLib::PVariable oldValue = parameter->rpcParameter->convertFromPacket(parameter->data, true);
+							std::vector<uint8_t> parameterData = parameter.getBinaryData();
+							BaseLib::PVariable oldValue = parameter.rpcParameter->convertFromPacket(parameterData, true);
 
 							//Update IS_MASTER
-							BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["IS_MASTER"];
-							if(parameter2->rpcParameter)
+							BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["IS_MASTER"];
+							if(parameter2.rpcParameter)
 							{
+								parameterData = parameter2.getBinaryData();
 								_isMaster = value->stringValue.size() < 9 || value->stringValue.compare(0, 9, "x-rincon:") != 0;
 								BaseLib::PVariable isMaster(new BaseLib::Variable(_isMaster));
-								if(parameter2->data.empty() || (bool)parameter2->data.back() != _isMaster)
+								if(parameterData.empty() || (bool)parameterData.back() != _isMaster)
 								{
-									parameter2->rpcParameter->convertToPacket(isMaster, parameter2->data);
-									if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+									parameter2.rpcParameter->convertToPacket(isMaster, parameterData);
+									parameter2.setBinaryData(parameterData);
+									if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, parameterData);
+									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameterData);
 									valueKeys[1]->push_back("IS_MASTER");
 									rpcValues[1]->push_back(isMaster);
 								}
@@ -1123,35 +1138,36 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							if(value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
 							{
 								//Delete track information for radio
+								std::vector<uint8_t> emptyData;
 
 								PVariable value(new Variable(VariableType::tString));
-								BaseLib::Systems::RPCConfigurationParameter* parameter2 = &valuesCentral[1]["CURRENT_ALBUM"];
-								parameter2->data.clear();
-								if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+								BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["CURRENT_ALBUM"];
+								parameter2.setBinaryData(emptyData);
+								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 								valueKeys[1]->push_back("CURRENT_ALBUM");
 								rpcValues[1]->push_back(value);
 
-								parameter2 = &valuesCentral[1]["CURRENT_ARTIST"];
-								parameter2->data.clear();
-								if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+								parameter2 = valuesCentral[1]["CURRENT_ARTIST"];
+								parameter2.setBinaryData(emptyData);
+								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 								valueKeys[1]->push_back("CURRENT_ARTIST");
 								rpcValues[1]->push_back(value);
 
-								parameter2 = &valuesCentral[1]["CURRENT_ALBUM_ART"];
-								parameter2->data.clear();
-								if(parameter2->databaseID > 0) saveParameter(parameter2->databaseID, parameter2->data);
-								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter2->data);
+								parameter2 = valuesCentral[1]["CURRENT_ALBUM_ART"];
+								parameter2.setBinaryData(emptyData);
+								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
 								valueKeys[1]->push_back("CURRENT_ALBUM_ART");
 								rpcValues[1]->push_back(value);
 							}
 						}
 						else if(i->first == "VOLUME") _currentVolume = value->integerValue;
 
-						parameter->data = i->second.value;
-						if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
-						else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameter->data);
+						parameter.setBinaryData(i->second.value);
+						if(parameter.databaseId > 0) saveParameter(parameter.databaseId, i->second.value);
+						else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, i->second.value);
 						if(_bl->debugLevel >= 4) GD::out.printInfo("Info: " + i->first + " of peer " + std::to_string(_peerID) + " with serial number " + _serialNumber + ":" + std::to_string(*j) + " was set.");
 
 						valueKeys[*j]->push_back(i->first);
@@ -1325,7 +1341,7 @@ PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browse
 {
 	try
 	{
-		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 		if(channelOneIterator == valuesCentral.end())
 		{
 			GD::out.printError("Error: Channel 1 not found.");
@@ -1335,10 +1351,11 @@ PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browse
 		execute("Browse", PSoapValues(new SoapValues{ SoapValuePair("ObjectID", browseId), SoapValuePair("BrowseFlag", "BrowseDirectChildren"), SoapValuePair("Filter", ""), SoapValuePair("StartingIndex", "0"), SoapValuePair("RequestedCount", "0"), SoapValuePair("SortCriteria", "") }));
 
 		PVariable entries;
-		std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find(listVariable);
+		std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find(listVariable);
 		if(parameterIterator != channelOneIterator->second.end())
 		{
-			entries = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+			std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+			entries = _binaryDecoder->decodeResponse(parameterData);
 		}
 		if(!entries) return Variable::createError(-32500, "Data could not be decoded.");
 
@@ -1362,7 +1379,8 @@ PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browse
 		parameterIterator = channelOneIterator->second.find("ID");
 		if(parameterIterator != channelOneIterator->second.end())
 		{
-			PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+			std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+			PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 			if(variable) rinconId = variable->stringValue;
 		}
 		if(rinconId.empty()) return Variable::createError(-32500, "Rincon id could not be decoded.");
@@ -1431,7 +1449,8 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 				if((*i)->parameterId == j->second->physical->groupId)
 				{
 					if((*i)->key.empty()) continue;
-					soapValues->push_back(std::pair<std::string, std::string>((*i)->key, _binaryDecoder->decodeResponse((valuesCentral[channel][j->second->id].data))->toString()));
+					std::vector<uint8_t> parameterData = valuesCentral[channel][j->second->id].getBinaryData();
+					soapValues->push_back(std::pair<std::string, std::string>((*i)->key, _binaryDecoder->decodeResponse(parameterData)->toString()));
 					paramFound = true;
 					break;
 				}
@@ -1461,7 +1480,8 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 			}
 		}
 
-		return parameter->convertFromPacket(valuesCentral[channel][parameter->id].data, true);
+		std::vector<uint8_t> parameterData = valuesCentral[channel][parameter->id].getBinaryData();
+		return parameter->convertFromPacket(parameterData, true);
 	}
 	catch(const std::exception& ex)
 	{
@@ -1505,8 +1525,18 @@ bool SonosPeer::getAllValuesHook2(PRpcClientInfo clientInfo, PParameter paramete
 	{
 		if(channel == 1)
 		{
-			if(parameter->id == "IP_ADDRESS") parameter->convertToPacket(PVariable(new Variable(_ip)), valuesCentral[channel][parameter->id].data);
-			else if(parameter->id == "PEER_ID") parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), valuesCentral[channel][parameter->id].data);
+			if(parameter->id == "IP_ADDRESS")
+			{
+				std::vector<uint8_t> parameterData;
+				parameter->convertToPacket(PVariable(new Variable(_ip)), parameterData);
+				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+			}
+			else if(parameter->id == "PEER_ID")
+			{
+				std::vector<uint8_t> parameterData;
+				parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), parameterData);
+				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+			}
 			else if(parameter->id == "AV_TRANSPORT_URI" || parameter->id == "AV_TRANSPORT_URI_METADATA")
 			{
 				getValue(clientInfo, 1, parameter->id, true, false);
@@ -1538,8 +1568,18 @@ bool SonosPeer::getParamsetHook2(PRpcClientInfo clientInfo, PParameter parameter
 	{
 		if(channel == 1)
 		{
-			if(parameter->id == "IP_ADDRESS") parameter->convertToPacket(PVariable(new Variable(_ip)), valuesCentral[channel][parameter->id].data);
-			else if(parameter->id == "PEER_ID") parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), valuesCentral[channel][parameter->id].data);
+			if(parameter->id == "IP_ADDRESS")
+			{
+				std::vector<uint8_t> parameterData;
+				parameter->convertToPacket(PVariable(new Variable(_ip)), parameterData);
+				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+			}
+			else if(parameter->id == "PEER_ID")
+			{
+				std::vector<uint8_t> parameterData;
+				parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), parameterData);
+				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+			}
 			else if(parameter->id == "AV_TRANSPORT_URI" || parameter->id == "AV_TRANSPORT_URI_METADATA")
 			{
 				getValue(clientInfo, 1, parameter->id, true, false);
@@ -1619,16 +1659,18 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 			for(Struct::iterator i = variables->structValue->begin(); i != variables->structValue->end(); ++i)
 			{
 				if(i->first.empty() || !i->second) continue;
-				std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
+				std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelIterator = configCentral.find(channel);
 				if(channelIterator == configCentral.end()) continue;
-				std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(i->first);
+				std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelIterator->second.find(i->first);
 				if(parameterIterator == channelIterator->second.end()) continue;
-				BaseLib::Systems::RPCConfigurationParameter& parameter = parameterIterator->second;
+				BaseLib::Systems::RpcConfigurationParameter& parameter = parameterIterator->second;
 				if(!parameter.rpcParameter) continue;
-				parameter.rpcParameter->convertToPacket(i->second, parameter.data);
-				if(parameter.databaseID > 0) saveParameter(parameter.databaseID, parameter.data);
-				else saveParameter(0, ParameterGroup::Type::Enum::config, channel, i->first, parameter.data);
-				GD::out.printInfo("Info: Parameter " + i->first + " of peer " + std::to_string(_peerID) + " and channel " + std::to_string(channel) + " was set to 0x" + BaseLib::HelperFunctions::getHexString(parameter.data) + ".");
+				std::vector<uint8_t> parameterData;
+				parameter.rpcParameter->convertToPacket(i->second, parameterData);
+				parameter.setBinaryData(parameterData);
+				if(parameter.databaseId > 0) saveParameter(parameter.databaseId, parameterData);
+				else saveParameter(0, ParameterGroup::Type::Enum::config, channel, i->first, parameterData);
+				GD::out.printInfo("Info: Parameter " + i->first + " of peer " + std::to_string(_peerID) + " and channel " + std::to_string(channel) + " was set to 0x" + BaseLib::HelperFunctions::getHexString(parameterData) + ".");
 				if(parameter.rpcParameter->physical->operationType != IPhysical::OperationType::Enum::config && parameter.rpcParameter->physical->operationType != IPhysical::OperationType::Enum::configString) continue;
 				configChanged = true;
 			}
@@ -1833,13 +1875,14 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 					else
 					{
 						bool paramFound = false;
-						for(std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator j = valuesCentral[channel].begin(); j != valuesCentral[channel].end(); ++j)
+						for(std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator j = valuesCentral[channel].begin(); j != valuesCentral[channel].end(); ++j)
 						{
 							if(!j->second.rpcParameter) continue;
 							if((*i)->parameterId == j->second.rpcParameter->physical->groupId)
 							{
 								if((*i)->key.empty()) continue;
-								soapValues->push_back(std::pair<std::string, std::string>((*i)->key, _binaryDecoder->decodeResponse(j->second.data)->toString()));
+								std::vector<uint8_t> parameterData2 = j->second.getBinaryData();
+								soapValues->push_back(std::pair<std::string, std::string>((*i)->key, _binaryDecoder->decodeResponse(parameterData2)->toString()));
 								paramFound = true;
 								break;
 							}
@@ -1883,10 +1926,10 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		}
 		else if(rpcParameter->physical->operationType != IPhysical::OperationType::Enum::store) return Variable::createError(-6, "Only interface types \"store\" and \"command\" are supported for this device family.");
 
-		BaseLib::Systems::RPCConfigurationParameter* parameter = &valuesCentral[channel][valueKey];
-		parameter->data = std::move(parameterData);
-		if(parameter->databaseID > 0) saveParameter(parameter->databaseID, parameter->data);
-		else saveParameter(0, ParameterGroup::Type::Enum::variables, channel, valueKey, parameter->data);
+		BaseLib::Systems::RpcConfigurationParameter& parameter = valuesCentral[channel][valueKey];
+		parameter.setBinaryData(parameterData);
+		if(parameter.databaseId > 0) saveParameter(parameter.databaseId, parameterData);
+		else saveParameter(0, ParameterGroup::Type::Enum::variables, channel, valueKey, parameterData);
 
 		raiseEvent(_peerID, channel, valueKeys, values);
 		raiseRPCEvent(_peerID, channel, _serialNumber + ":" + std::to_string(channel), valueKeys, values);
@@ -2018,7 +2061,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>> peerMap = getPeers();
 		std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>> peers = peerMap[1];
 
-		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 		if(channelOneIterator == valuesCentral.end())
 		{
 			GD::out.printError("Error: Channel 1 not found.");
@@ -2033,10 +2076,11 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				return;
 			}
 
-			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_URI");
+			std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_URI");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) currentTransportUri = variable->stringValue;
 				if(currentTransportUri.compare(0, 14, "x-rincon-queue") != 0)
 				{
@@ -2046,7 +2090,8 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 					parameterIterator = channelOneIterator->second.find("AV_TRANSPORT_METADATA");
 					if(parameterIterator != channelOneIterator->second.end())
 					{
-						PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+						parameterData = parameterIterator->second.getBinaryData();
+						PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 						if(variable) currentTransportUriMetadata = variable->stringValue;
 					}
 				}
@@ -2055,49 +2100,56 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 			parameterIterator = channelOneIterator->second.find("VOLUME");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) volumeState = variable->integerValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("MUTE");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) muteState = (variable->stringValue == "1");
 			}
 
 			parameterIterator = channelOneIterator->second.find("CURRENT_TRACK");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) trackNumberState = variable->integerValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("CURRENT_TRACK_RELATIVE_TIME");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) seekTimeState = variable->stringValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("TRANSPORT_STATE");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) transportState = variable->stringValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("CURRENT_PLAY_MODE");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) playmodeState = variable->stringValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("ID");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) rinconId = variable->stringValue;
 			}
 
@@ -2198,10 +2250,11 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 
 				execute("GetPositionInfo");
 
-				std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("CURRENT_TRACK");
+				std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("CURRENT_TRACK");
 				if(parameterIterator != channelOneIterator->second.end())
 				{
-					PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+					std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+					PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 					if(!variable || (variable->integerValue != 1 && variable->integerValue != 2)) break;
 				}
 				else break;
@@ -2211,7 +2264,8 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				parameterIterator = channelOneIterator->second.find("TRANSPORT_STATE");
 				if(parameterIterator != channelOneIterator->second.end())
 				{
-					PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+					std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+					PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 					if(!variable || (variable->stringValue != "PLAYING" && variable->stringValue != "TRANSITIONING")) break;
 				}
 				else break;
@@ -2273,10 +2327,11 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 				{
 					std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-					std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("TRANSPORT_STATE");
+					std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("TRANSPORT_STATE");
 					if(parameterIterator != channelOneIterator->second.end())
 					{
-						PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+						std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+						PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 						if(!variable || (variable->stringValue != "TRANSITIONING")) break;
 					}
 				}
@@ -2343,31 +2398,34 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			std::string language;
 			std::string voice;
 
-			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 			if(channelOneIterator == valuesCentral.end())
 			{
 				GD::out.printError("Error: Channel 1 not found.");
 				return true;
 			}
 
-			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("PLAY_TTS_UNMUTE");
+			std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("PLAY_TTS_UNMUTE");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) unmute = variable->booleanValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("PLAY_TTS_VOLUME");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) volume = variable->integerValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("PLAY_TTS_LANGUAGE");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) language = variable->stringValue;
 				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
 				{
@@ -2379,7 +2437,8 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			parameterIterator = channelOneIterator->second.find("PLAY_TTS_VOICE");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) voice = variable->stringValue;
 				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
 				{
@@ -2421,24 +2480,26 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			bool unmute = true;
 			int32_t volume = -1;
 
-			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 			if(channelOneIterator == valuesCentral.end())
 			{
 				GD::out.printError("Error: Channel 1 not found.");
 				return true;
 			}
 
-			std::unordered_map<std::string, BaseLib::Systems::RPCConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("PLAY_AUDIO_FILE_UNMUTE");
+			std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>::iterator parameterIterator = channelOneIterator->second.find("PLAY_AUDIO_FILE_UNMUTE");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) unmute = variable->booleanValue;
 			}
 
 			parameterIterator = channelOneIterator->second.find("PLAY_AUDIO_FILE_VOLUME");
 			if(parameterIterator != channelOneIterator->second.end())
 			{
-				PVariable variable = _binaryDecoder->decodeResponse(parameterIterator->second.data);
+				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) volume = variable->integerValue;
 			}
 

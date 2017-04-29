@@ -175,14 +175,11 @@ void SonosPeer::setRinconId(std::string value)
 {
 	try
 	{
-		if(!_rpcDevice) return;
-		Functions::iterator functionIterator = _rpcDevice->functions.find(1);
-		if(functionIterator == _rpcDevice->functions.end()) return;
-		PParameter parameter = functionIterator->second->variables->getParameter("ID");
-		if(!parameter) return;
 		BaseLib::Systems::RpcConfigurationParameter& configParameter = valuesCentral[1]["ID"];
+		if(!configParameter.rpcParameter) return;
 		std::vector<uint8_t> parameterData;
-		parameter->convertToPacket(PVariable(new Variable(value)), parameterData);
+		configParameter.rpcParameter->convertToPacket(PVariable(new Variable(value)), parameterData);
+		if(configParameter.equals(parameterData)) return;
 		configParameter.setBinaryData(parameterData);
 		if(configParameter.databaseId > 0) saveParameter(configParameter.databaseId, parameterData);
 		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ID", parameterData);
@@ -205,15 +202,12 @@ void SonosPeer::setRoomName(std::string value, bool broadCastEvent)
 {
 	try
 	{
-		if(!_rpcDevice) return;
-		Functions::iterator functionIterator = _rpcDevice->functions.find(1);
-		if(functionIterator == _rpcDevice->functions.end()) return;
-		PParameter parameter = functionIterator->second->variables->getParameter("ROOMNAME");
-		if(!parameter) return;
-		PVariable variable(new Variable(value));
 		BaseLib::Systems::RpcConfigurationParameter& configParameter = valuesCentral[1]["ROOMNAME"];
+		if(!configParameter.rpcParameter) return;
+		PVariable variable(new Variable(value));
 		std::vector<uint8_t> parameterData;
-		parameter->convertToPacket(variable, parameterData);
+		configParameter.rpcParameter->convertToPacket(variable, parameterData);
+		if(configParameter.equals(parameterData)) return;
 		configParameter.setBinaryData(parameterData);
 		if(configParameter.databaseId > 0) saveParameter(configParameter.databaseId, parameterData);
 		else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "ROOMNAME", parameterData);
@@ -223,7 +217,7 @@ void SonosPeer::setRoomName(std::string value, bool broadCastEvent)
 			std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>{ "ROOMNAME" });
 			std::shared_ptr<std::vector<PVariable>> values(new std::vector<PVariable>{ variable });
 			raiseEvent(_peerID, 1, valueKeys, values);
-			raiseRPCEvent(_peerID, 1, _serialNumber + ":" + std::to_string(1), valueKeys, values);
+			raiseRPCEvent(_peerID, 1, _serialNumber + ":1", valueKeys, values);
 		}
 	}
 	catch(const std::exception& ex)

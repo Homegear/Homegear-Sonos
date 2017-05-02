@@ -293,15 +293,15 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 	}
 	catch(const std::exception& ex)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what() + " Packet was: " + soap);
     }
     catch(BaseLib::Exception& ex)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what() + " Packet was: " + soap);
     }
     catch(...)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, "Packet was: " + soap);
     }
 }
 

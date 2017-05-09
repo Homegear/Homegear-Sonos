@@ -39,8 +39,6 @@ EventServer::EventServer(std::shared_ptr<BaseLib::Systems::PhysicalInterfaceSett
 	_out.init(GD::bl);
 	_out.setPrefix(GD::out.getPrefix() + "Event server \"" + settings->id + "\": ");
 
-	signal(SIGPIPE, SIG_IGN);
-
 	_stopServer = true;
 
 	if(!settings)

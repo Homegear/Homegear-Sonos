@@ -1767,7 +1767,7 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		{
 			if(valueKey == "PLAY_FAVORITE")
 			{
-				BaseLib::PVariable result = playBrowsableContent(value->stringValue, "FV:0", "FAVORITES");
+				BaseLib::PVariable result = playBrowsableContent(value->stringValue, "FV:2", "FAVORITES");
 				if(result->errorStruct) return result;
 			}
 			else if(valueKey == "PLAY_PLAYLIST")

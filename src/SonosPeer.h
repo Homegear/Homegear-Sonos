@@ -136,6 +136,7 @@ protected:
 	bool _shuttingDown = false;
 	bool _getOneMorePositionInfo = true;
 	bool _isMaster = false;
+	bool _isStream = false;
 	std::shared_ptr<BaseLib::Rpc::RpcEncoder> _binaryEncoder;
 	std::shared_ptr<BaseLib::Rpc::RpcDecoder> _binaryDecoder;
 	std::shared_ptr<BaseLib::HttpClient> _httpClient;

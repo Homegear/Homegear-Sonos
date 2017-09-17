@@ -997,28 +997,28 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["CURRENT_TITLE"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_TITLE", emptyData);
 							valueKeys[1]->push_back("CURRENT_TITLE");
 							rpcValues[1]->push_back(value);
 
 							parameter2 = valuesCentral[1]["CURRENT_ALBUM"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ALBUM", emptyData);
 							valueKeys[1]->push_back("CURRENT_ALBUM");
 							rpcValues[1]->push_back(value);
 
 							parameter2 = valuesCentral[1]["CURRENT_ARTIST"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ARTIST", emptyData);
 							valueKeys[1]->push_back("CURRENT_ARTIST");
 							rpcValues[1]->push_back(value);
 
 							parameter2 = valuesCentral[1]["CURRENT_ALBUM_ART"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ALBUM_ART", emptyData);
 							valueKeys[1]->push_back("CURRENT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
@@ -1030,28 +1030,28 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["NEXT_TITLE"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "NEXT_TITLE", emptyData);
 							valueKeys[1]->push_back("NEXT_TITLE");
 							rpcValues[1]->push_back(value);
 
 							parameter2 = valuesCentral[1]["NEXT_ALBUM"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "NEXT_ALBUM", emptyData);
 							valueKeys[1]->push_back("NEXT_ALBUM");
 							rpcValues[1]->push_back(value);
 
 							parameter2 = valuesCentral[1]["NEXT_ARTIST"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "NEXT_ARTIST", emptyData);
 							valueKeys[1]->push_back("NEXT_ARTIST");
 							rpcValues[1]->push_back(value);
 
 							parameter2 = valuesCentral[1]["NEXT_ALBUM_ART"];
 							parameter2.setBinaryData(emptyData);
 							if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+							else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "NEXT_ALBUM_ART", emptyData);
 							valueKeys[1]->push_back("NEXT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
@@ -1141,33 +1141,77 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 
 							if(value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
 							{
+								_isStream = true;
 								//Delete track information for radio
 								std::vector<uint8_t> emptyData;
 
 								PVariable value(new Variable(VariableType::tString));
+								BaseLib::Systems::RpcConfigurationParameter& parameter3 = valuesCentral[1]["AV_TRANSPORT_TITLE"];
 								BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["CURRENT_ALBUM"];
-								parameter2.setBinaryData(emptyData);
-								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+								parameter2.setBinaryData(parameter3.getBinaryDataReference());
+								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, parameter2.getBinaryDataReference());
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ALBUM", parameter2.getBinaryDataReference());
 								valueKeys[1]->push_back("CURRENT_ALBUM");
 								rpcValues[1]->push_back(value);
 
 								parameter2 = valuesCentral[1]["CURRENT_ARTIST"];
 								parameter2.setBinaryData(emptyData);
 								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ARTIST", emptyData);
 								valueKeys[1]->push_back("CURRENT_ARTIST");
 								rpcValues[1]->push_back(value);
 
 								parameter2 = valuesCentral[1]["CURRENT_ALBUM_ART"];
 								parameter2.setBinaryData(emptyData);
 								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, emptyData);
-								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, emptyData);
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ALBUM_ART", emptyData);
 								valueKeys[1]->push_back("CURRENT_ALBUM_ART");
 								rpcValues[1]->push_back(value);
+
+								parameter3 = valuesCentral[1]["CURRENT_TRACK_STREAM_CONTENT"];
+								parameter2 = valuesCentral[1]["CURRENT_TITLE"];
+								parameter2.setBinaryData(parameter3.getBinaryDataReference());
+								if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, parameter2.getBinaryDataReference());
+								else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_TITLE", parameter2.getBinaryDataReference());
+								valueKeys[1]->push_back("CURRENT_TITLE");
+								rpcValues[1]->push_back(value);
 							}
+							else _isStream = false;
 						}
 						else if(i->first == "VOLUME") _currentVolume = value->integerValue;
+						else if(_isStream)
+						{
+							if(i->first == "CURRENT_TRACK_STREAM_CONTENT")
+							{
+								BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["CURRENT_TITLE"];
+								if(parameter2.rpcParameter)
+								{
+									std::vector<uint8_t> binaryData;
+									parameter2.rpcParameter->convertToPacket(value, binaryData);
+									parameter2.setBinaryData(binaryData);
+									if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, binaryData);
+									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_TITLE", binaryData);
+									valueKeys[1]->push_back("CURRENT_TITLE");
+									rpcValues[1]->push_back(value);
+								}
+							}
+							else if(i->first == "AV_TRANSPORT_TITLE")
+							{
+								BaseLib::Systems::RpcConfigurationParameter& parameter2 = valuesCentral[1]["CURRENT_ALBUM"];
+								if(parameter2.rpcParameter)
+								{
+									std::vector<uint8_t> binaryData;
+									parameter2.rpcParameter->convertToPacket(value, binaryData);
+									parameter2.setBinaryData(binaryData);
+									if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, binaryData);
+									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ALBUM", binaryData);
+									valueKeys[1]->push_back("CURRENT_ALBUM");
+									rpcValues[1]->push_back(value);
+								}
+							}
+							else if(i->first == "CURRENT_TITLE") continue; //Ignore
+							else if(i->first == "CURRENT_ALBUM") continue; //Ignore
+						}
 
 						parameter.setBinaryData(i->second.value);
 						if(parameter.databaseId > 0) saveParameter(parameter.databaseId, i->second.value);

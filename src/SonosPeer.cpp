@@ -295,7 +295,7 @@ void SonosPeer::worker()
 							GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: Response code was: " + std::to_string(response.getHeader().responseCode));
 							if(response.getHeader().responseCode == -1)
 							{
-								serviceMessages->setUnreach(true, false);
+								//serviceMessages->setUnreach(true, false);
 								break;
 							}
 						}
@@ -1269,7 +1269,7 @@ bool SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 					if(ignoreErrors) return false;
 					GD::out.printWarning("Warning: Error in UPnP request: Response code was: " + std::to_string(response.getHeader().responseCode));
 					GD::out.printMessage("Request was: \n" + request);
-					if(response.getHeader().responseCode == -1) serviceMessages->setUnreach(true, false);
+					//if(response.getHeader().responseCode == -1) serviceMessages->setUnreach(true, false);
 				}
 				else
 				{
@@ -1531,7 +1531,7 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 				if(GD::bl->debugLevel >= 5) GD::out.printDebug("Debug: SOAP response:\n" + stringResponse);
 				if(response.getHeader().responseCode < 200 || response.getHeader().responseCode > 299)
 				{
-					if(response.getHeader().responseCode == -1) serviceMessages->setUnreach(true, false);
+					//if(response.getHeader().responseCode == -1) serviceMessages->setUnreach(true, false);
 					return Variable::createError(-100, "Error sending value to Sonos device: Response code was: " + std::to_string(response.getHeader().responseCode));
 				}
 				std::shared_ptr<SonosPacket> responsePacket(new SonosPacket(stringResponse));

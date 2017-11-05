@@ -822,7 +822,7 @@ std::shared_ptr<SonosPeer> SonosCentral::createPeer(uint32_t deviceType, std::st
 		std::shared_ptr<SonosPeer> peer(new SonosPeer(_deviceId, this));
 		peer->setDeviceType(deviceType);
 		peer->setSerialNumber(serialNumber);
-		peer->setIp(ip);""
+		peer->setIp(ip);
 		peer->setIdString(idString);
 		peer->setTypeString(typeString);
 		peer->setFirmwareVersionString(softwareVersion);

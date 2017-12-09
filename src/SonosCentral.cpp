@@ -1184,12 +1184,13 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 {
 	try
 	{
+		std::lock_guard<std::mutex> searchDevicesGuard(_searchDevicesMutex);
 		std::string stHeader("urn:schemas-upnp-org:device:ZonePlayer:1");
-		std::vector<BaseLib::SsdpInfo> devices;
+		std::vector<BaseLib::SsdpInfo> searchResult;
 		std::vector<std::shared_ptr<SonosPeer>> newPeers;
-		_ssdp->searchDevices(stHeader, 5000, devices);
+		_ssdp->searchDevices(stHeader, 5000, searchResult);
 
-		for(std::vector<BaseLib::SsdpInfo>::iterator i = devices.begin(); i != devices.end(); ++i)
+		for(std::vector<BaseLib::SsdpInfo>::iterator i = searchResult.begin(); i != searchResult.end(); ++i)
 		{
 			PVariable info = i->info();
 			if(!info ||	info->structValue->find("serialNum") == info->structValue->end() || info->structValue->find("UDN") == info->structValue->end())
@@ -1244,7 +1245,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 					GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 				}
 				_peersMutex.unlock();
-				GD::out.printMessage("Added peer 0x" + BaseLib::HelperFunctions::getHexString(peer->getID()) + ".");
+				GD::out.printMessage("Added peer " + std::to_string(peer->getID()) + ".");
 				newPeers.push_back(peer);
 			}
 			if(peer)

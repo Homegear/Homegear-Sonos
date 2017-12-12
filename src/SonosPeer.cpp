@@ -761,6 +761,14 @@ bool SonosPeer::load(BaseLib::Systems::ICentral* central)
 				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) _isMaster = variable->booleanValue;
 			}
+
+            parameterIterator = channelOneIterator->second.find("IS_STREAM");
+            if(parameterIterator != channelOneIterator->second.end())
+            {
+                std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+                PVariable variable = _binaryDecoder->decodeResponse(parameterData);
+                if(variable) _isStream = variable->booleanValue;
+            }
 		}
 
 		return true;
@@ -989,6 +997,16 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 
 						PVariable value = parameter.rpcParameter->convertFromPacket(i->second.value, true);
 						if(i->first == "CURRENT_TRACK") _currentTrack = value->integerValue;
+						if(i->first == "CURRENT_ALBUM_ART")
+						{
+							value->stringValue = "http://" + _ip + value->stringValue;
+                            parameter.rpcParameter->convertToPacket(value, i->second.value);
+						}
+						else if(i->first == "NEXT_ALBUM_ART")
+						{
+                            value->stringValue = "http://" + _ip + value->stringValue;
+                            parameter.rpcParameter->convertToPacket(value, i->second.value);
+						}
 						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())
 						{
 							//Clear current track information when uri is empty
@@ -1141,7 +1159,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 
 							if(value->stringValue.compare(0, 18, "x-sonosapi-stream:") == 0)
 							{
-								_isStream = true;
+                                _isStream = true;
 								//Delete track information for radio
 								std::vector<uint8_t> emptyData;
 
@@ -1176,7 +1194,25 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 								valueKeys[1]->push_back("CURRENT_TITLE");
 								rpcValues[1]->push_back(value);
 							}
-							else _isStream = false;
+                            else _isStream = false;
+
+                            //{{{ Update IS_STREAM
+                                parameter2 = valuesCentral[1]["IS_STREAM"];
+                                if(parameter2.rpcParameter)
+                                {
+                                    parameterData = parameter2.getBinaryData();
+                                    if(parameterData.empty() || (bool) parameterData.back() != _isStream)
+                                    {
+                                        BaseLib::PVariable isStream(new BaseLib::Variable(_isStream));
+                                        parameter2.rpcParameter->convertToPacket(isStream, parameterData);
+                                        parameter2.setBinaryData(parameterData);
+                                        if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, parameterData);
+                                        else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, i->first, parameterData);
+                                        valueKeys[1]->push_back("IS_STREAM");
+                                        rpcValues[1]->push_back(isStream);
+                                    }
+                                }
+                            //}}}
 						}
 						else if(i->first == "VOLUME") _currentVolume = value->integerValue;
 						else if(_isStream)

@@ -1475,6 +1475,18 @@
 					<operationType>command</operationType>
 				</physicalNone>
 			</parameter>
+			<parameter id="IS_STREAM">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalBoolean/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
 			<parameter id="STOP">
 				<properties>
 					<casts>

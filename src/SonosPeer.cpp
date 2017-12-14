@@ -1001,14 +1001,14 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						{
                             std::string artPath;
                             BaseLib::Html::unescapeHtmlEntities(value->stringValue, artPath);
-							value->stringValue = "http://" + _ip + artPath;
+							value->stringValue = "http://" + _ip + ":1400" + artPath;
                             parameter.rpcParameter->convertToPacket(value, i->second.value);
 						}
 						else if(i->first == "NEXT_ALBUM_ART")
 						{
                             std::string artPath;
                             BaseLib::Html::unescapeHtmlEntities(value->stringValue, artPath);
-                            value->stringValue = "http://" + _ip + artPath;
+                            value->stringValue = "http://" + _ip + ":1400" + artPath;
                             parameter.rpcParameter->convertToPacket(value, i->second.value);
 						}
 						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())

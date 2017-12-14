@@ -999,12 +999,12 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						if(i->first == "CURRENT_TRACK") _currentTrack = value->integerValue;
 						if(i->first == "CURRENT_ALBUM_ART")
 						{
-							value->stringValue = "http://" + _ip + value->stringValue;
+							value->stringValue = "http://" + _ip + BaseLib::Http::decodeURL(value->stringValue);
                             parameter.rpcParameter->convertToPacket(value, i->second.value);
 						}
 						else if(i->first == "NEXT_ALBUM_ART")
 						{
-                            value->stringValue = "http://" + _ip + value->stringValue;
+                            value->stringValue = "http://" + _ip + BaseLib::Http::decodeURL(value->stringValue);
                             parameter.rpcParameter->convertToPacket(value, i->second.value);
 						}
 						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())

@@ -133,10 +133,11 @@ protected:
 		std::shared_ptr<std::vector<std::pair<std::string, std::string>>> _soapValues;
 	};
 
-	bool _shuttingDown = false;
-	bool _getOneMorePositionInfo = true;
-	bool _isMaster = false;
-	bool _isStream = false;
+    std::atomic_bool _shuttingDown;
+    std::atomic_bool _getOneMorePositionInfo;
+	std::atomic_bool _isMaster;
+    std::atomic_bool _isStream;
+    std::atomic_bool _transportUriDirty;
 	std::shared_ptr<BaseLib::Rpc::RpcEncoder> _binaryEncoder;
 	std::shared_ptr<BaseLib::Rpc::RpcDecoder> _binaryDecoder;
 	std::shared_ptr<BaseLib::HttpClient> _httpClient;

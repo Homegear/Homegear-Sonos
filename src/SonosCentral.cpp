@@ -586,24 +586,29 @@ std::string SonosCentral::handleCliCommand(std::string command)
 				std::string bar(" │ ");
 				const int32_t idWidth = 8;
 				const int32_t nameWidth = 25;
+                const int32_t addressWidth = 15;
 				const int32_t serialWidth = 19;
 				const int32_t typeWidth1 = 4;
 				const int32_t typeWidth2 = 25;
 				std::string nameHeader("Name");
 				nameHeader.resize(nameWidth, ' ');
+                std::string addressHeader("IP Address");
+                addressHeader.resize(addressWidth, ' ');
 				std::string typeStringHeader("Type String");
 				typeStringHeader.resize(typeWidth2, ' ');
 				stringStream << std::setfill(' ')
 					<< std::setw(idWidth) << "ID" << bar
 					<< nameHeader << bar
+                    << addressHeader << bar
 					<< std::setw(serialWidth) << "Serial Number" << bar
 					<< std::setw(typeWidth1) << "Type" << bar
 					<< typeStringHeader
 					<< std::endl;
-				stringStream << "─────────┼───────────────────────────┼─────────────────────┼──────┼───────────────────────────" << std::endl;
+				stringStream << "─────────┼───────────────────────────┼─────────────────┼─────────────────────┼──────┼───────────────────────────" << std::endl;
 				stringStream << std::setfill(' ')
 					<< std::setw(idWidth) << " " << bar
 					<< std::setw(nameWidth) << " " << bar
+                    << std::setw(addressWidth) << " " << bar
 					<< std::setw(serialWidth) << " " << bar
 					<< std::setw(typeWidth1) << " " << bar
 					<< std::setw(typeWidth2)
@@ -621,6 +626,10 @@ std::string SonosCentral::handleCliCommand(std::string command)
 						std::string name = i->second->getName();
 						if((signed)BaseLib::HelperFunctions::toLower(name).find(filterValue) == (signed)std::string::npos) continue;
 					}
+                    else if(filterType == "address")
+                    {
+                        if(i->second->getIp() != filterValue) continue;
+                    }
 					else if(filterType == "serial")
 					{
 						if(i->second->getSerialNumber() != filterValue) continue;
@@ -640,7 +649,10 @@ std::string SonosCentral::handleCliCommand(std::string command)
 						name += "...";
 					}
 					else name.resize(nameWidth + (name.size() - nameSize), ' ');
+                    std::string ipAddress = i->second->getIp();
+                    ipAddress.resize(addressWidth, ' ');
 					stringStream << name << bar
+                        << ipAddress << bar
 						<< std::setw(serialWidth) << i->second->getSerialNumber() << bar
 						<< std::setw(typeWidth1) << BaseLib::HelperFunctions::getHexString(i->second->getDeviceType(), 4) << bar;
 					if(i->second->getRpcDevice())
@@ -657,7 +669,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
 					stringStream << std::endl << std::dec;
 				}
 				_peersMutex.unlock();
-				stringStream << "─────────┴───────────────────────────┴─────────────────────┴──────┴───────────────────────────" << std::endl;
+				stringStream << "─────────┴───────────────────────────┴─────────────────┴─────────────────────┴──────┴───────────────────────────" << std::endl;
 
 				return stringStream.str();
 			}

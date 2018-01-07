@@ -1475,6 +1475,20 @@
 					<operationType>command</operationType>
 				</physicalNone>
 			</parameter>
+			<parameter id="MASTER_ID">
+				<properties>
+					<writeable>false</writeable>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalInteger>
+					<minimumValue>0</minimumValue>
+				</logicalInteger>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
 			<parameter id="IS_STREAM">
 				<properties>
 					<writeable>false</writeable>

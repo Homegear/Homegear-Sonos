@@ -91,7 +91,7 @@ void Sonos::createCentral()
     }
 }
 
-PVariable Sonos::getPairingMethods()
+PVariable Sonos::getPairingInfo()
 {
 	try
 	{

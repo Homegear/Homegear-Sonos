@@ -2191,7 +2191,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		playlistFilename = BaseLib::Http::encodeURL(playlistFilename);
 
 		std::string silence2sPlaylistFilename = "silence_2s.m3u";
-		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_2s.mp3\n";
+		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_250ms.mp3\n";
 		std::string silencePlaylistFilepath = tempPath + silence2sPlaylistFilename;
 		BaseLib::Io::writeFile(silencePlaylistFilepath, playlistContent);
 		silence2sPlaylistFilename = BaseLib::Http::encodeURL(silence2sPlaylistFilename);

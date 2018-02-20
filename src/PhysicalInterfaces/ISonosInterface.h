@@ -41,10 +41,11 @@ public:
 	ISonosInterface(std::shared_ptr<BaseLib::Systems::PhysicalInterfaceSettings> settings);
 	virtual ~ISonosInterface();
 
-	virtual std::string listenAddress() = 0;
-	virtual int32_t listenPort() = 0;
-	virtual std::string ttsProgram() = 0;
-	virtual std::string dataPath() = 0;
+	virtual std::string listenAddress() { return "::1"; }
+	virtual int32_t listenPort() { return 7373; }
+	virtual std::string ttsProgram() { return ""; }
+	virtual std::string dataPath() { return ""; }
+    virtual void sendPacket(std::shared_ptr<BaseLib::Systems::Packet> packet) {}
 protected:
 	BaseLib::Output _out;
 };

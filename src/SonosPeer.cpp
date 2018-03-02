@@ -2589,7 +2589,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
 				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) language = variable->stringValue;
-				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
+				if(!BaseLib::HelperFunctions::isAlphaNumeric(language, std::unordered_set<char>{'-', '_'}))
 				{
 					GD::out.printError("Error: Language is not alphanumeric.");
 					language = "en-US";
@@ -2602,7 +2602,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
 				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) voice = variable->stringValue;
-				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
+				if(!BaseLib::HelperFunctions::isAlphaNumeric(language, std::unordered_set<char>{'-', '_'}))
 				{
 					GD::out.printError("Error: Voice is not alphanumeric.");
 					language = "Justin";

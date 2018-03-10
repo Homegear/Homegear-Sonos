@@ -147,7 +147,7 @@ PVariable Sonos::getPairingInfo()
 		field->structValue->emplace("label", std::make_shared<BaseLib::Variable>(std::string("l10n.common.ttsprogram")));
 		field->structValue->emplace("type", std::make_shared<BaseLib::Variable>(std::string("string")));
 		field->structValue->emplace("required", std::make_shared<BaseLib::Variable>(false));
-		interface->structValue->emplace("host", field);
+		interface->structValue->emplace("ttsProgram", field);
 
 		interfaces->structValue->emplace("eventserver", interface);
 		//}}}

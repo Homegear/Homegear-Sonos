@@ -116,7 +116,7 @@ PVariable Sonos::getPairingInfo()
 		//{{{ interfaces
 		auto interfaces = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
 
-		//{{{ KNXnet/IP
+		//{{{ Event server
 		auto interface = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
 		interface->structValue->emplace("name", std::make_shared<BaseLib::Variable>(std::string("Event Server")));
 		interface->structValue->emplace("ipDevice", std::make_shared<BaseLib::Variable>(false));

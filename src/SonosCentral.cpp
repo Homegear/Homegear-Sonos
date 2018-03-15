@@ -991,13 +991,14 @@ PVariable SonosCentral::deleteDevice(BaseLib::PRpcClientInfo clientInfo, uint64_
 	try
 	{
 		if(peerID == 0) return Variable::createError(-2, "Unknown device.");
-		std::shared_ptr<SonosPeer> peer = getPeer(peerID);
-		if(!peer) return PVariable(new Variable(VariableType::tVoid));
-		uint64_t id = peer->getID();
+        {
+            std::shared_ptr<SonosPeer> peer = getPeer(peerID);
+            if(!peer) return PVariable(new Variable(VariableType::tVoid));
+        }
 
-		deletePeer(id);
+		deletePeer(peerID);
 
-		if(peerExists(id)) return Variable::createError(-1, "Error deleting peer. See log for more details.");
+		if(peerExists(peerID)) return Variable::createError(-1, "Error deleting peer. See log for more details.");
 
 		return PVariable(new Variable(VariableType::tVoid));
 	}

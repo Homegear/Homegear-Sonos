@@ -1881,7 +1881,11 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 				valueKey == "PLAY_TTS VOICE" ||
 				valueKey == "PLAY_TTS_VOLUME" ||
 				valueKey == "PREVIOUS" ||
-				valueKey == "STOP"))
+				valueKey == "STOP" ||
+                valueKey == "ADD_SPEAKER" ||
+                valueKey == "REMOVE_SPEAKER" ||
+                valueKey == "ADD_SPEAKER_BY_SERIAL" ||
+                valueKey == "REMOVE_SPEAKER_BY_SERIAL"))
 		{
 			std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
 			std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>> peerMap = getPeers();

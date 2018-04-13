@@ -95,10 +95,68 @@ PVariable Sonos::getPairingInfo()
 {
 	try
 	{
-		if(!_central) return PVariable(new Variable(VariableType::tArray));
-		PVariable array(new Variable(VariableType::tArray));
-		array->arrayValue->push_back(PVariable(new Variable(std::string("searchDevices"))));
-		return array;
+		if(!_central) return std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		PVariable info = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+		//{{{ General
+		info->structValue->emplace("searchInterfaces", std::make_shared<BaseLib::Variable>(false));
+		//}}}
+
+		//{{{ Family settings
+		PVariable familySettings = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		info->structValue->emplace("familySettings", familySettings);
+		//}}}
+
+		//{{{ Pairing methods
+		PVariable pairingMethods = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		pairingMethods->structValue->emplace("searchDevices", std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct));
+		info->structValue->emplace("pairingMethods", pairingMethods);
+		//}}}
+
+		//{{{ interfaces
+		auto interfaces = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+
+		//{{{ Event server
+		auto interface = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		interface->structValue->emplace("name", std::make_shared<BaseLib::Variable>(std::string("Event Server")));
+		interface->structValue->emplace("ipDevice", std::make_shared<BaseLib::Variable>(false));
+        interface->structValue->emplace("predefined", std::make_shared<BaseLib::Variable>(true));
+
+		auto field = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		field->structValue->emplace("pos", std::make_shared<BaseLib::Variable>(0));
+		field->structValue->emplace("label", std::make_shared<BaseLib::Variable>(std::string("l10n.common.id")));
+		field->structValue->emplace("type", std::make_shared<BaseLib::Variable>(std::string("string")));
+		interface->structValue->emplace("id", field);
+
+		field = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		field->structValue->emplace("pos", std::make_shared<BaseLib::Variable>(2));
+		field->structValue->emplace("label", std::make_shared<BaseLib::Variable>(std::string("l10n.common.listenip")));
+		field->structValue->emplace("type", std::make_shared<BaseLib::Variable>(std::string("string")));
+		field->structValue->emplace("required", std::make_shared<BaseLib::Variable>(false));
+		interface->structValue->emplace("host", field);
+
+		field = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		field->structValue->emplace("pos", std::make_shared<BaseLib::Variable>(3));
+		field->structValue->emplace("label", std::make_shared<BaseLib::Variable>(std::string("l10n.common.listenport")));
+		field->structValue->emplace("type", std::make_shared<BaseLib::Variable>(std::string("string")));
+		field->structValue->emplace("default", std::make_shared<BaseLib::Variable>(std::string("7373")));
+		field->structValue->emplace("required", std::make_shared<BaseLib::Variable>(true));
+		interface->structValue->emplace("port", field);
+
+		field = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tStruct);
+		field->structValue->emplace("pos", std::make_shared<BaseLib::Variable>(4));
+		field->structValue->emplace("label", std::make_shared<BaseLib::Variable>(std::string("l10n.common.ttsprogram")));
+		field->structValue->emplace("type", std::make_shared<BaseLib::Variable>(std::string("string")));
+		field->structValue->emplace("required", std::make_shared<BaseLib::Variable>(false));
+		interface->structValue->emplace("ttsProgram", field);
+
+		interfaces->structValue->emplace("eventserver", interface);
+		//}}}
+
+		info->structValue->emplace("interfaces", interfaces);
+		//}}}
+
+		return info;
 	}
 	catch(const std::exception& ex)
 	{

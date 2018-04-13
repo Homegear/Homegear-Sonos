@@ -1787,7 +1787,7 @@ PVariable SonosPeer::getValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
     return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool onlyPushing)
+PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t channel, ParameterGroup::Type::Enum type, uint64_t remoteID, int32_t remoteChannel, PVariable variables, bool checkAcls, bool onlyPushing)
 {
 	try
 	{
@@ -1800,6 +1800,9 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 		PParameterGroup parameterGroup = functionIterator->second->getParameterGroup(type);
 		if(!parameterGroup) return Variable::createError(-3, "Unknown parameter set.");
 		if(variables->structValue->empty()) return PVariable(new Variable(VariableType::tVoid));
+
+		auto central = getCentral();
+		if(!central) return Variable::createError(-32500, "Could not get central.");
 
 		if(type == ParameterGroup::Type::Enum::config)
 		{
@@ -1830,6 +1833,9 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 			for(Struct::iterator i = variables->structValue->begin(); i != variables->structValue->end(); ++i)
 			{
 				if(i->first.empty() || !i->second) continue;
+
+				if(checkAcls && !clientInfo->acls->checkVariableWriteAccess(central->getPeer(_peerID), channel, i->first)) continue;
+
 				setValue(clientInfo, channel, i->first, i->second, true);
 			}
 		}
@@ -1875,7 +1881,11 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 				valueKey == "PLAY_TTS VOICE" ||
 				valueKey == "PLAY_TTS_VOLUME" ||
 				valueKey == "PREVIOUS" ||
-				valueKey == "STOP"))
+				valueKey == "STOP" ||
+                valueKey == "ADD_SPEAKER" ||
+                valueKey == "REMOVE_SPEAKER" ||
+                valueKey == "ADD_SPEAKER_BY_SERIAL" ||
+                valueKey == "REMOVE_SPEAKER_BY_SERIAL"))
 		{
 			std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
 			std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>> peerMap = getPeers();
@@ -2583,7 +2593,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
 				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) language = variable->stringValue;
-				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
+				if(!BaseLib::HelperFunctions::isAlphaNumeric(language, std::unordered_set<char>{'-', '_'}))
 				{
 					GD::out.printError("Error: Language is not alphanumeric.");
 					language = "en-US";
@@ -2596,7 +2606,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 				std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
 				PVariable variable = _binaryDecoder->decodeResponse(parameterData);
 				if(variable) voice = variable->stringValue;
-				if(!BaseLib::HelperFunctions::isAlphaNumeric(language))
+				if(!BaseLib::HelperFunctions::isAlphaNumeric(language, std::unordered_set<char>{'-', '_'}))
 				{
 					GD::out.printError("Error: Voice is not alphanumeric.");
 					language = "Justin";

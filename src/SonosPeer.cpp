@@ -1182,13 +1182,16 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
                                         if(!masterId) masterId = std::make_shared<BaseLib::Variable>(0);
 
                                         BaseLib::Systems::RpcConfigurationParameter& parameter3 = valuesCentral[1]["MASTER_ID"];
-                                        std::vector<uint8_t> parameterData2;
-                                        parameter3.rpcParameter->convertToPacket(masterId, parameterData2);
-                                        parameter3.setBinaryData(parameterData2);
-                                        if(parameter3.databaseId > 0) saveParameter(parameter3.databaseId, parameterData2);
-                                        else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "MASTER_ID", parameterData2);
-                                        valueKeys[1]->push_back("MASTER_ID");
-                                        rpcValues[1]->push_back(masterId);
+                                        if(parameter3.rpcParameter)
+                                        {
+                                            std::vector<uint8_t> parameterData2;
+                                            parameter3.rpcParameter->convertToPacket(masterId, parameterData2);
+                                            parameter3.setBinaryData(parameterData2);
+                                            if(parameter3.databaseId > 0) saveParameter(parameter3.databaseId, parameterData2);
+                                            else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "MASTER_ID", parameterData2);
+                                            valueKeys[1]->push_back("MASTER_ID");
+                                            rpcValues[1]->push_back(masterId);
+                                        }
                                         //}}}
                                     }
                                 }
@@ -1534,6 +1537,8 @@ PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browse
 		execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", "x-rincon-queue:" + rinconId + "#0"), SoapValuePair("CurrentURIMetaData", "") }));
 		execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(1)) }));
 		execute("Play", true);
+
+        return std::make_shared<BaseLib::Variable>();
 	}
 	catch(const std::exception& ex)
     {
@@ -2100,7 +2105,7 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		raiseEvent(_peerID, channel, valueKeys, values);
 		raiseRPCEvent(_peerID, channel, _serialNumber + ":" + std::to_string(channel), valueKeys, values);
 
-		return PVariable(new Variable(VariableType::tVoid));
+		return std::make_shared<BaseLib::Variable>();
 	}
 	catch(const std::exception& ex)
     {

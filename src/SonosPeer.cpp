@@ -1531,11 +1531,18 @@ PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browse
 		if(rinconId.empty()) return Variable::createError(-32500, "Rincon id could not be decoded.");
 
 		execute("Pause", true);
-		execute("RemoveAllTracksFromQueue", true);
 		execute("SetMute", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredMute", "0") }));
-		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", uri), SoapValuePair("EnqueuedURIMetaData", metadata), SoapValuePair("DesiredFirstTrackNumberEnqueued", "0"), SoapValuePair("EnqueueAsNext", "0") }));
-		execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", "x-rincon-queue:" + rinconId + "#0"), SoapValuePair("CurrentURIMetaData", "") }));
-		execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(1)) }));
+		if(uri.compare(0, 16, "x-sonosapi-radio") == 0)
+		{
+			execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", uri), SoapValuePair("CurrentURIMetaData", metadata) }));
+		}
+		else
+		{
+			execute("RemoveAllTracksFromQueue", true);
+			execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", uri), SoapValuePair("EnqueuedURIMetaData", metadata), SoapValuePair("DesiredFirstTrackNumberEnqueued", "0"), SoapValuePair("EnqueueAsNext", "0") }));
+			execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", "x-rincon-queue:" + rinconId + "#0"), SoapValuePair("CurrentURIMetaData", "") }));
+			execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(1)) }));
+		}
 		execute("Play", true);
 
         return std::make_shared<BaseLib::Variable>();

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<homegearDeviceTranslation lang="en-US">
+	<supportedDevices>
+		<device id="Sonos">
+			<description>Sonos Speaker</description>
+			<longDescription></longDescription>
+		</device>
+	</supportedDevices>
+	<parameterGroups>
+		<variables id="maint_ch_values">
+			<parameter id="UNREACH">
+				<label>Unreachable</label>
+				<description>Set to "true" when the device is unreachable.</description>
+			</parameter>
+			<parameter id="STICKY_UNREACH">
+				<label>Sticky unreachable</label>
+				<description>Set to "true" when the device is unreachable. It stays "true" until reset manually.</description>
+			</parameter>
+		</variables>
+		<variables id="speaker_valueset">
+			<parameter id="STREAM_LOCAL_INPUT">
+				<label>Stream local input</label>
+				<description>Play the local audio input (e. g. from the 3.5 mm jack plug on the speaker). Only works, if the speaker has an audio input and something is connected to it.</description>
+			</parameter>
+		</variables>
+	</parameterGroups>
+</homegearDeviceTranslation>

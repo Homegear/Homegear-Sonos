@@ -181,6 +181,8 @@ protected:
 
 	PVariable playBrowsableContent(std::string& title, std::string browseId, std::string listVariable);
 
+    PVariable streamLocalInput(PRpcClientInfo clientInfo, bool wait);
+
 	// {{{ Hooks
 		/**
 		 * {@inheritDoc}

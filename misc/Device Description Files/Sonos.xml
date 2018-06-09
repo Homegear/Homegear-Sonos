@@ -1549,6 +1549,17 @@
 					</packet>
 				</packets>
 			</parameter>
+			<parameter id="STREAM_LOCAL_INPUT">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalAction/>
+				<physicalNone>
+					<operationType>command</operationType>
+				</physicalNone>
+			</parameter>
 			<parameter id="PLAY_FADE">
 				<properties>
 					<casts>

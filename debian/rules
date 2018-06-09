@@ -9,9 +9,9 @@ override_dh_auto_install:
 	chmod 644 $(CURDIR)/debian/homegear-sonos/etc/homegear/families/*
 
 	mkdir -p $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6
-	cp $(CURDIR)/misc/Device\ Description\ Files/* $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6
-	chmod 755 $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6
-	chmod 644 $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6/*
+	cp -R $(CURDIR)/misc/Device\ Description\ Files/* $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6
+	chmod -R 755 $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6
+	find $(CURDIR)/debian/homegear-sonos/etc/homegear/devices/6 -type f -exec chmod 644 -- {} +
 
 	mkdir -p $(CURDIR)/debian/homegear-sonos/var/lib/homegear
 	cp -R $(CURDIR)/misc/State\ Directory/* $(CURDIR)/debian/homegear-sonos/var/lib/homegear

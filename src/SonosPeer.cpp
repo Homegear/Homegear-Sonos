@@ -1531,16 +1531,76 @@ PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browse
 		if(rinconId.empty()) return Variable::createError(-32500, "Rincon id could not be decoded.");
 
 		execute("Pause", true);
-		execute("RemoveAllTracksFromQueue", true);
 		execute("SetMute", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Channel", "Master"), SoapValuePair("DesiredMute", "0") }));
-		execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", uri), SoapValuePair("EnqueuedURIMetaData", metadata), SoapValuePair("DesiredFirstTrackNumberEnqueued", "0"), SoapValuePair("EnqueueAsNext", "0") }));
-		execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", "x-rincon-queue:" + rinconId + "#0"), SoapValuePair("CurrentURIMetaData", "") }));
-		execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(1)) }));
+		if(uri.compare(0, 16, "x-sonosapi-radio") == 0)
+		{
+			execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", uri), SoapValuePair("CurrentURIMetaData", metadata) }));
+		}
+		else
+		{
+			execute("RemoveAllTracksFromQueue", true);
+			execute("AddURIToQueue", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("EnqueuedURI", uri), SoapValuePair("EnqueuedURIMetaData", metadata), SoapValuePair("DesiredFirstTrackNumberEnqueued", "0"), SoapValuePair("EnqueueAsNext", "0") }));
+			execute("SetAVTransportURI", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("CurrentURI", "x-rincon-queue:" + rinconId + "#0"), SoapValuePair("CurrentURIMetaData", "") }));
+			execute("Seek", PSoapValues(new SoapValues{ SoapValuePair("InstanceID", "0"), SoapValuePair("Unit", "TRACK_NR"), SoapValuePair("Target", std::to_string(1)) }));
+		}
 		execute("Play", true);
 
         return std::make_shared<BaseLib::Variable>();
 	}
 	catch(const std::exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(BaseLib::Exception& ex)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
+    }
+    catch(...)
+    {
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    }
+    return Variable::createError(-32500, "Unknown application error.");
+}
+
+PVariable SonosPeer::streamLocalInput(PRpcClientInfo clientInfo, bool wait)
+{
+    try
+    {
+        std::string rinconId;
+        auto channelOneIterator = valuesCentral.find(1);
+        if(channelOneIterator != valuesCentral.end())
+        {
+            auto parameterIterator = channelOneIterator->second.find("ID");
+            if(parameterIterator != channelOneIterator->second.end())
+            {
+                std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+                PVariable variable = _binaryDecoder->decodeResponse(parameterData);
+                if(variable) rinconId = variable->stringValue;
+            }
+        }
+        if(rinconId.empty()) return Variable::createError(-1, "Could not get required variables.");
+
+        if(!_isMaster)
+        {
+            std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
+            std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>> peerMap = getPeers();
+
+            for(auto basicPeer : peerMap[1])
+            {
+                if(!basicPeer->isSender) continue;
+                std::shared_ptr<SonosPeer> peer = central->getPeer(basicPeer->id);
+                if(!peer) continue;
+                peer->setValue(clientInfo, 1, "AV_TRANSPORT_METADATA", std::make_shared<BaseLib::Variable>(std::string("")), wait);
+                return peer->setValue(clientInfo, 1, "AV_TRANSPORT_URI", std::make_shared<BaseLib::Variable>(std::string("x-rincon-stream:" + rinconId)), wait);
+            }
+        }
+        else
+        {
+            setValue(clientInfo, 1, "AV_TRANSPORT_METADATA", std::make_shared<BaseLib::Variable>(std::string("")), wait);
+            return setValue(clientInfo, 1, "AV_TRANSPORT_URI", std::make_shared<BaseLib::Variable>(std::string("x-rincon-stream:" + rinconId)), wait);
+        }
+    }
+    catch(const std::exception& ex)
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
@@ -1977,6 +2037,10 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 					peer->setVolume(peerVolumes.at(j), true);
 				}
 			}
+            else if(valueKey == "STREAM_LOCAL_INPUT")
+            {
+                return streamLocalInput(clientInfo, wait);
+            }
 			else if(valueKey == "ADD_SPEAKER")
 			{
 				std::shared_ptr<SonosCentral> central(std::dynamic_pointer_cast<SonosCentral>(getCentral()));
@@ -2232,7 +2296,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		std::unordered_map<int32_t, std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>> peerMap = getPeers();
 		std::vector<std::shared_ptr<BaseLib::Systems::BasicPeer>>& peers = peerMap[1];
 
-		std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
+		auto channelOneIterator = valuesCentral.find(1);
 		if(channelOneIterator == valuesCentral.end())
 		{
 			GD::out.printError("Error: Channel 1 not found.");

@@ -222,8 +222,10 @@ void SonosPeer::setRoomName(std::string value, bool broadCastEvent)
 		{
 			std::shared_ptr<std::vector<std::string>> valueKeys(new std::vector<std::string>{ "ROOMNAME" });
 			std::shared_ptr<std::vector<PVariable>> values(new std::vector<PVariable>{ variable });
-			raiseEvent(_peerID, 1, valueKeys, values);
-			raiseRPCEvent(_peerID, 1, _serialNumber + ":1", valueKeys, values);
+            std::string eventSource = "device-" + std::to_string(_peerID);
+			std::string address = _serialNumber + ":1";
+            raiseEvent(eventSource, _peerID, 1, valueKeys, values);
+			raiseRPCEvent(eventSource, _peerID, 1, address, valueKeys, values);
 		}
 	}
 	catch(const std::exception& ex)
@@ -1313,13 +1315,14 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 
 		if(!rpcValues.empty())
 		{
-			for(std::map<uint32_t, std::shared_ptr<std::vector<std::string>>>::const_iterator j = valueKeys.begin(); j != valueKeys.end(); ++j)
+			for(std::map<uint32_t, std::shared_ptr<std::vector<std::string>>>::iterator j = valueKeys.begin(); j != valueKeys.end(); ++j)
 			{
 				if(j->second->empty()) continue;
 
-				std::string address(_serialNumber + ":" + std::to_string(j->first));
-				raiseEvent(_peerID, j->first, j->second, rpcValues.at(j->first));
-				raiseRPCEvent(_peerID, j->first, address, j->second, rpcValues.at(j->first));
+                std::string eventSource = "device-" + std::to_string(_peerID);
+                std::string address(_serialNumber + ":" + std::to_string(j->first));
+                raiseEvent(eventSource, _peerID, j->first, j->second, rpcValues.at(j->first));
+                raiseRPCEvent(eventSource, _peerID, j->first, address, j->second, rpcValues.at(j->first));
 			}
 		}
 	}
@@ -2166,8 +2169,9 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		if(parameter.databaseId > 0) saveParameter(parameter.databaseId, parameterData);
 		else saveParameter(0, ParameterGroup::Type::Enum::variables, channel, valueKey, parameterData);
 
-		raiseEvent(_peerID, channel, valueKeys, values);
-		raiseRPCEvent(_peerID, channel, _serialNumber + ":" + std::to_string(channel), valueKeys, values);
+        std::string address(_serialNumber + ":" + std::to_string(channel));
+        raiseEvent(clientInfo->initInterfaceId, _peerID, channel, valueKeys, values);
+        raiseRPCEvent(clientInfo->initInterfaceId, _peerID, channel, address, valueKeys, values);
 
 		return std::make_shared<BaseLib::Variable>();
 	}

@@ -2690,9 +2690,10 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			std::string filename;
 			BaseLib::HelperFunctions::stringReplace(value->stringValue, "\"", "");
 			std::string execPath = ttsProgram + ' ' + language + ' ' + voice + " \"" + value->stringValue + "\"";
-			if(BaseLib::HelperFunctions::exec(execPath, filename) != 0)
+            auto exitCode = BaseLib::HelperFunctions::exec(execPath, filename);
+			if(exitCode != 0)
 			{
-				GD::out.printError("Error: Error executing program to generate TTS audio file: \"" + ttsProgram + ' ' + language + ' ' + value->stringValue + "\"");
+				GD::out.printError("Error: Error executing program to generate TTS audio file (exit code " + std::to_string(exitCode) + "): \"" + ttsProgram + ' ' + language + ' ' + value->stringValue + "\"");
 				return true;
 			}
 			BaseLib::HelperFunctions::trim(filename);

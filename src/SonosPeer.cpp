@@ -94,7 +94,6 @@ void SonosPeer::init()
     _getOneMorePositionInfo = true;
     _isMaster = false;
     _isStream = false;
-    _transportUriDirty = true;
 
 	_binaryEncoder.reset(new BaseLib::Rpc::RpcEncoder(GD::bl));
 	_binaryDecoder.reset(new BaseLib::Rpc::RpcDecoder(GD::bl));
@@ -974,7 +973,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 					if(std::find(i->second.channels.begin(), i->second.channels.end(), *j) == i->second.channels.end()) continue;
 
 					BaseLib::Systems::RpcConfigurationParameter& parameter = valuesCentral[*j][i->first];
-					if(parameter.equals(i->second.value) && (!_transportUriDirty || i->first != "AV_TRANSPORT_URI")) continue;
+					if(parameter.equals(i->second.value) && i->first != "AV_TRANSPORT_URI") continue;
 
 					if(!valueKeys[*j] || !rpcValues[*j])
 					{
@@ -1085,7 +1084,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							valueKeys[1]->push_back("NEXT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
-						else if(i->first == "AV_TRANSPORT_URI" && value->stringValue.size() > 0)
+						else if(i->first == "AV_TRANSPORT_URI" && !value->stringValue.empty())
 						{
 							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
 							std::vector<uint8_t> transportParameterData = parameter.getBinaryData();
@@ -1966,8 +1965,6 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 				return peer->setValue(clientInfo, channel, valueKey, value, wait);
 			}
 		}
-
-        if(valueKey == "AV_TRANSPORT_URI") _transportUriDirty = true;
 
 		Peer::setValue(clientInfo, channel, valueKey, value, wait); //Ignore result, otherwise setHomegerValue might not be executed
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");

@@ -1084,7 +1084,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							valueKeys[1]->push_back("NEXT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
-						else if(i->first == "AV_TRANSPORT_URI" && !value->stringValue.empty())
+						else if(i->first == "AV_TRANSPORT_URI")
 						{
 							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
 							std::vector<uint8_t> transportParameterData = parameter.getBinaryData();
@@ -1156,7 +1156,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
                                 if(parameter2.rpcParameter)
                                 {
                                     std::vector<uint8_t> parameterData = parameter2.getBinaryData();
-                                    _isMaster = value->stringValue.size() < 9 || value->stringValue.compare(0, 9, "x-rincon:") != 0;
+                                    _isMaster = value->stringValue.empty() || (value->stringValue.size() >= 9 && value->stringValue.compare(0, 9, "x-rincon:") != 0);
                                     BaseLib::PVariable isMaster = std::make_shared<BaseLib::Variable>(_isMaster);
                                     if(parameterData.empty() || (bool) parameterData.back() != _isMaster)
                                     {
@@ -2271,7 +2271,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		playlistFilename = BaseLib::Http::encodeURL(playlistFilename);
 
 		std::string silence2sPlaylistFilename = "silence_2s.m3u";
-		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_250ms.mp3\n";
+		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_1s.mp3\n";
 		std::string silencePlaylistFilepath = tempPath + silence2sPlaylistFilename;
 		BaseLib::Io::writeFile(silencePlaylistFilepath, playlistContent);
 		silence2sPlaylistFilename = BaseLib::Http::encodeURL(silence2sPlaylistFilename);

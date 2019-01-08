@@ -94,7 +94,6 @@ void SonosPeer::init()
     _getOneMorePositionInfo = true;
     _isMaster = false;
     _isStream = false;
-    _transportUriDirty = true;
 
 	_binaryEncoder.reset(new BaseLib::Rpc::RpcEncoder(GD::bl));
 	_binaryDecoder.reset(new BaseLib::Rpc::RpcDecoder(GD::bl));
@@ -974,7 +973,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 					if(std::find(i->second.channels.begin(), i->second.channels.end(), *j) == i->second.channels.end()) continue;
 
 					BaseLib::Systems::RpcConfigurationParameter& parameter = valuesCentral[*j][i->first];
-					if(parameter.equals(i->second.value) && (!_transportUriDirty || i->first != "AV_TRANSPORT_URI")) continue;
+					if(parameter.equals(i->second.value) && i->first != "AV_TRANSPORT_URI") continue;
 
 					if(!valueKeys[*j] || !rpcValues[*j])
 					{
@@ -1085,7 +1084,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							valueKeys[1]->push_back("NEXT_ALBUM_ART");
 							rpcValues[1]->push_back(value);
 						}
-						else if(i->first == "AV_TRANSPORT_URI" && value->stringValue.size() > 0)
+						else if(i->first == "AV_TRANSPORT_URI")
 						{
 							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
 							std::vector<uint8_t> transportParameterData = parameter.getBinaryData();
@@ -1157,7 +1156,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
                                 if(parameter2.rpcParameter)
                                 {
                                     std::vector<uint8_t> parameterData = parameter2.getBinaryData();
-                                    _isMaster = value->stringValue.size() < 9 || value->stringValue.compare(0, 9, "x-rincon:") != 0;
+                                    _isMaster = value->stringValue.empty() || (value->stringValue.size() >= 9 && value->stringValue.compare(0, 9, "x-rincon:") != 0);
                                     BaseLib::PVariable isMaster = std::make_shared<BaseLib::Variable>(_isMaster);
                                     if(parameterData.empty() || (bool) parameterData.back() != _isMaster)
                                     {
@@ -1967,8 +1966,6 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 			}
 		}
 
-        if(valueKey == "AV_TRANSPORT_URI") _transportUriDirty = true;
-
 		Peer::setValue(clientInfo, channel, valueKey, value, wait); //Ignore result, otherwise setHomegerValue might not be executed
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");
@@ -2274,7 +2271,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
 		playlistFilename = BaseLib::Http::encodeURL(playlistFilename);
 
 		std::string silence2sPlaylistFilename = "silence_2s.m3u";
-		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_250ms.mp3\n";
+		playlistContent = "#EXTM3U\n#EXTINF:0,<Homegear><TTS><TTS>\nhttp://" + GD::physicalInterface->listenAddress() + ':' + std::to_string(GD::physicalInterface->listenPort()) + "/Silence_1s.mp3\n";
 		std::string silencePlaylistFilepath = tempPath + silence2sPlaylistFilename;
 		BaseLib::Io::writeFile(silencePlaylistFilepath, playlistContent);
 		silence2sPlaylistFilename = BaseLib::Http::encodeURL(silence2sPlaylistFilename);

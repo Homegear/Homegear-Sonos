@@ -41,7 +41,7 @@ using namespace BaseLib;
 class Sonos : public BaseLib::Systems::DeviceFamily
 {
 public:
-	Sonos(BaseLib::SharedObjects* bl, BaseLib::Systems::DeviceFamily::IFamilyEventSink* eventHandler);
+	Sonos(BaseLib::SharedObjects* bl, BaseLib::Systems::IFamilyEventSink* eventHandler);
 	virtual ~Sonos();
 	virtual void dispose();
 

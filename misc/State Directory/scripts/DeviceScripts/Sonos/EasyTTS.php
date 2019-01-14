@@ -72,9 +72,9 @@ class EASY_TTS
         $url    = "https://www.meine-homematic.de/tts.php?id=".self::$cmID."&username=".self::$cmUsername."&engine=mary&locale=".$payload['Voice']['Language']."&voice=".$payload['Voice']['Name']."&text=".$payload['Input']['Data'];
         $ch     = curl_init();
         $curl_headers = array();
-	if(file_exists("/usr/local/etc/config/addons/www/homegear/data/www/rpc/ui/ca-bundle.pem"))
+	if(file_exists("/usr/local/etc/config/addons/www/homegear/data/www/rpc/hgui/ca-bundle.pem"))
 	{
-		curl_setopt($ch, CURLOPT_CAINFO, "/usr/local/etc/config/addons/www/homegear/data/www/rpc/ui/ca-bundle.pem");
+		curl_setopt($ch, CURLOPT_CAINFO, "/usr/local/etc/config/addons/www/homegear/data/www/rpc/hgui/ca-bundle.pem");
 	}
         curl_setopt($ch, CURLOPT_URL,$url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_headers);

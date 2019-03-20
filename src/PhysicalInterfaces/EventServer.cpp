@@ -260,7 +260,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 				_out.printDebug("Debug: Packet received: " + BaseLib::HelperFunctions::getHexString(rawPacket));
 			}
 			buffer[bytesRead] = '\0';
-			if(!http.headerProcessingStarted() && (!strncmp(&buffer[0], "NOTIFY", 6) || !strncmp(&buffer[0], "GET", 3) || !strncmp(&buffer[0], "HTTP/1.", 7))) http.reset();
+			if(!http.headerProcessingStarted() && (!strncmp(buffer, "NOTIFY", 6) || !strncmp(buffer, "GET", 3) || !strncmp(buffer, "HTTP/1.", 7))) http.reset();
 			else if(!http.headerProcessingStarted())
 			{
 				_out.printError("Error: Uninterpretable packet received. Closing connection. Packet was: " + std::string(buffer, bytesRead));

@@ -1370,14 +1370,14 @@ bool SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 			catch(BaseLib::HttpClientException& ex)
 			{
 				if(ignoreErrors) return false;
-				GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+				GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 				GD::out.printMessage("Request was: \n" + request);
 				if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
 			}
 			catch(BaseLib::Exception& ex)
 			{
 				if(ignoreErrors) return false;
-				GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+				GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 				GD::out.printMessage("Request was: \n" + request);
 				serviceMessages->setUnreach(true, false);
 			}
@@ -1691,7 +1691,7 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 			catch(BaseLib::HttpClientException& ex)
 			{
 				if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
-				return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+				return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 			}
 		}
 
@@ -2140,21 +2140,21 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 					}
 					catch(BaseLib::HttpException& ex)
 					{
-						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+						GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 						GD::out.printMessage("Request was: \n" + soapRequest);
-						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+						return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 					}
 					catch(BaseLib::HttpClientException& ex)
 					{
-						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+						GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 						GD::out.printMessage("Request was: \n" + soapRequest);
-						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+						return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 					}
 					catch(BaseLib::Exception& ex)
 					{
-						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+						GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 						GD::out.printMessage("Request was: \n" + soapRequest);
-						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+						return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 					}
 				}
 			}
@@ -2607,7 +2607,7 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
     }
     catch(BaseLib::Exception& ex)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what() + " Filename: " + filename);
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, std::string(ex.what()) + " Filename: " + filename);
     }
     catch(...)
     {

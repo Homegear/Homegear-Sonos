@@ -297,7 +297,7 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
     }
     catch(BaseLib::Exception& ex)
     {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what() + " Packet was: " + soap);
+        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, std::string(ex.what()) + " Packet was: " + soap);
     }
     catch(...)
     {

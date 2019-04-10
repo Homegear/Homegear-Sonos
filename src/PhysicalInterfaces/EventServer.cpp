@@ -245,7 +245,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 			}
 			catch(const BaseLib::SocketClosedException& ex)
 			{
-				_out.printInfo("Info: " + ex.what());
+				_out.printInfo("Info: " + std::string(ex.what()));
 				break;
 			}
 			catch(const BaseLib::SocketOperationException& ex)
@@ -273,7 +273,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 			}
 			catch(BaseLib::HttpException& ex)
 			{
-				_out.printError("Error: Could not process HTTP packet: " + ex.what() + " Buffer: " + std::string(buffer, bytesRead));
+				_out.printError("Error: Could not process HTTP packet: " + std::string(ex.what()) + " Buffer: " + std::string(buffer, bytesRead));
 				http.reset();
 			}
 
@@ -303,11 +303,11 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 					}
 					catch(BaseLib::SocketDataLimitException& ex)
 					{
-						_out.printWarning("Warning: " + ex.what());
+						_out.printWarning("Warning: " + std::string(ex.what()));
 					}
 					catch(const BaseLib::SocketOperationException& ex)
 					{
-						_out.printInfo("Info: " + ex.what());
+						_out.printInfo("Info: " + std::string(ex.what()));
 					}
 					break;
 				}

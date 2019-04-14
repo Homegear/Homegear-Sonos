@@ -33,6 +33,8 @@
 #include "GD.h"
 #include "sys/wait.h"
 
+#include <iomanip>
+
 namespace Sonos
 {
 std::shared_ptr<BaseLib::Systems::ICentral> SonosPeer::getCentral()

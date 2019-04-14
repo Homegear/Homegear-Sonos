@@ -32,6 +32,8 @@
 #include "Interfaces.h"
 #include "GD.h"
 
+#include <iomanip>
+
 namespace Sonos
 {
 

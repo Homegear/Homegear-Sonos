@@ -30,6 +30,8 @@
 #include "SonosCentral.h"
 #include "GD.h"
 
+#include <iomanip>
+
 namespace Sonos {
 
 SonosCentral::SonosCentral(ICentralEventSink* eventHandler) : BaseLib::Systems::ICentral(SONOS_FAMILY_ID, GD::bl, eventHandler)

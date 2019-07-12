@@ -953,23 +953,33 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 			}
 		}
 
-		if(newPeers.size() > 0)
-		{
+        if(newPeers.size() > 0)
+        {
             std::vector<uint64_t> newIds;
             newIds.reserve(newPeers.size());
-			PVariable deviceDescriptions(new Variable(VariableType::tArray));
-			for(std::vector<std::shared_ptr<SonosPeer>>::iterator i = newPeers.begin(); i != newPeers.end(); ++i)
-			{
-				std::shared_ptr<std::vector<PVariable>> descriptions = (*i)->getDeviceDescriptions(clientInfo, true, std::map<std::string, bool>());
-				if(!descriptions) continue;
-                newIds.push_back((*i)->getID());
-				for(std::vector<PVariable>::iterator j = descriptions->begin(); j != descriptions->end(); ++j)
-				{
-					deviceDescriptions->arrayValue->push_back(*j);
-				}
-			}
-			raiseRPCNewDevices(newIds, deviceDescriptions);
-		}
+            PVariable deviceDescriptions = std::make_shared<BaseLib::Variable>(BaseLib::VariableType::tArray);
+            deviceDescriptions->arrayValue->reserve(100);
+            for(auto& newPeer : newPeers)
+            {
+                std::shared_ptr<std::vector<PVariable>> descriptions = newPeer->getDeviceDescriptions(clientInfo, true, std::map<std::string, bool>());
+                if(!descriptions) continue;
+                newIds.push_back(newPeer->getID());
+                for(auto& description : *descriptions)
+                {
+                    if(deviceDescriptions->arrayValue->size() + 1 > deviceDescriptions->arrayValue->capacity()) deviceDescriptions->arrayValue->reserve(deviceDescriptions->arrayValue->size() + 100);
+                    deviceDescriptions->arrayValue->push_back(description);
+                }
+
+                {
+                    auto pairingState = std::make_shared<PairingState>();
+                    pairingState->peerId = newPeer->getID();
+                    pairingState->state = "success";
+                    std::lock_guard<std::mutex> newPeersGuard(_newPeersMutex);
+                    _newPeers[BaseLib::HelperFunctions::getTime()].emplace_back(std::move(pairingState));
+                }
+            }
+            raiseRPCNewDevices(newIds, deviceDescriptions);
+        }
 		return PVariable(new Variable((int32_t)newPeers.size()));
 	}
 	catch(const std::exception& ex)

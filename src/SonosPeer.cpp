@@ -31,7 +31,12 @@
 #include "SonosCentral.h"
 #include "SonosPacket.h"
 #include "GD.h"
+
+#include <homegear-base/Managers/ProcessManager.h>
+
 #include "sys/wait.h"
+
+#include <iomanip>
 
 namespace Sonos
 {
@@ -46,14 +51,6 @@ std::shared_ptr<BaseLib::Systems::ICentral> SonosPeer::getCentral()
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return std::shared_ptr<BaseLib::Systems::ICentral>();
 }
@@ -77,14 +74,6 @@ SonosPeer::~SonosPeer()
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 }
 
@@ -139,14 +128,6 @@ void SonosPeer::setIp(std::string value)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 }
 
 std::string SonosPeer::getRinconId()
@@ -164,14 +145,6 @@ std::string SonosPeer::getRinconId()
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return "";
 }
@@ -192,14 +165,6 @@ void SonosPeer::setRinconId(std::string value)
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 }
 
@@ -230,14 +195,6 @@ void SonosPeer::setRoomName(std::string value, bool broadCastEvent)
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 }
 
@@ -308,7 +265,7 @@ void SonosPeer::worker()
 						}
 						serviceMessages->setUnreach(false, true);
 					}
-					catch(BaseLib::HttpClientException& ex)
+					catch(const BaseLib::HttpClientException& ex)
 					{
 						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
 						if(ex.responseCode() == -1)
@@ -316,11 +273,6 @@ void SonosPeer::worker()
 							serviceMessages->setUnreach(true, false);
 							break;
 						}
-					}
-					catch(BaseLib::Exception& ex)
-					{
-						GD::out.printWarning("Warning: Error calling SUBSCRIBE (" + std::to_string(i) + ") on Sonos device: " + ex.what());
-						break;
 					}
 					catch(const std::exception& ex)
 					{
@@ -335,14 +287,6 @@ void SonosPeer::worker()
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 }
 
 void SonosPeer::homegearShuttingDown()
@@ -355,14 +299,6 @@ void SonosPeer::homegearShuttingDown()
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 }
 
@@ -444,14 +380,6 @@ std::string SonosPeer::handleCliCommand(std::string command)
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return "Error executing command. See log file for more details.\n";
 }
 
@@ -477,14 +405,6 @@ void SonosPeer::addPeer(std::shared_ptr<BaseLib::Systems::BasicPeer> peer)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void SonosPeer::removePeer(uint64_t id)
@@ -509,14 +429,6 @@ void SonosPeer::removePeer(uint64_t id)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 void SonosPeer::savePeers()
@@ -530,14 +442,6 @@ void SonosPeer::savePeers()
 	catch(const std::exception& ex)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -570,14 +474,6 @@ void SonosPeer::serializePeers(std::vector<uint8_t>& encodedData)
 	catch(const std::exception& ex)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -614,14 +510,6 @@ void SonosPeer::unserializePeers(std::shared_ptr<std::vector<char>> serializedDa
 	catch(const std::exception& ex)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -678,14 +566,6 @@ std::string SonosPeer::printConfig()
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return "";
 }
 
@@ -718,14 +598,6 @@ void SonosPeer::loadVariables(BaseLib::Systems::ICentral* central, std::shared_p
 	catch(const std::exception& ex)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -784,14 +656,6 @@ bool SonosPeer::load(BaseLib::Systems::ICentral* central)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -805,14 +669,6 @@ void SonosPeer::saveVariables()
 	catch(const std::exception& ex)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -936,14 +792,6 @@ void SonosPeer::getValuesFromPacket(std::shared_ptr<SonosPacket> packet, std::ve
 	catch(const std::exception& ex)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -1329,14 +1177,6 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
     {
     	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-    	GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
 }
 
 bool SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
@@ -1367,17 +1207,17 @@ bool SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 					return true;
 				}
 			}
-			catch(BaseLib::HttpClientException& ex)
+			catch(const BaseLib::HttpClientException& ex)
 			{
 				if(ignoreErrors) return false;
-				GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+				GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 				GD::out.printMessage("Request was: \n" + request);
 				if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
 			}
-			catch(BaseLib::Exception& ex)
+			catch(const std::exception& ex)
 			{
 				if(ignoreErrors) return false;
-				GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+				GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 				GD::out.printMessage("Request was: \n" + request);
 				serviceMessages->setUnreach(true, false);
 			}
@@ -1386,14 +1226,6 @@ bool SonosPeer::sendSoapRequest(std::string& request, bool ignoreErrors)
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return false;
 }
@@ -1412,15 +1244,6 @@ void SonosPeer::execute(std::string& functionName, std::string& service, std::st
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
-
 }
 
 void SonosPeer::execute(std::string functionName, bool ignoreErrors)
@@ -1443,14 +1266,6 @@ void SonosPeer::execute(std::string functionName, bool ignoreErrors)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
 	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-	}
 }
 
 bool SonosPeer::execute(std::string functionName, PSoapValues soapValues, bool ignoreErrors)
@@ -1472,14 +1287,6 @@ bool SonosPeer::execute(std::string functionName, PSoapValues soapValues, bool i
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return false;
 }
@@ -1553,14 +1360,6 @@ PVariable SonosPeer::playBrowsableContent(std::string& title, std::string browse
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error.");
 }
 
@@ -1605,14 +1404,6 @@ PVariable SonosPeer::streamLocalInput(PRpcClientInfo clientInfo, bool wait)
     catch(const std::exception& ex)
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -1688,10 +1479,10 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 				packetReceived(responsePacket);
 				serviceMessages->setUnreach(false, true);
 			}
-			catch(BaseLib::HttpClientException& ex)
+			catch(const BaseLib::HttpClientException& ex)
 			{
 				if(ex.responseCode() == -1) serviceMessages->setUnreach(true, false);
-				return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+				return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 			}
 		}
 
@@ -1701,14 +1492,6 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return Variable::createError(-32500, "Unknown application error.");
 }
@@ -1722,14 +1505,6 @@ PParameterGroup SonosPeer::getParameterSet(int32_t channel, ParameterGroup::Type
 	catch(const std::exception& ex)
 	{
 		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(BaseLib::Exception& ex)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-	}
-	catch(...)
-	{
-		GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
 	}
 	return PParameterGroup();
 }
@@ -1766,14 +1541,6 @@ bool SonosPeer::getAllValuesHook2(PRpcClientInfo clientInfo, PParameter paramete
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -1809,14 +1576,6 @@ bool SonosPeer::getParamsetHook2(PRpcClientInfo clientInfo, PParameter parameter
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return false;
 }
 
@@ -1842,14 +1601,6 @@ PVariable SonosPeer::getValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 	catch(const std::exception& ex)
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -1915,14 +1666,6 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 	catch(const std::exception& ex)
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
     return Variable::createError(-32500, "Unknown application error.");
 }
@@ -2138,23 +1881,23 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 							return Variable::createError(-100, "Error sending value to Sonos device: Response code was: " + std::to_string(response.getHeader().responseCode));
 						}
 					}
-					catch(BaseLib::HttpException& ex)
+					catch(const BaseLib::HttpException& ex)
 					{
-						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+						GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 						GD::out.printMessage("Request was: \n" + soapRequest);
-						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+						return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 					}
-					catch(BaseLib::HttpClientException& ex)
+					catch(const BaseLib::HttpClientException& ex)
 					{
-						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+						GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 						GD::out.printMessage("Request was: \n" + soapRequest);
-						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+						return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 					}
-					catch(BaseLib::Exception& ex)
+					catch(const std::exception& ex)
 					{
-						GD::out.printWarning("Warning: Error in UPnP request: " + ex.what());
+						GD::out.printWarning("Warning: Error in UPnP request: " + std::string(ex.what()));
 						GD::out.printMessage("Request was: \n" + soapRequest);
-						return Variable::createError(-100, "Error sending value to Sonos device: " + ex.what());
+						return Variable::createError(-100, "Error sending value to Sonos device: " + std::string(ex.what()));
 					}
 				}
 			}
@@ -2176,14 +1919,6 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
     }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-    }
     return Variable::createError(-32500, "Unknown application error. See error log for more details.");
 }
 
@@ -2198,14 +1933,6 @@ void SonosPeer::setVolume(int32_t volume, bool ramp)
 	catch(const std::exception& ex)
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 }
 
@@ -2605,14 +2332,6 @@ void SonosPeer::playLocalFile(std::string filename, bool now, bool unmute, int32
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, std::string(ex.what()) + " Filename: " + filename);
     }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what() + " Filename: " + filename);
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, "Filename: " + filename);
-    }
 }
 
 bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariable value)
@@ -2687,7 +2406,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			std::string filename;
 			BaseLib::HelperFunctions::stringReplace(value->stringValue, "\"", "");
 			std::string execPath = ttsProgram + ' ' + language + ' ' + voice + " \"" + value->stringValue + "\"";
-            auto exitCode = BaseLib::HelperFunctions::exec(execPath, filename);
+            auto exitCode = BaseLib::ProcessManager::exec(execPath, _bl->fileDescriptorManager.getMax(), filename);
 			if(exitCode != 0)
 			{
 				GD::out.printError("Error: Error executing program to generate TTS audio file (exit code " + std::to_string(exitCode) + "): \"" + ttsProgram + ' ' + language + ' ' + value->stringValue + "\"");
@@ -2770,14 +2489,6 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 	catch(const std::exception& ex)
     {
         GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(BaseLib::Exception& ex)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
-    }
-    catch(...)
-    {
-        GD::out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__);
     }
 	return false;
 }

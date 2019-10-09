@@ -275,7 +275,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 					if(http.getContentSize() > 0 && !serialNumber.empty())
 					{
 						xml_document<> doc;
-						doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&http.getContent().at(0));
+						doc.parse<parse_no_entity_translation | parse_validate_closing_tags>((char*)http.getContent().data()); //Dirty, but data is not modified
 						for(xml_node<>* node = doc.first_node(); node; node = node->next_sibling())
 						{
 							std::string name(node->name());

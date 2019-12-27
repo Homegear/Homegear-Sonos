@@ -275,7 +275,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 					if(http.getContentSize() > 0 && !serialNumber.empty())
 					{
 						xml_document<> doc;
-						doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&http.getContent().at(0));
+						doc.parse<parse_no_entity_translation | parse_validate_closing_tags>((char*)http.getContent().data()); //Dirty, but data is not modified
 						for(xml_node<>* node = doc.first_node(); node; node = node->next_sibling())
 						{
 							std::string name(node->name());
@@ -358,7 +358,7 @@ void EventServer::getSocketDescriptor()
 				if(fcntl(_serverFileDescriptor->descriptor, F_SETFL, fcntl(_serverFileDescriptor->descriptor, F_GETFL) | O_NONBLOCK) < 0) throw BaseLib::Exception("Error: Could not set socket options.");
 			}
 			if(setsockopt(_serverFileDescriptor->descriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int32_t)) == -1) throw BaseLib::Exception("Error: Could not set socket options.");
-			if(bind(_serverFileDescriptor->descriptor, info->ai_addr, info->ai_addrlen) == -1)
+			if(bind(_serverFileDescriptor->descriptor.load(), info->ai_addr, info->ai_addrlen) == -1)
 			{
 				error = errno;
 				continue;

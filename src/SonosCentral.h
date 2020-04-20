@@ -68,7 +68,7 @@ public:
 	virtual PVariable deleteDevice(BaseLib::PRpcClientInfo clientInfo, uint64_t peerID, int32_t flags);
 	virtual PVariable removeLink(BaseLib::PRpcClientInfo clientInfo, std::string senderSerialNumber, int32_t senderChannel, std::string receiverSerialNumber, int32_t receiverChannel);
 	virtual PVariable removeLink(BaseLib::PRpcClientInfo clientInfo, uint64_t senderID, int32_t senderChannel, uint64_t receiverID, int32_t receiverChannel);
-	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo);
+	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo, const std::string& interfaceId);
 	virtual PVariable searchDevices(BaseLib::PRpcClientInfo clientInfo, bool updateOnly);
 protected:
 	std::unique_ptr<BaseLib::Ssdp> _ssdp;

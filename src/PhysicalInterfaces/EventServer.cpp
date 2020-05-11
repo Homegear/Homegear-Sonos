@@ -29,7 +29,7 @@
 
 #include "EventServer.h"
 #include "../GD.h"
-#include "homegear-base/Encoding/RapidXml/rapidxml.hpp"
+#include "homegear-base/Encoding/RapidXml/rapidxml.h"
 #include <ifaddrs.h>
 
 namespace Sonos

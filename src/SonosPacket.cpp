@@ -47,12 +47,12 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 		_valuesToSet.reset(new std::vector<std::pair<std::string, std::string>>());
 		_timeReceived = timeReceived;
 		if(soap.empty()) return;
-		xml_document<> doc;
-		doc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&soap.at(0));
-		xml_node<>* node = doc.first_node("s:Envelope");
+		xml_document doc;
+		doc.parse<parse_no_entity_translation>(&soap.at(0));
+		xml_node* node = doc.first_node("s:Envelope");
 		if(!node) //Info packet
 		{
-			xml_node<>* node = doc.first_node("Event");
+			xml_node* node = doc.first_node("Event");
 			if(!node)
 			{
 				GD::out.printWarning("Warning: Tried to parse invalid packet.");
@@ -65,11 +65,11 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 				GD::out.printWarning("Warning: Tried to parse invalid packet.");
 				return;
 			}
-			for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+			for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 			{
 				std::string name(subNode->name());
-				xml_attribute<>* attr = subNode->first_attribute("val");
-				xml_attribute<>* channel = subNode->first_attribute("channel");
+				xml_attribute* attr = subNode->first_attribute("val");
+				xml_attribute* channel = subNode->first_attribute("channel");
 				if(channel) name.append(std::string(channel->value()));
 				if(!attr)
 				{
@@ -84,23 +84,23 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 					if(value.empty()) continue;
 					std::string xml;
 					BaseLib::Html::unescapeHtmlEntities(value, xml);
-					xml_document<> metadataDoc;
-					metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-					xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+					xml_document metadataDoc;
+					metadataDoc.parse<parse_no_entity_translation>((char*)xml.data());
+					xml_node* metadataNode = metadataDoc.first_node("DIDL-Lite");
 					if(!metadataNode) continue;
 					metadataNode = metadataNode->first_node("item");
 					if(!metadataNode) continue;
-					for(xml_attribute<>* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+					for(xml_attribute* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
 					{
 						_currentTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
 					}
-					for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
+					for(xml_node* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
 					{
 						std::string metadataName(metadataSubNode->name());
 						if(metadataName == "res")
 						{
 							_currentTrackMetadata->operator [](metadataName) = std::string(metadataSubNode->value());
-							for(xml_attribute<>* metadataAttribute = metadataSubNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+							for(xml_attribute* metadataAttribute = metadataSubNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
 							{
 								_currentTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
 							}
@@ -118,23 +118,23 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 					if(value.empty()) continue;
 					std::string xml;
 					BaseLib::Html::unescapeHtmlEntities(value, xml);
-					xml_document<> metadataDoc;
-					metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-					xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+					xml_document metadataDoc;
+					metadataDoc.parse<parse_no_entity_translation>((char*)xml.data());
+					xml_node* metadataNode = metadataDoc.first_node("DIDL-Lite");
 					if(!metadataNode) continue;
 					metadataNode = metadataNode->first_node("item");
 					if(!metadataNode) continue;
-					for(xml_attribute<>* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+					for(xml_attribute* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
 					{
 						_nextTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
 					}
-					for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
+					for(xml_node* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
 					{
 						std::string metadataName(metadataSubNode->name());
 						if(metadataName == "res")
 						{
 							_nextTrackMetadata->operator [](metadataName) = std::string(metadataSubNode->value());
-							for(xml_attribute<>* metadataAttribute = metadataSubNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+							for(xml_attribute* metadataAttribute = metadataSubNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
 							{
 								_nextTrackMetadata->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
 							}
@@ -152,17 +152,17 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 					if(value.empty()) continue;
 					std::string xml;
 					BaseLib::Html::unescapeHtmlEntities(value, xml);
-					xml_document<> metadataDoc;
-					metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-					xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+					xml_document metadataDoc;
+					metadataDoc.parse<parse_no_entity_translation>((char*)xml.data());
+					xml_node* metadataNode = metadataDoc.first_node("DIDL-Lite");
 					if(!metadataNode) continue;
 					metadataNode = metadataNode->first_node("item");
 					if(!metadataNode) continue;
-					for(xml_attribute<>* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+					for(xml_attribute* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
 					{
 						_avTransportUriMetaData->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
 					}
-					for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
+					for(xml_node* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
 					{
 						std::string metadataName(metadataSubNode->name());
 						_avTransportUriMetaData->operator [](std::string(metadataSubNode->name())) = std::string(metadataSubNode->value());
@@ -175,17 +175,17 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 					if(value.empty()) continue;
 					std::string xml;
 					BaseLib::Html::unescapeHtmlEntities(value, xml);
-					xml_document<> metadataDoc;
-					metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-					xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+					xml_document metadataDoc;
+					metadataDoc.parse<parse_no_entity_translation>((char*)xml.data());
+					xml_node* metadataNode = metadataDoc.first_node("DIDL-Lite");
 					if(!metadataNode) continue;
 					metadataNode = metadataNode->first_node("item");
 					if(!metadataNode) continue;
-					for(xml_attribute<>* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+					for(xml_attribute* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
 					{
 						_nextAvTransportUriMetaData->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
 					}
-					for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
+					for(xml_node* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
 					{
 						std::string metadataName(metadataSubNode->name());
 						_nextAvTransportUriMetaData->operator [](std::string(metadataSubNode->name())) = std::string(metadataSubNode->value());
@@ -198,17 +198,17 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 					if(value.empty()) continue;
 					std::string xml;
 					BaseLib::Html::unescapeHtmlEntities(value, xml);
-					xml_document<> metadataDoc;
-					metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-					xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+					xml_document metadataDoc;
+					metadataDoc.parse<parse_no_entity_translation>((char*)xml.data());
+					xml_node* metadataNode = metadataDoc.first_node("DIDL-Lite");
 					if(!metadataNode) continue;
 					metadataNode = metadataNode->first_node("item");
 					if(!metadataNode) continue;
-					for(xml_attribute<>* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
+					for(xml_attribute* metadataAttribute = metadataNode->first_attribute(); metadataAttribute; metadataAttribute = metadataAttribute->next_attribute())
 					{
 						_enqueuedTransportUriMetaData->operator [](std::string(metadataAttribute->name())) = std::string(metadataAttribute->value());
 					}
-					for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
+					for(xml_node* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
 					{
 						std::string metadataName(metadataSubNode->name());
 						_enqueuedTransportUriMetaData->operator [](std::string(metadataSubNode->name())) = std::string(metadataSubNode->value());
@@ -230,28 +230,28 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 			if(_functionName.size() > 2) _functionName = _functionName.substr(2);
 			if(_functionName == "BrowseResponse")
 			{
-				xml_node<>* subNode = node->first_node("Result");
+				xml_node* subNode = node->first_node("Result");
 				if(!subNode) return;
 				std::string value(subNode->value());
 				std::string xml;
 				BaseLib::Html::unescapeHtmlEntities(value, xml);
-				xml_document<> metadataDoc;
-				metadataDoc.parse<parse_no_entity_translation | parse_validate_closing_tags>(&xml.at(0));
-				xml_node<>* metadataNode = metadataDoc.first_node("DIDL-Lite");
+				xml_document metadataDoc;
+				metadataDoc.parse<parse_no_entity_translation>((char*)xml.data());
+				xml_node* metadataNode = metadataDoc.first_node("DIDL-Lite");
 				if(!metadataNode) return;
 				_browseResult.reset(new std::pair<std::string, BaseLib::PVariable>("", BaseLib::PVariable(new Variable(VariableType::tArray))));
-				for(xml_node<>* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
+				for(xml_node* metadataSubNode = metadataNode->first_node(); metadataSubNode; metadataSubNode = metadataSubNode->next_sibling())
 				{
 					std::string nodeName(metadataSubNode->name());
 					if(nodeName != "item" && nodeName != "container") continue;
-					xml_attribute<>* parentIdAttr = metadataSubNode->first_attribute("parentID");
-					xml_node<>* titleNode = metadataSubNode->first_node("dc:title");
-					xml_node<>* albumArtNode = metadataSubNode->first_node("upnp:albumArtURI");
-					xml_node<>* uriNode = metadataSubNode->first_node("res");
-					xml_node<>* metadataNode = metadataSubNode->first_node("r:resMD");
-					xml_node<>* classNode = metadataSubNode->first_node("upnp:class");
-					xml_node<>* artistNode = metadataSubNode->first_node("dc:creator");
-					xml_node<>* albumNode = metadataSubNode->first_node("upnp:album");
+					xml_attribute* parentIdAttr = metadataSubNode->first_attribute("parentID");
+					xml_node* titleNode = metadataSubNode->first_node("dc:title");
+					xml_node* albumArtNode = metadataSubNode->first_node("upnp:albumArtURI");
+					xml_node* uriNode = metadataSubNode->first_node("res");
+					xml_node* metadataNode = metadataSubNode->first_node("r:resMD");
+					xml_node* classNode = metadataSubNode->first_node("upnp:class");
+					xml_node* artistNode = metadataSubNode->first_node("dc:creator");
+					xml_node* albumNode = metadataSubNode->first_node("upnp:album");
 					if(!parentIdAttr || !titleNode || !uriNode || !classNode) continue;
 
 					if(_browseResult->first.empty())
@@ -284,7 +284,7 @@ SonosPacket::SonosPacket(std::string& soap, int64_t timeReceived)
 			}
 			else
 			{
-				for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+				for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 				{
 					_values->operator [](std::string(subNode->name())) = std::string(subNode->value());
 				}
@@ -302,7 +302,7 @@ SonosPacket::SonosPacket(std::string& soap, std::string serialNumber, int64_t ti
 	_serialNumber = serialNumber;
 }
 
-SonosPacket::SonosPacket(xml_node<>* node, int64_t timeReceived )
+SonosPacket::SonosPacket(xml_node* node, int64_t timeReceived )
 {
 	try
 	{
@@ -311,7 +311,7 @@ SonosPacket::SonosPacket(xml_node<>* node, int64_t timeReceived )
 		_valuesToSet.reset(new std::vector<std::pair<std::string, std::string>>());
 		_timeReceived = timeReceived;
 		_functionName = "InfoBroadcast2";
-		for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+		for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 		{
 			_values->operator [](std::string(subNode->name())) = std::string(subNode->value());
 		}
@@ -322,7 +322,7 @@ SonosPacket::SonosPacket(xml_node<>* node, int64_t timeReceived )
     }
 }
 
-SonosPacket::SonosPacket(xml_node<>* node, std::string serialNumber, int64_t timeReceived) : SonosPacket(node, timeReceived)
+SonosPacket::SonosPacket(xml_node* node, std::string serialNumber, int64_t timeReceived) : SonosPacket(node, timeReceived)
 {
 	_serialNumber = serialNumber;
 }

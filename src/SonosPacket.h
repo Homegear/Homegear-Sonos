@@ -31,7 +31,7 @@
 #define SONOSPACKET_H_
 
 #include <homegear-base/BaseLib.h>
-#include "homegear-base/Encoding/RapidXml/rapidxml.hpp"
+#include "homegear-base/Encoding/RapidXml/rapidxml.h"
 
 #include <unordered_map>
 
@@ -44,8 +44,8 @@ class SonosPacket : public BaseLib::Systems::Packet
         SonosPacket();
         SonosPacket(std::string& soap, std::string serialNumber, int64_t timeReceived = 0);
         SonosPacket(std::string& soap, int64_t timeReceived = 0);
-        SonosPacket(xml_node<>* node, std::string serialNumber, int64_t timeReceived = 0);
-        SonosPacket(xml_node<>* node, int64_t timeReceived = 0);
+        SonosPacket(xml_node* node, std::string serialNumber, int64_t timeReceived = 0);
+        SonosPacket(xml_node* node, int64_t timeReceived = 0);
         SonosPacket(std::string& ip, std::string& path, std::string& soapAction, std::string& schema, std::string& functionName, std::shared_ptr<std::vector<std::pair<std::string, std::string>>> valuesToSet);
         virtual ~SonosPacket();
 

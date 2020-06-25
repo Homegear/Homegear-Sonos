@@ -657,7 +657,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
 				index++;
 			}
 
-			PVariable result = searchDevices(nullptr);
+			PVariable result = searchDevices(nullptr, "");
 			if(result->errorStruct) stringStream << "Error: " << result->structValue->at("faultString")->stringValue << std::endl;
 			else stringStream << "Search completed successfully." << std::endl;
 			return stringStream.str();
@@ -878,7 +878,7 @@ PVariable SonosCentral::removeLink(BaseLib::PRpcClientInfo clientInfo, uint64_t 
 	return Variable::createError(-32500, "Unknown application error.");
 }
 
-PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo)
+PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, const std::string& interfaceId)
 {
 	return searchDevices(clientInfo, false);
 }
@@ -950,6 +950,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 				if(pos != std::string::npos && pos + 1 < udn.size()) udn = udn.substr(pos + 1);
 				peer->setRinconId(udn);
 				if(!roomName.empty()) peer->setRoomName(roomName, updateOnly);
+				if(peer->getName().empty()) peer->setName(typeString + " " + roomName);
 			}
 		}
 

@@ -21,8 +21,7 @@ set(SOURCE_FILES
         src/SonosPacket.cpp
         src/SonosPacket.h
         src/SonosPeer.cpp
-        src/SonosPeer.h
-        config.h)
+        src/SonosPeer.h)
 
 add_custom_target(homegear COMMAND ../../makeAll.sh SOURCES ${SOURCE_FILES})
 

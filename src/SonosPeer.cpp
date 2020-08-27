@@ -140,7 +140,7 @@ std::string SonosPeer::getRinconId()
 		PParameter parameter = functionIterator->second->variables->getParameter("ID");
 		if(!parameter) return "";
 		std::vector<uint8_t> parameterData = valuesCentral[1]["ID"].getBinaryData();
-		return parameter->convertFromPacket(parameterData)->stringValue;
+		return parameter->convertFromPacket(parameterData, Role(), false)->stringValue;
 	}
 	catch(const std::exception& ex)
 	{
@@ -156,7 +156,7 @@ void SonosPeer::setRinconId(std::string value)
 		BaseLib::Systems::RpcConfigurationParameter& configParameter = valuesCentral[1]["ID"];
 		if(!configParameter.rpcParameter) return;
 		std::vector<uint8_t> parameterData;
-		configParameter.rpcParameter->convertToPacket(PVariable(new Variable(value)), parameterData);
+		configParameter.rpcParameter->convertToPacket(PVariable(new Variable(value)), Role(), parameterData);
 		if(configParameter.equals(parameterData)) return;
 		configParameter.setBinaryData(parameterData);
 		if(configParameter.databaseId > 0) saveParameter(configParameter.databaseId, parameterData);
@@ -176,7 +176,7 @@ void SonosPeer::setRoomName(std::string value, bool broadCastEvent)
 		if(!configParameter.rpcParameter) return;
 		PVariable variable(new Variable(value));
 		std::vector<uint8_t> parameterData;
-		configParameter.rpcParameter->convertToPacket(variable, parameterData);
+		configParameter.rpcParameter->convertToPacket(variable, Role(), parameterData);
 		if(configParameter.equals(parameterData)) return;
 		configParameter.setBinaryData(parameterData);
 		if(configParameter.databaseId > 0) saveParameter(configParameter.databaseId, parameterData);
@@ -781,8 +781,8 @@ void SonosPeer::getValuesFromPacket(std::shared_ptr<SonosPacket> packet, std::ve
 						std::vector<uint8_t> encodedData;
 						if(packet->browseResult()) _binaryEncoder->encodeResponse(packet->browseResult()->second, encodedData);
 						else _binaryEncoder->encodeResponse(Variable::fromString(soapValues->at(field), (*k)->physical->type), encodedData);
-						PVariable data = (*k)->convertFromPacket(encodedData, true);
-						(*k)->convertToPacket(data, currentFrameValues.values[(*k)->id].value);
+						PVariable data = (*k)->convertFromPacket(encodedData, Role(), true);
+						(*k)->convertToPacket(data, Role(), currentFrameValues.values[(*k)->id].value);
 					}
 				}
 			}
@@ -850,21 +850,21 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 							}
 						}
 
-						PVariable value = parameter.rpcParameter->convertFromPacket(i->second.value, true);
+						PVariable value = parameter.rpcParameter->convertFromPacket(i->second.value, parameter.mainRole(), true);
 						if(i->first == "CURRENT_TRACK") _currentTrack = value->integerValue;
 						if(i->first == "CURRENT_ALBUM_ART")
 						{
                             std::string artPath;
                             BaseLib::Html::unescapeHtmlEntities(value->stringValue, artPath);
 							value->stringValue = "http://" + _ip + ":1400" + artPath;
-                            parameter.rpcParameter->convertToPacket(value, i->second.value);
+                            parameter.rpcParameter->convertToPacket(value, parameter.mainRole(), i->second.value);
 						}
 						else if(i->first == "NEXT_ALBUM_ART")
 						{
                             std::string artPath;
                             BaseLib::Html::unescapeHtmlEntities(value->stringValue, artPath);
                             value->stringValue = "http://" + _ip + ":1400" + artPath;
-                            parameter.rpcParameter->convertToPacket(value, i->second.value);
+                            parameter.rpcParameter->convertToPacket(value, parameter.mainRole(), i->second.value);
 						}
 						if(i->first == "CURRENT_TRACK_URI" && value->stringValue.empty())
 						{
@@ -936,7 +936,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 						{
 							std::shared_ptr<SonosCentral> central = std::dynamic_pointer_cast<SonosCentral>(getCentral());
 							std::vector<uint8_t> transportParameterData = parameter.getBinaryData();
-							BaseLib::PVariable oldValue = parameter.rpcParameter->convertFromPacket(transportParameterData, true);
+							BaseLib::PVariable oldValue = parameter.rpcParameter->convertFromPacket(transportParameterData, parameter.mainRole(), true);
 
 							//Update links
 							if(oldValue->stringValue.size() > 9 && oldValue->stringValue.compare(0, 9, "x-rincon:") == 0 && oldValue->stringValue != value->stringValue)
@@ -1008,7 +1008,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
                                     BaseLib::PVariable isMaster = std::make_shared<BaseLib::Variable>(_isMaster);
                                     if(parameterData.empty() || (bool) parameterData.back() != _isMaster)
                                     {
-                                        parameter2.rpcParameter->convertToPacket(isMaster, parameterData);
+                                        parameter2.rpcParameter->convertToPacket(isMaster, parameter2.mainRole(), parameterData);
                                         parameter2.setBinaryData(parameterData);
                                         auto bla = parameter2.getBinaryData();
                                         if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, parameterData);
@@ -1034,7 +1034,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
                                         if(parameter3.rpcParameter)
                                         {
                                             std::vector<uint8_t> parameterData2;
-                                            parameter3.rpcParameter->convertToPacket(masterId, parameterData2);
+                                            parameter3.rpcParameter->convertToPacket(masterId, parameter3.mainRole(), parameterData2);
                                             parameter3.setBinaryData(parameterData2);
                                             if(parameter3.databaseId > 0) saveParameter(parameter3.databaseId, parameterData2);
                                             else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "MASTER_ID", parameterData2);
@@ -1103,7 +1103,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 									if(parameterData.empty() || (bool) parameterData.back() != _isStream)
 									{
 										BaseLib::PVariable isStream(new BaseLib::Variable(_isStream));
-										parameter3.rpcParameter->convertToPacket(isStream, parameterData);
+										parameter3.rpcParameter->convertToPacket(isStream, parameter3.mainRole(), parameterData);
 										parameter3.setBinaryData(parameterData);
 										if(parameter3.databaseId > 0) saveParameter(parameter3.databaseId, parameterData);
 										else saveParameter(0, ParameterGroup::Type::Enum::variables, 1, "IS_STREAM", parameterData);
@@ -1122,7 +1122,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 								if(parameter2.rpcParameter)
 								{
 									std::vector<uint8_t> binaryData;
-									parameter2.rpcParameter->convertToPacket(value, binaryData);
+									parameter2.rpcParameter->convertToPacket(value, parameter2.mainRole(), binaryData);
 									parameter2.setBinaryData(binaryData);
 									if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, binaryData);
 									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_TITLE", binaryData);
@@ -1136,7 +1136,7 @@ void SonosPeer::packetReceived(std::shared_ptr<SonosPacket> packet)
 								if(parameter2.rpcParameter)
 								{
 									std::vector<uint8_t> binaryData;
-									parameter2.rpcParameter->convertToPacket(value, binaryData);
+									parameter2.rpcParameter->convertToPacket(value, parameter2.mainRole(), binaryData);
 									parameter2.setBinaryData(binaryData);
 									if(parameter2.databaseId > 0) saveParameter(parameter2.databaseId, binaryData);
 									else saveParameter(0, ParameterGroup::Type::Enum::variables, *j, "CURRENT_ALBUM", binaryData);
@@ -1486,8 +1486,9 @@ PVariable SonosPeer::getValueFromDevice(PParameter& parameter, int32_t channel, 
 			}
 		}
 
-		std::vector<uint8_t> parameterData = valuesCentral[channel][parameter->id].getBinaryData();
-		return parameter->convertFromPacket(parameterData, true);
+		auto& rpcConfigurationParameter = valuesCentral[channel][parameter->id];
+		std::vector<uint8_t> parameterData = rpcConfigurationParameter.getBinaryData();
+		return parameter->convertFromPacket(parameterData, rpcConfigurationParameter.mainRole(), true);
 	}
 	catch(const std::exception& ex)
 	{
@@ -1518,14 +1519,16 @@ bool SonosPeer::getAllValuesHook2(PRpcClientInfo clientInfo, PParameter paramete
 			if(parameter->id == "IP_ADDRESS")
 			{
 				std::vector<uint8_t> parameterData;
-				parameter->convertToPacket(PVariable(new Variable(_ip)), parameterData);
-				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+                auto& rpcConfigurationParameter = valuesCentral[channel][parameter->id];
+				parameter->convertToPacket(PVariable(new Variable(_ip)), rpcConfigurationParameter.mainRole(), parameterData);
+                rpcConfigurationParameter.setBinaryData(parameterData);
 			}
 			else if(parameter->id == "PEER_ID")
 			{
 				std::vector<uint8_t> parameterData;
-				parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), parameterData);
-				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+                auto& rpcConfigurationParameter = valuesCentral[channel][parameter->id];
+				parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), rpcConfigurationParameter.mainRole(), parameterData);
+                rpcConfigurationParameter.setBinaryData(parameterData);
 			}
 			else if(parameter->id == "AV_TRANSPORT_URI" || parameter->id == "AV_TRANSPORT_URI_METADATA")
 			{
@@ -1553,14 +1556,16 @@ bool SonosPeer::getParamsetHook2(PRpcClientInfo clientInfo, PParameter parameter
 			if(parameter->id == "IP_ADDRESS")
 			{
 				std::vector<uint8_t> parameterData;
-				parameter->convertToPacket(PVariable(new Variable(_ip)), parameterData);
-				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+                auto& rpcConfigurationParameter = valuesCentral[channel][parameter->id];
+				parameter->convertToPacket(PVariable(new Variable(_ip)), rpcConfigurationParameter.mainRole(), parameterData);
+                rpcConfigurationParameter.setBinaryData(parameterData);
 			}
 			else if(parameter->id == "PEER_ID")
 			{
 				std::vector<uint8_t> parameterData;
-				parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), parameterData);
-				valuesCentral[channel][parameter->id].setBinaryData(parameterData);
+                auto& rpcConfigurationParameter = valuesCentral[channel][parameter->id];
+				parameter->convertToPacket(PVariable(new Variable((int32_t)_peerID)), rpcConfigurationParameter.mainRole(), parameterData);
+                rpcConfigurationParameter.setBinaryData(parameterData);
 			}
 			else if(parameter->id == "AV_TRANSPORT_URI" || parameter->id == "AV_TRANSPORT_URI_METADATA")
 			{
@@ -1635,7 +1640,7 @@ PVariable SonosPeer::putParamset(BaseLib::PRpcClientInfo clientInfo, int32_t cha
 				BaseLib::Systems::RpcConfigurationParameter& parameter = parameterIterator->second;
 				if(!parameter.rpcParameter) continue;
 				std::vector<uint8_t> parameterData;
-				parameter.rpcParameter->convertToPacket(i->second, parameterData);
+				parameter.rpcParameter->convertToPacket(i->second, parameter.mainRole(), parameterData);
 				parameter.setBinaryData(parameterData);
 				if(parameter.databaseId > 0) saveParameter(parameter.databaseId, parameterData);
 				else saveParameter(0, ParameterGroup::Type::Enum::config, channel, i->first, parameterData);
@@ -1713,15 +1718,16 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		if(_disposing) return Variable::createError(-32500, "Peer is disposing.");
 		if(valueKey.empty()) return Variable::createError(-5, "Value key is empty.");
 		if(valuesCentral.find(channel) == valuesCentral.end()) return Variable::createError(-2, "Unknown channel.");
-		if(setHomegearValue(channel, valueKey, value)) return PVariable(new Variable(VariableType::tVoid));
+		if(setHomegearValue(channel, valueKey, value)) return std::make_shared<Variable>(VariableType::tVoid);
 		if(valuesCentral[channel].find(valueKey) == valuesCentral[channel].end()) return Variable::createError(-5, "Unknown parameter.");
+		auto& parameter = valuesCentral[channel][valueKey];
 		PParameter rpcParameter = valuesCentral[channel][valueKey].rpcParameter;
 		if(!rpcParameter) return Variable::createError(-5, "Unknown parameter.");
 		if(rpcParameter->service)
 		{
 			if(channel == 0 && value->type == VariableType::tBoolean)
 			{
-				if(serviceMessages->set(valueKey, value->booleanValue)) return PVariable(new Variable(VariableType::tVoid));
+				if(serviceMessages->set(valueKey, value->booleanValue)) return std::make_shared<Variable>(VariableType::tVoid);
 			}
 			else if(value->type == VariableType::tInteger) serviceMessages->set(valueKey, value->integerValue, channel);
 		}
@@ -1730,8 +1736,8 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		std::shared_ptr<std::vector<PVariable>> values(new std::vector<PVariable>());
 
 		std::vector<uint8_t> parameterData;
-		rpcParameter->convertToPacket(value, parameterData);
-		value = rpcParameter->convertFromPacket(parameterData, true);
+		rpcParameter->convertToPacket(value, parameter.mainRole(), parameterData);
+		value = rpcParameter->convertFromPacket(parameterData, parameter.mainRole(), true);
 
 		valueKeys->push_back(valueKey);
 		values->push_back(value);
@@ -1904,7 +1910,6 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 		}
 		else if(rpcParameter->physical->operationType != IPhysical::OperationType::Enum::store) return Variable::createError(-6, "Only interface types \"store\" and \"command\" are supported for this device family.");
 
-		BaseLib::Systems::RpcConfigurationParameter& parameter = valuesCentral[channel][valueKey];
 		parameter.setBinaryData(parameterData);
 		if(parameter.databaseId > 0) saveParameter(parameter.databaseId, parameterData);
 		else saveParameter(0, ParameterGroup::Type::Enum::variables, channel, valueKey, parameterData);

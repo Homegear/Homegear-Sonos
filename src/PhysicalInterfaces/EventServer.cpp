@@ -29,7 +29,7 @@
 
 #include "EventServer.h"
 #include "../GD.h"
-#include "homegear-base/Encoding/RapidXml/rapidxml.hpp"
+#include "homegear-base/Encoding/RapidXml/rapidxml.h"
 #include <ifaddrs.h>
 
 namespace Sonos
@@ -274,14 +274,14 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 					}
 					if(http.getContentSize() > 0 && !serialNumber.empty())
 					{
-						xml_document<> doc;
-						doc.parse<parse_no_entity_translation | parse_validate_closing_tags>((char*)http.getContent().data()); //Dirty, but data is not modified
-						for(xml_node<>* node = doc.first_node(); node; node = node->next_sibling())
+						xml_document doc;
+						doc.parse<parse_no_entity_translation>((char*)http.getContent().data()); //Dirty, but data is not modified
+						for(xml_node* node = doc.first_node(); node; node = node->next_sibling())
 						{
 							std::string name(node->name());
 							if(name == "e:propertyset")
 							{
-								for(xml_node<>* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
+								for(xml_node* subNode = node->first_node(); subNode; subNode = subNode->next_sibling())
 								{
 									std::string subNodeName(subNode->name());
 									if(subNodeName == "e:property")
@@ -289,7 +289,7 @@ void EventServer::readClient(std::shared_ptr<BaseLib::TcpSocket> socket, const s
 										if(subNode->first_node() && std::string(subNode->first_node()->name()) == "LastChange")
 										{
 											std::string xml;
-											for(xml_node<>* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
+											for(xml_node* propertyNode = subNode->first_node(); propertyNode; propertyNode = propertyNode->next_sibling())
 											{
 												std::string propertyName(propertyNode->name());
 												std::string value(propertyNode->value());

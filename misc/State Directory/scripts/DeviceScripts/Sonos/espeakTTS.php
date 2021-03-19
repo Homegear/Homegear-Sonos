@@ -14,7 +14,7 @@ function sliceString($string, $maxCharacters)
         return $strings;
 }
 
-if($argc != 3) die("Wrong parameter count. Please provice the language as first and the string to say as second parameter. E. g.: espeakTTS.php de \"Hello World\"");
+if($argc != 4) die("Wrong parameter count. Please provide the language as first, the voice as second and the string to say as third parameter. E. g.: espeakTTS.php de \"\" \"Hello World\"");
 
 $language = $argv[1];
 $path = "/var/lib/homegear/tmp/sonos/";
@@ -30,7 +30,7 @@ if(!file_exists($path))
         if(!mkdir($path, 0777, true)) die("Could not create directory $path");
 }
 
-$words = escapeshellarg($argv[2]);
+$words = escapeshellarg($argv[3]);
 $filename = $path.md5($words)."-".$language.".mp3";
 if(!file_exists($filename))
 {

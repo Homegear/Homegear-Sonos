@@ -29,6 +29,7 @@ $speech = [
   'Text' => '',
   'OutputFormat' => 'mp3',
   'TextType' => 'text',
+  "Engine": "neural",
   'VoiceId' => ''
 ];
 

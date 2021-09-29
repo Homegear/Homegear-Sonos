@@ -1,6 +1,6 @@
 <?php
 
-if($argc != 4) die("Wrong parameter count. Please provice the language as first, the voice as second and the string to say as thrid parameter. E. g.: IvonaTTS.php de-DE Marlene \"Hello World\"");
+if($argc != 4 && $argc != 5) die("Wrong parameter count. Please provice the language as first, the voice as second and the string to say as third parameter. You can optionally pass the engine to use as fourth parameter. E. g.: Polly.php de-DE Marlene \"Hello World\"");
 
 require(__DIR__.'/vendor/autoload.php');
 use Aws\Polly\PollyClient;
@@ -11,6 +11,7 @@ else if($language == 'fr') $language = 'fr-FR';
 else if($language == 'en') $language = 'en-US';
 $voice = $argv[2];
 $words = $argv[3];
+$engine = $argv[4] ?? '';
 $path = \Homegear\Homegear::TEMP_PATH."sonos/";
 
 if($language == 'de-DE' && $voice != 'Vicki' && $voice != 'Marlene' && $voice != 'Hans') $voice = 'Vicki';
@@ -43,6 +44,7 @@ $config = [
 
 $speech['Text'] = $words;
 $speech['VoiceId'] = $voice;
+if ($engine) $speech['Engine'] = $engine;
 
 $config['credentials']['key'] = $hg->getFamilySetting(6, 'ttsusername');
 $config['credentials']['secret'] = $hg->getFamilySetting(6, 'ttskey');

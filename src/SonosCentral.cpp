@@ -657,7 +657,7 @@ std::string SonosCentral::handleCliCommand(std::string command)
 				index++;
 			}
 
-			PVariable result = searchDevices(nullptr, "");
+			PVariable result = searchDevices(nullptr, false);
 			if(result->errorStruct) stringStream << "Error: " << result->structValue->at("faultString")->stringValue << std::endl;
 			else stringStream << "Search completed successfully." << std::endl;
 			return stringStream.str();
@@ -909,7 +909,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 			std::string serialNumber = info->structValue->at("serialNum")->stringValue;
 			std::string::size_type pos = serialNumber.find(':');
 			if(pos != std::string::npos) serialNumber = serialNumber.substr(0, pos);
-			GD::bl->hf.stringReplace(serialNumber, "-", "");
+			BaseLib::HelperFunctions::stringReplace(serialNumber, "-", "");
 			std::string softwareVersion = (info->structValue->find("softwareVersion") == info->structValue->end()) ? "" : info->structValue->at("softwareVersion")->stringValue;
 			std::string roomName = (info->structValue->find("roomName") == info->structValue->end()) ? "" : info->structValue->at("roomName")->stringValue;
 			std::string idString = (info->structValue->find("modelNumber") == info->structValue->end()) ? "" : info->structValue->at("modelNumber")->stringValue;
@@ -946,15 +946,15 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
 			if(peer)
 			{
 				std::string udn = info->structValue->at("UDN")->stringValue;
-				std::string::size_type pos = udn.find(':');
-				if(pos != std::string::npos && pos + 1 < udn.size()) udn = udn.substr(pos + 1);
+				std::string::size_type colonPos = udn.find(':');
+				if(colonPos != std::string::npos && colonPos + 1 < udn.size()) udn = udn.substr(colonPos + 1);
 				peer->setRinconId(udn);
 				if(!roomName.empty()) peer->setRoomName(roomName, updateOnly);
 				if(peer->getName().empty()) peer->setName(typeString + " " + roomName);
 			}
 		}
 
-        if(newPeers.size() > 0)
+        if(!newPeers.empty())
         {
             std::vector<uint64_t> newIds;
             newIds.reserve(newPeers.size());
@@ -981,7 +981,7 @@ PVariable SonosCentral::searchDevices(BaseLib::PRpcClientInfo clientInfo, bool u
             }
             raiseRPCNewDevices(newIds, deviceDescriptions);
         }
-		return PVariable(new Variable((int32_t)newPeers.size()));
+		return std::make_shared<Variable>((int32_t)newPeers.size());
 	}
 	catch(const std::exception& ex)
 	{

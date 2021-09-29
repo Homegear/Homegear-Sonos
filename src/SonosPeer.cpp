@@ -1693,7 +1693,8 @@ PVariable SonosPeer::setValue(BaseLib::PRpcClientInfo clientInfo, uint32_t chann
 				valueKey == "PLAY_TTS" ||
 				valueKey == "PLAY_TTS_LANGUAGE" ||
 				valueKey == "PLAY_TTS_UNMUTE" ||
-				valueKey == "PLAY_TTS VOICE" ||
+				valueKey == "PLAY_TTS_VOICE" ||
+                valueKey == "PLAY_TTS_ENGINE" ||
 				valueKey == "PLAY_TTS_VOLUME" ||
 				valueKey == "PREVIOUS" ||
 				valueKey == "STOP" ||
@@ -2357,6 +2358,7 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 			int32_t volume = -1;
 			std::string language;
 			std::string voice;
+			std::string engine;
 
 			std::unordered_map<uint32_t, std::unordered_map<std::string, BaseLib::Systems::RpcConfigurationParameter>>::iterator channelOneIterator = valuesCentral.find(1);
 			if(channelOneIterator == valuesCentral.end())
@@ -2403,14 +2405,27 @@ bool SonosPeer::setHomegearValue(uint32_t channel, std::string valueKey, PVariab
 				if(!BaseLib::HelperFunctions::isAlphaNumeric(language, std::unordered_set<char>{'-', '_'}))
 				{
 					GD::out.printError("Error: Voice is not alphanumeric.");
-					language = "Justin";
+					voice = "Justin";
 				}
 			}
+
+          parameterIterator = channelOneIterator->second.find("PLAY_TTS_ENGINE");
+          if(parameterIterator != channelOneIterator->second.end())
+          {
+            std::vector<uint8_t> parameterData = parameterIterator->second.getBinaryData();
+            PVariable variable = _binaryDecoder->decodeResponse(parameterData);
+            if(variable) engine = variable->stringValue;
+            if(!BaseLib::HelperFunctions::isAlphaNumeric(language, std::unordered_set<char>{'-', '_'}))
+            {
+              GD::out.printError("Error: Engine is not alphanumeric.");
+              engine = "standard";
+            }
+          }
 
 			std::string audioPath = GD::bl->settings.tempPath() + "sonos/";
 			std::string filename;
 			BaseLib::HelperFunctions::stringReplace(value->stringValue, "\"", "");
-			std::string execPath = ttsProgram + ' ' + language + ' ' + voice + " \"" + value->stringValue + "\"";
+			std::string execPath = ttsProgram + ' ' + language + ' ' + voice + " \"" + value->stringValue + "\"" + (!engine.empty() ? " " + engine : "");
             auto exitCode = BaseLib::ProcessManager::exec(execPath, _bl->fileDescriptorManager.getMax(), filename);
 			if(exitCode != 0)
 			{

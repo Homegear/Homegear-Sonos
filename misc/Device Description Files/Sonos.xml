@@ -1866,6 +1866,19 @@
 					<operationType>store</operationType>
 				</physicalNone>
 			</parameter>
+			<parameter id="PLAY_TTS_ENGINE">
+				<properties>
+					<casts>
+						<rpcBinary/>
+					</casts>
+				</properties>
+				<logicalString>
+					<defaultValue>neural</defaultValue>
+				</logicalString>
+				<physicalNone>
+					<operationType>store</operationType>
+				</physicalNone>
+			</parameter>
 			<parameter id="PLAY_AUDIO_FILE">
 				<properties>
 					<casts>

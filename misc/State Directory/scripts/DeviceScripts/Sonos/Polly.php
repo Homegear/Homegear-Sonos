@@ -1,6 +1,6 @@
 <?php
 
-if($argc != 4 && $argc != 5) die("Wrong parameter count. Please provice the language as first, the voice as second and the string to say as third parameter. You can optionally pass the engine to use as fourth parameter. E. g.: Polly.php de-DE Marlene \"Hello World\"");
+if($argc != 4 && $argc != 5) die("Wrong parameter count. Please provide the language as first, the voice as second and the string to say as third parameter. You can optionally pass the engine to use as fourth parameter. E. g.: Polly.php de-DE Marlene \"Hello World\"");
 
 require(__DIR__.'/vendor/autoload.php');
 use Aws\Polly\PollyClient;

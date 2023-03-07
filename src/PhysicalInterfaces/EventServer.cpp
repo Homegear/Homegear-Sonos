@@ -118,7 +118,7 @@ void EventServer::mainThread() {
 
     while (!_stopServer) {
       try {
-        if (!_serverFileDescriptor->IsValid()) {
+        if (!_serverFileDescriptor || !_serverFileDescriptor->IsValid()) {
           if (_stopServer) break;
           std::this_thread::sleep_for(std::chrono::milliseconds(5000));
           getSocketDescriptor();
@@ -141,7 +141,7 @@ void EventServer::mainThread() {
   catch (const std::exception &ex) {
     _out.printEx(__FILE__, __LINE__, __PRETTY_FUNCTION__, ex.what());
   }
-  _serverFileDescriptor->Shutdown();
+  if (_serverFileDescriptor) _serverFileDescriptor->Shutdown();
 }
 
 void EventServer::readClient(C1Net::PTcpSocket socket, const std::string &ipAddress, int32_t port) {

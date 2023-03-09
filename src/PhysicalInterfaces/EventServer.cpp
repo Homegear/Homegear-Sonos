@@ -125,7 +125,7 @@ void EventServer::mainThread() {
           continue;
         }
         clientFileDescriptor = getClientSocketDescriptor(ipAddress, port);
-        if (!clientFileDescriptor->IsValid()) continue;
+        if (!clientFileDescriptor || !clientFileDescriptor->IsValid()) continue;
 
         C1Net::TcpSocketInfo tcp_socket_info;
 

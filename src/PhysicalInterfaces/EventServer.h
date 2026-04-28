@@ -30,6 +30,8 @@
 #ifndef EVENTSERVER_H
 #define EVENTSERVER_H
 
+#include <cstdint>
+
 #include "../SonosPacket.h"
 #include "ISonosInterface.h"
 

@@ -30,6 +30,8 @@
 #ifndef SONOSCENTRAL_H_
 #define SONOSCENTRAL_H_
 
+#include <cstdint>
+
 #include <homegear-base/BaseLib.h>
 #include "SonosPeer.h"
 

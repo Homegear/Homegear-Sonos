@@ -30,6 +30,8 @@
 #ifndef SONOSPEER_H_
 #define SONOSPEER_H_
 
+#include <cstdint>
+
 #include <homegear-base/BaseLib.h>
 
 #include <list>

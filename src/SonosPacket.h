@@ -30,6 +30,8 @@
 #ifndef SONOSPACKET_H_
 #define SONOSPACKET_H_
 
+#include <cstdint>
+
 #include <homegear-base/BaseLib.h>
 #include "homegear-base/Encoding/RapidXml/rapidxml.h"
 

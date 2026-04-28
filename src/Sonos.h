@@ -30,6 +30,8 @@
 #ifndef SONOS_H_
 #define SONOS_H_
 
+#include <cstdint>
+
 #include <homegear-base/BaseLib.h>
 
 namespace Sonos

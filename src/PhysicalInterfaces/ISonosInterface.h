@@ -30,6 +30,8 @@
 #ifndef ISONOSINTERFACE_H_
 #define ISONOSINTERFACE_H_
 
+#include <cstdint>
+
 #include <homegear-base/BaseLib.h>
 #include "../SonosPacket.h"
 
